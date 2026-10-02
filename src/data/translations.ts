@@ -1,8 +1,8 @@
 export const UI_TRANSLATIONS = {
   ar: {
     // Header & Nav
-    brandName: "مركز رواء الفن للغوص",
-    brandSubtitle: "مركز تدريب ودورات الغوص المعتمدة · كابتن فهد الهويملي PADI",
+    brandName: "رواء الفن",
+    brandSubtitle: "دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI",
     navHome: "الرئيسية",
     navInstructor: "عن المدرب",
     navCourses: "الدورات التدريبية",
@@ -14,11 +14,11 @@ export const UI_TRANSLATIONS = {
     langSwitch: "English",
 
     // Hero
-    heroBadge: "مركز رواء الفن للغوص بجدة · PADI Master Scuba Diver Trainer",
+    heroBadge: "رواء الفن بجدة · PADI Open Water Scuba Instructor (OWSI)",
     heroLocation: "جدة فقط (عروس البحر الأحمر)",
-    heroHeadlinePart1: "اكتشف أسرار البحر الأحمر وتدرّب مع ",
-    heroHeadlineHighlight: "مركز رواء الفن للغوص (Riwa Alfan)",
-    heroSubhead: "رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في مركز رواء الفن للغوص بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.",
+    heroHeadlinePart1: "اكتشف أسرار عالم الغوص في ",
+    heroHeadlineHighlight: "البحر الأحمر",
+    heroSubhead: "رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في رواء الفن بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.",
     heroCtaBook: "احجز موعد أو استشارة مجانية",
     heroCtaCourses: "تصفح برامج الدورات",
     statDivesNumber: "1,450+",
@@ -44,8 +44,8 @@ export const UI_TRANSLATIONS = {
     instSectionKicker: "السيرة المهنية والاعتمادات",
     instSectionTitle: "تعرّف على مدربك · كابتن فهد الهويملي",
     instSectionDesc: "خبرة أكثر من 10 أعوام في استكشاف وتدريب الغوص في مياه البحر الأحمر، مع شغف عميق بنقل جمال الأعماق لكل متدرب بكل ثقة وأمان.",
-    instRole: "Master Scuba Diver Trainer (MSDT)",
-    instAgencyBadge: "مدرب محترف معتمد دولياً لدى منظمة PADI",
+    instRole: "PADI Open Water Scuba Instructor (OWSI)",
+    instAgencyBadge: "مدرب معتمد دولياً لدى منظمة PADI (OWSI)",
     danBadge: "عضو معتمد في شبكة تنبيه الغواصين (DAN Europe / World)",
     efrBadge: "مدرب معتمد للإسعافات الأولية والإنعاش القلبي (EFR Instructor)",
     instCtaTalk: "تحدث مع الكابتن وحدد موعد دورتك",
@@ -212,8 +212,8 @@ export const UI_TRANSLATIONS = {
 
   en: {
     // Header & Nav
-    brandName: "Riwa Alfan Diving Center",
-    brandSubtitle: "Certified PADI Diving Center & Training",
+    brandName: "Riwa Alfan",
+    brandSubtitle: "Certified PADI Diving Training",
     navHome: "Home",
     navInstructor: "Instructor",
     navCourses: "Courses",
@@ -225,11 +225,11 @@ export const UI_TRANSLATIONS = {
     langSwitch: "العربية",
 
     // Hero
-    heroBadge: "Riwa Alfan Diving Center in Jeddah · PADI Master Scuba Diver Trainer",
+    heroBadge: "Riwa Alfan in Jeddah · PADI Open Water Scuba Instructor (OWSI)",
     heroLocation: "Jeddah Exclusively (Bride of the Red Sea)",
-    heroHeadlinePart1: "Explore the Red Sea & Train with ",
-    heroHeadlineHighlight: "Riwa Alfan Diving Center",
-    heroSubhead: "Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan Diving Center in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.",
+    heroHeadlinePart1: "Discover the Secrets of Diving in the ",
+    heroHeadlineHighlight: "Red Sea",
+    heroSubhead: "Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.",
     heroCtaBook: "Book Free Consultation / Course",
     heroCtaCourses: "Explore Courses",
     statDivesNumber: "1,450+",
@@ -255,8 +255,8 @@ export const UI_TRANSLATIONS = {
     instSectionKicker: "Credentials & Professional Bio",
     instSectionTitle: "Meet Your Instructor · Capt. Fahad Al-Huwaimli",
     instSectionDesc: "Over 10 years of experience training and diving throughout the Red Sea, with a deep passion for guiding every student into the underwater realm with complete confidence and peace of mind.",
-    instRole: "Master Scuba Diver Trainer (MSDT)",
-    instAgencyBadge: "Internationally certified instructor with PADI",
+    instRole: "PADI Open Water Scuba Instructor (OWSI)",
+    instAgencyBadge: "Internationally certified PADI OWSI Instructor",
     danBadge: "Certified Member of Divers Alert Network (DAN)",
     efrBadge: "Certified Emergency First Response (EFR) & CPR Instructor",
     instCtaTalk: "Talk with Captain & Set Your Schedule",

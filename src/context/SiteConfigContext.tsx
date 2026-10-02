@@ -13,36 +13,36 @@ import {
   getDocFromServer 
 } from 'firebase/firestore';
 
-const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v6';
-const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v6';
+const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v10';
+const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v10';
 
 const DEFAULT_CONFIG: SiteConfig = {
   brand: {
-    centerNameAr: 'مركز رواء الفن للغوص',
-    centerNameEn: 'Riwa Alfan Diving Center',
-    subtitleAr: 'مركز تدريب ودورات الغوص المعتمدة · كابتن فهد الهويملي PADI',
-    subtitleEn: 'Certified PADI Diving Center & Training',
+    centerNameAr: 'رواء الفن',
+    centerNameEn: 'Riwa Alfan',
+    subtitleAr: 'دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI',
+    subtitleEn: 'Certified PADI Diving Training',
     logoType: 'vector',
     customLogoUrl: '',
     logoText: 'RIWA ALFAN',
-    logoSubtext: 'DIVE CENTER · JEDDAH · PADI',
-    phone: INSTRUCTOR_INFO.phone,
-    whatsappNumber: INSTRUCTOR_INFO.whatsappNumber,
+    logoSubtext: 'رواء الفن',
+    phone: '+966530549675',
+    whatsappNumber: '966530549675',
     email: INSTRUCTOR_INFO.email,
     city: 'جدة',
     locationAr: 'جدة - ساحل البحر الأحمر، المملكة العربية السعودية',
     locationEn: 'Jeddah - Red Sea Coast, Saudi Arabia',
-    padiNumber: 'PADI MSDT #482910'
+    padiNumber: 'PADI OWSI #482910'
   },
   hero: {
-    badgeAr: 'مركز رواء الفن للغوص بجدة · PADI Master Scuba Diver Trainer',
-    badgeEn: 'Riwa Alfan Diving Center in Jeddah · PADI Master Scuba Diver Trainer',
-    headlineAr: 'اكتشف أسرار البحر الأحمر وتدرّب مع ',
-    headlineHighlightAr: 'مركز رواء الفن للغوص (Riwa Alfan)',
-    headlineEn: 'Explore the Red Sea & Train with ',
-    headlineHighlightEn: 'Riwa Alfan Diving Center',
-    subheadAr: 'رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في مركز رواء الفن للغوص بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.',
-    subheadEn: 'Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan Diving Center in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.',
+    badgeAr: 'رواء الفن بجدة · PADI Open Water Scuba Instructor (OWSI)',
+    badgeEn: 'Riwa Alfan in Jeddah · PADI Open Water Scuba Instructor (OWSI)',
+    headlineAr: 'اكتشف أسرار عالم الغوص في ',
+    headlineHighlightAr: 'البحر الأحمر',
+    headlineEn: 'Discover the Secrets of Diving in the ',
+    headlineHighlightEn: 'Red Sea',
+    subheadAr: 'رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في رواء الفن بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.',
+    subheadEn: 'Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.',
     showStats: true,
     divesStat: '1,450+',
     divesLabelAr: 'عدد الغوصات الموثقة',
@@ -57,16 +57,16 @@ const DEFAULT_CONFIG: SiteConfig = {
   instructor: {
     nameAr: 'كابتن فهد الهويملي',
     nameEn: 'Capt. Fahad Al-Huwaimli',
-    titleAr: 'مدرب غوص معتمد PADI (Master Scuba Diver Trainer)',
-    titleEn: 'Certified PADI Master Scuba Diver Trainer (MSDT)',
-    accreditationAr: 'مدرب محترف معتمد دولياً لدى منظمة PADI',
-    accreditationEn: 'Internationally Certified PADI Diving Professional',
+    titleAr: 'PADI Open Water Scuba Instructor (OWSI)',
+    titleEn: 'PADI Open Water Scuba Instructor (OWSI)',
+    accreditationAr: 'مدرب معتمد دولياً لدى منظمة PADI (OWSI)',
+    accreditationEn: 'Internationally Certified PADI OWSI Instructor',
     bioAr: 'مدرب غوص سعودي شغوف بأعماق البحر الأحمر لأكثر من عقد من الزمان. نؤمن بأن الغوص ليس مجرد رياضة، بل رحلة استكشاف وتأمل وتناغم تام مع الطبيعة. نلتزم بأعلى معايير السلامة الدولية وأسلوب تدريب صبور ومحفز يزيل أي توتر ويمنح المتدرب ثقة مطلقة تحت الماء.',
     bioEn: 'A passionate Saudi diving instructor immersed in the depths of the Red Sea for over a decade. We believe diving is not merely a sport, but a transformative journey of exploration, contemplation, and complete harmony with nature. Committed to the highest international safety standards with a patient, empowering coaching methodology.',
     quoteAr: 'البحر لا يُعلّمنا فقط كيف نتنفس تحت الماء، بل يُعلّمنا كيف نهدأ ونتأمل ونثق بأنفسنا في عالم أزرق ساحر.',
     quoteEn: 'The sea does not merely teach us to breathe underwater; it teaches us serenity, mindfulness, and unbreakable inner trust.',
-    padiMemberNumber: 'PADI MSDT Member #482910',
-    owsiNumber: 'PADI Open Water Scuba Instructor (OWSI)',
+    padiMemberNumber: 'PADI OWSI Member #482910',
+    owsiNumber: 'PADI Open Water Scuba Instructor (OWSI #482910)',
     danNumber: 'عضو معتمد في شبكة تنبيه الغواصين (DAN Europe / World)',
     efrNumber: 'مدرب معتمد للإسعافات الأولية والإنعاش القلبي (EFR Instructor)',
     certificatesListAr: [

@@ -1,10 +1,8 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Award, ShieldCheck, Waves, Users, CalendarCheck } from 'lucide-react';
-import { INSTRUCTOR_INFO } from '../data/divingData';
+import { ArrowLeft, ArrowRight, Award, ShieldCheck, Users, CalendarCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
-import { FahadsLogo } from './FahadsLogo';
 
 interface HeroProps {
   onOpenBooking: (courseId?: string) => void;
@@ -134,58 +132,51 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
               
               <div className="relative rounded-[22px] overflow-hidden bg-slate-900 border border-slate-800 p-6 sm:p-8 space-y-6">
                 
-                {/* Official Logo Banner Showcase with light clean neutral backdrop matching logo */}
-                <div className="relative rounded-2xl overflow-hidden bg-slate-800/90 border border-blue-500/30 p-6 flex flex-col items-center justify-center text-center shadow-inner">
-                  <div className="bg-slate-200/95 py-4 px-6 rounded-xl shadow-lg border border-slate-300 w-full flex items-center justify-center">
-                    <FahadsLogo 
-                      size="lg" 
-                      theme="light" 
-                      customImageUrl={config.brand.logoType === 'custom-image' ? config.brand.customLogoUrl : undefined}
-                      customTitle={config.brand.logoText}
-                      customSubtext={config.brand.logoSubtext}
-                    />
+                {/* Official Accreditation Header */}
+                <div className={`flex items-center gap-3.5 pb-5 border-b border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 shadow-inner">
+                    <Award className="w-6 h-6" />
                   </div>
-                  <div className="mt-3 flex items-center justify-between w-full text-xs text-slate-300 pt-2 border-t border-slate-700/80">
-                    <span className="flex items-center gap-1.5 font-medium text-blue-300">
-                      <Waves className="w-4 h-4 text-blue-400 animate-pulse" />
-                      {t.heroCardRegion}
+                  <div>
+                    <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block">
+                      {isRtl ? 'اعتمادات PADI الدولية المعتمدة' : 'Official PADI Accreditations'}
                     </span>
-                    <span className="font-mono tabular-nums bg-slate-900/90 px-2.5 py-1 rounded-md border border-slate-700 text-blue-300">
-                      {t.heroCardDepth}
-                    </span>
+                    <h3 className="text-base font-extrabold text-white">
+                      {config.instructor.titleAr || 'PADI Open Water Scuba Instructor (OWSI)'}
+                    </h3>
                   </div>
                 </div>
 
                 {/* Instructor Highlights list */}
-                <div className={`space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+                <div className={`space-y-3.5 ${isRtl ? 'text-right' : 'text-left'}`}>
                   <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     {t.heroWhyTitle}
                   </div>
 
-                  <div className="space-y-2 text-sm text-slate-300">
-                    <div className="flex items-start gap-2.5">
-                      <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                      <span>{t.heroWhy1}</span>
+                  <div className="space-y-3 text-sm text-slate-300">
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{t.heroWhy1}</span>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <Award className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                      <span>{t.heroWhy2}</span>
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <Award className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{t.heroWhy2}</span>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <Users className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                      <span>{t.heroWhy3}</span>
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <Users className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{t.heroWhy3}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Instant WhatsApp Quick Link */}
                 <a
-                  href={`https://wa.me/${INSTRUCTOR_INFO.whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
+                  href={`https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-sm transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-sm transition-colors cursor-pointer group"
                 >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
                   </svg>
                   <span>{t.heroChatWhatsApp}</span>

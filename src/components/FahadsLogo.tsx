@@ -46,7 +46,7 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
   const lineColor = isDark ? '#64748B' : '#718096';
 
   let titleText = customTitle || "RIWA ALFAN";
-  let subText = customSubtext || "DIVE CENTER · PADI";
+  let subText = customSubtext || "رواء الفن";
   let fontSize = "42";
 
   if (variant === 'fahads') {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, MapPin, MessageSquare, Calendar, ShieldCheck } from 'lucide-react';
+import { Mail, MapPin, MessageSquare, Calendar, ShieldCheck, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -13,8 +13,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
 
-  const phone = config.brand.phone || '0500000000';
-  const whatsappNumber = config.brand.whatsappNumber || '966500000000';
+  const phone = config.brand.phone || '+966530549675';
+  const whatsappNumber = config.brand.whatsappNumber || '966530549675';
   const email = config.brand.email || 'Fahad.Alhuwaimli@gmail.com';
 
   const whatsAppText = isRtl
@@ -62,6 +62,21 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                   <div>
                     <span className="text-xs text-slate-400 block">{t.directWhatsApp}</span>
                     <span className="font-semibold text-white group-hover:text-emerald-300 font-mono">
+                      {phone}
+                    </span>
+                  </div>
+                </a>
+
+                <a
+                  href={`tel:${phone}`}
+                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                    <PhoneCall className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block">{isRtl ? 'اتصال مباشر:' : 'Direct Call:'}</span>
+                    <span className="font-semibold text-white group-hover:text-blue-300 font-mono">
                       {phone}
                     </span>
                   </div>

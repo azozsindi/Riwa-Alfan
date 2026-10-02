@@ -49,16 +49,16 @@ export const INSTRUCTOR_INFO = {
     en: "Capt. Fahad Al-Huwaimli"
   },
   title: {
-    ar: "مدرب غوص معتمد PADI (Master Scuba Diver Trainer)",
-    en: "PADI Master Scuba Diver Trainer (MSDT)"
+    ar: "PADI Open Water Scuba Instructor (OWSI)",
+    en: "PADI Open Water Scuba Instructor (OWSI)"
   },
-  agencies: ["PADI MSDT #482910", "PADI EFR Emergency First Response Instructor"],
+  agencies: ["PADI OWSI #482910", "PADI EFR Emergency First Response Instructor"],
   experienceYears: 10,
   loggedDives: 1450,
   certifiedStudents: 520,
   safetyRecord: "100%",
-  phone: "+966500000000",
-  whatsappNumber: "966500000000",
+  phone: "+966530549675",
+  whatsappNumber: "966530549675",
   email: "Fahad.Alhuwaimli@gmail.com",
   location: {
     ar: "جدة - ساحل البحر الأحمر، المملكة العربية السعودية",

@@ -20,7 +20,7 @@ import { Footer } from './components/Footer';
 import { BookingModal } from './components/BookingModal';
 import { AdminLoginModal } from './components/admin/AdminLoginModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { Shield } from 'lucide-react';
+import { Shield, MessageCircle } from 'lucide-react';
 
 function AppContent() {
   const { isRtl, language } = useLanguage();
@@ -150,6 +150,24 @@ function AppContent() {
           {language === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}
         </span>
       </button>
+
+      {/* Floating Quick WhatsApp Chat Button */}
+      <a
+        href={`https://wa.me/966530549675?text=${encodeURIComponent(
+          language === 'ar' 
+            ? 'السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل دورات الغوص والرحلات القادمة بجدة' 
+            : 'Hello Captain Fahad, I would like to inquire about certified scuba courses in Jeddah.'
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-5 end-5 z-40 p-3 sm:px-4 sm:py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-600/40 backdrop-blur-md border border-emerald-400/40 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer group"
+        title={language === 'ar' ? 'محادثة واتساب مباشرة مع كابتن فهد' : 'Direct WhatsApp with Capt. Fahad'}
+      >
+        <MessageCircle className="w-5 h-5 fill-white text-emerald-600 group-hover:rotate-12 transition-transform" />
+        <span className="text-xs font-bold hidden sm:inline">
+          {language === 'ar' ? 'تواصل واتساب' : 'WhatsApp Us'}
+        </span>
+      </a>
     </div>
   );
 }
