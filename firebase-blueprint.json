@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Booking": {
+      "title": "Booking",
+      "description": "A booking or consultation request submitted by a visitor or student.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "interest": { "type": "string", "maxLength": 200 },
+        "experience": { "type": "string", "maxLength": 100 },
+        "timing": { "type": "string", "maxLength": 100 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["new", "contacted", "confirmed", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "phone", "interest", "status", "createdAt"]
+    },
+    "SiteConfigDoc": {
+      "title": "SiteConfigDoc",
+      "description": "Global website configuration for Riwa Alfan Dive Center.",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["updatedAt"]
+    }
+  },
+  "firestore": {
+    "/bookings/{bookingId}": {
+      "schema": "#/entities/Booking",
+      "description": "Collection of student bookings and consultation requests."
+    },
+    "/settings/{settingId}": {
+      "schema": "#/entities/SiteConfigDoc",
+      "description": "App configuration document for live persistence."
+    }
+  }
+}

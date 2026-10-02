@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'interest', 'status', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 150
+        && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 50
+        && data.interest is string && data.interest.size() <= 200
+        && (!('experience' in data) || (data.experience is string && data.experience.size() <= 100))
+        && (!('timing' in data) || (data.timing is string && data.timing.size() <= 100))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && data.status in ['new', 'contacted', 'confirmed', 'completed', 'cancelled']
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow create: if isValidId(bookingId) 
+        && isValidBooking(incoming()) 
+        && incoming().id == bookingId;
+      allow read, update, delete: if isValidId(bookingId);
+    }
+
+    // Public & Admin Settings
+    match /settings/{settingId} {
+      allow read: if isValidId(settingId);
+      allow write: if isValidId(settingId);
+    }
+  }
+}

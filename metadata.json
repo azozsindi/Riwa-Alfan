@@ -1,0 +1,6 @@
+{
+  "name": "مركز رواء الفن للغوص (Riwa Alfan) | كابتن فهد الهويملي",
+  "description": "المنصة الرسمية لمركز رواء الفن للغوص (Riwa Alfan Diving Center) بجدة بقيادة كابتن فهد الهويملي. دورات PADI المعتمدة، رحلات غوص البحر الأحمر، حاسبة النيتروكس، وحجوزات التدريب في جدة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
