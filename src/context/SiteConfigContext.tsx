@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SiteConfig, BookingRecord, CenterBrandConfig, HeroConfig, InstructorConfig, AnnouncementConfig } from '../types/admin';
-import { COURSES_DATA, DIVE_SITES, INSTRUCTOR_INFO, Course, DiveSite } from '../data/divingData';
+import { COURSES_DATA, DIVE_SITES, INSTRUCTOR_INFO, FAQS, TESTIMONIALS, Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 import { db } from '../firebase';
 import { 
   collection, 
@@ -13,8 +13,8 @@ import {
   getDocFromServer 
 } from 'firebase/firestore';
 
-const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v10';
-const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v10';
+const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v11';
+const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v11';
 
 const DEFAULT_CONFIG: SiteConfig = {
   brand: {
@@ -113,6 +113,8 @@ const DEFAULT_CONFIG: SiteConfig = {
   },
   courses: COURSES_DATA,
   diveSites: DIVE_SITES,
+  faqs: FAQS,
+  testimonials: TESTIMONIALS,
   adminPin: '1234'
 };
 
@@ -155,6 +157,11 @@ interface SiteConfigContextType {
   addCourse: (newCourse: Course) => void;
   deleteCourse: (courseId: string) => void;
   updateDiveSites: (sites: DiveSite[]) => void;
+  updateDiveSite: (siteId: string, updated: Partial<DiveSite>) => void;
+  addDiveSite: (newSite: DiveSite) => void;
+  deleteDiveSite: (siteId: string) => void;
+  updateFaqs: (faqs: FAQItem[]) => void;
+  updateTestimonials: (testimonials: Testimonial[]) => void;
   addBooking: (booking: Omit<BookingRecord, 'id' | 'createdAt' | 'status'>) => string;
   updateBookingStatus: (id: string, status: BookingRecord['status']) => void;
   deleteBooking: (id: string) => void;
@@ -319,6 +326,35 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({ ...prev, diveSites: sites }));
   };
 
+  const updateDiveSite = (siteId: string, updated: Partial<DiveSite>) => {
+    setConfig(prev => ({
+      ...prev,
+      diveSites: prev.diveSites.map(s => s.id === siteId ? { ...s, ...updated } : s)
+    }));
+  };
+
+  const addDiveSite = (newSite: DiveSite) => {
+    setConfig(prev => ({
+      ...prev,
+      diveSites: [...prev.diveSites, newSite]
+    }));
+  };
+
+  const deleteDiveSite = (siteId: string) => {
+    setConfig(prev => ({
+      ...prev,
+      diveSites: prev.diveSites.filter(s => s.id !== siteId)
+    }));
+  };
+
+  const updateFaqs = (faqs: FAQItem[]) => {
+    setConfig(prev => ({ ...prev, faqs }));
+  };
+
+  const updateTestimonials = (testimonials: Testimonial[]) => {
+    setConfig(prev => ({ ...prev, testimonials }));
+  };
+
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt' | 'status'>) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
@@ -415,6 +451,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addCourse,
       deleteCourse,
       updateDiveSites,
+      updateDiveSite,
+      addDiveSite,
+      deleteDiveSite,
+      updateFaqs,
+      updateTestimonials,
       addBooking,
       updateBookingStatus,
       deleteBooking,

@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { FAQS } from '../data/divingData';
 import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const { language, isRtl } = useLanguage();
+  const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
+
+  const faqsList = config.faqs && config.faqs.length > 0 ? config.faqs : FAQS;
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -32,7 +36,7 @@ export const FaqSection: React.FC = () => {
 
         {/* Accordion */}
         <div className={`space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
-          {FAQS.map((faq, idx) => {
+          {faqsList.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div

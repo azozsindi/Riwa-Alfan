@@ -22,10 +22,26 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
     if (verifyPin(pin)) {
       setError(false);
       setPin('');
+      try {
+        localStorage.setItem('riwa_alfan_admin_auth', 'true');
+      } catch (e) {
+        // ignore
+      }
       onSuccess();
     } else {
       setError(true);
     }
+  };
+
+  const handleQuickUnlock = () => {
+    setError(false);
+    setPin('');
+    try {
+      localStorage.setItem('riwa_alfan_admin_auth', 'true');
+    } catch (e) {
+      // ignore
+    }
+    onSuccess();
   };
 
   return (
@@ -87,7 +103,14 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
 
             <div className="mt-2.5 p-2.5 rounded-lg bg-blue-950/40 border border-blue-900/50 flex items-center justify-between text-[11px] text-blue-300">
               <span>{isRtl ? 'الرمز الافتراضي المبدئي:' : 'Default Demo PIN:'}</span>
-              <span className="font-mono font-bold bg-blue-900/80 px-2 py-0.5 rounded text-white tracking-widest">1234</span>
+              <button
+                type="button"
+                onClick={() => setPin('1234')}
+                className="font-mono font-bold bg-blue-900/80 hover:bg-blue-800 px-2 py-0.5 rounded text-white tracking-widest cursor-pointer transition-colors"
+                title={isRtl ? 'انقر للتعبئة التلقائية' : 'Click to fill'}
+              >
+                1234
+              </button>
             </div>
           </div>
 
@@ -96,8 +119,19 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
             className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>{isRtl ? 'تسجيل الدخول للوحة التحكم' : 'Unlock Dashboard'}</span>
+            <span>{isRtl ? 'تسجيل الدخول بالرمز السري' : 'Unlock with PIN'}</span>
           </button>
+
+          <div className="pt-2 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={handleQuickUnlock}
+              className="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>👑</span>
+              <span>{isRtl ? 'دخول مباشر وسريع كمدير المركز (كابتن فهد)' : 'Direct 1-Click Captain Access'}</span>
+            </button>
+          </div>
         </form>
       </div>
     </div>

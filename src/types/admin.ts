@@ -1,4 +1,4 @@
-import { Course, DiveSite } from '../data/divingData';
+import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 
 export interface CenterBrandConfig {
   centerNameAr: string;
@@ -93,5 +93,7 @@ export interface SiteConfig {
   announcement: AnnouncementConfig;
   courses: Course[];
   diveSites: DiveSite[];
+  faqs: FAQItem[];
+  testimonials: Testimonial[];
   adminPin: string;
 }

@@ -7,10 +7,10 @@ import { FahadsLogo } from './FahadsLogo';
 
 interface HeaderProps {
   onOpenBooking: (courseId?: string) => void;
-  onOpenAdmin: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenBooking, onOpenAdmin }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage } = useLanguage();
   const { config } = useSiteConfig();
@@ -72,21 +72,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking, onOpenAdmin }) =>
           </a>
         </nav>
 
-        {/* Zone 3: Actions + Admin + Language */}
+        {/* Zone 3: Actions + Language */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Admin Control Portal Button */}
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-blue-300 hover:text-white bg-blue-950/40 hover:bg-blue-900/60 border border-blue-800/60 rounded-xl transition-all cursor-pointer shadow-sm"
-            title={language === 'ar' ? 'لوحة تحكم الكابتن والموقع' : 'Captain Admin Portal'}
-          >
-            <Shield className="w-3.5 h-3.5 text-blue-400" />
-            <span className="hidden sm:inline font-bold">
-              {language === 'ar' ? 'لوحة التحكم' : 'Admin'}
-            </span>
-          </button>
-
           {/* Language Switcher Toggle */}
           <button
             type="button"
@@ -168,17 +155,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking, onOpenAdmin }) =>
           </nav>
 
           <div className="pt-2 border-t border-slate-850 flex flex-col gap-2">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAdmin();
-              }}
-              className="w-full py-2.5 px-4 rounded-xl bg-blue-950/60 border border-blue-800/80 text-blue-300 font-bold text-xs flex items-center justify-center gap-2"
-            >
-              <Shield className="w-4 h-4 text-blue-400" />
-              <span>{language === 'ar' ? 'فتح لوحة تحكم الكابتن' : 'Open Admin Portal'}</span>
-            </button>
-
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

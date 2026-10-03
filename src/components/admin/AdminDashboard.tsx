@@ -4,21 +4,22 @@ import {
   Save, RotateCcw, Plus, Trash2, Edit3, Check, ExternalLink, 
   Upload, Image as ImageIcon, Sparkles, MessageCircle, Phone, 
   Calendar, Award, Download, FileUp, Eye, UserCheck, User,
-  AlertTriangle
+  AlertTriangle, HelpCircle, MessageSquare, LogOut
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
-import { Course } from '../../data/divingData';
+import { Course, DiveSite, FAQItem, Testimonial } from '../../data/divingData';
 import { FahadsLogo } from '../FahadsLogo';
 
-type AdminTab = 'offers' | 'brand' | 'instructor' | 'courses' | 'sites' | 'bookings' | 'settings';
+type AdminTab = 'offers' | 'brand' | 'instructor' | 'courses' | 'sites' | 'faqs' | 'testimonials' | 'bookings' | 'settings';
 
 interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
+  isStandalonePage?: boolean;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose, isStandalonePage = false }) => {
   const { isRtl } = useLanguage();
   const { 
     config, 
@@ -30,6 +31,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
     updateCourse, 
     addCourse, 
     deleteCourse,
+    updateDiveSites,
+    updateDiveSite,
+    addDiveSite,
+    deleteDiveSite,
+    updateFaqs,
+    updateTestimonials,
     updateBookingStatus,
     deleteBooking,
     clearAllBookings,
@@ -60,6 +67,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
   const [pinFeedback, setPinFeedback] = useState<string | null>(null);
   const [importJsonText, setImportJsonText] = useState('');
   const [bookingFilter, setBookingFilter] = useState<'all' | 'new' | 'contacted' | 'confirmed'>('all');
+
+  // Sites management state
+  const [editingSite, setEditingSite] = useState<DiveSite | null>(null);
+  const [isAddingSite, setIsAddingSite] = useState(false);
+  const [siteToDelete, setSiteToDelete] = useState<DiveSite | null>(null);
+
+  // FAQs management state
+  const [editingFaqIndex, setEditingFaqIndex] = useState<number | null>(null);
+  const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
+  const [isAddingFaq, setIsAddingFaq] = useState(false);
+  const [newFaq, setNewFaq] = useState<FAQItem>({
+    question: { ar: '', en: '' },
+    answer: { ar: '', en: '' }
+  });
+
+  // Testimonials management state
+  const [editingTestimonialIndex, setEditingTestimonialIndex] = useState<number | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [isAddingTestimonial, setIsAddingTestimonial] = useState(false);
+  const [newTestimonial, setNewTestimonial] = useState<Testimonial>({
+    id: '',
+    name: { ar: '', en: '' },
+    role: { ar: '', en: '' },
+    course: { ar: '', en: '' },
+    quote: { ar: '', en: '' },
+    date: { ar: '2026', en: '2026' },
+    avatarSeed: 'diver'
+  });
 
   if (!isOpen) return null;
 
@@ -250,52 +285,82 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
 
   const newBookingsCount = bookings.filter(b => b.status === 'new').length;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div 
-        className="w-full max-w-6xl h-[92vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100"
-        dir={isRtl ? 'rtl' : 'ltr'}
-      >
-        {/* Top Header */}
-        <div className="px-6 py-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400">
-              <Compass className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white tracking-tight">
-                  {isRtl ? 'لوحة تحكم مركز رواء الفن للغوص' : 'Riwa Alfan Dive Center Dashboard'}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-mono font-semibold border border-blue-500/30">
-                  {isRtl ? 'بإشراف كابتن فهد' : 'Capt. Fahad'}
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                {isRtl ? 'إدارة الشعار، العروض، الدورات، الأسعار، والحجوزات الواردة مباشرة' : 'Manage brand logo, promo offers, courses, prices and bookings inbox'}
-              </p>
-            </div>
+  const content = (
+    <div 
+      className={
+        isStandalonePage
+          ? "w-full min-h-screen bg-slate-900 flex flex-col flex-1 text-slate-100"
+          : "w-full max-w-6xl h-[92vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100"
+      }
+      dir={isRtl ? 'rtl' : 'ltr'}
+    >
+      {/* Top Header */}
+      <div className="px-4 sm:px-6 py-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between shrink-0 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400">
+            <Compass className="w-6 h-6" />
           </div>
-
-          <div className="flex items-center gap-3">
-            {saveToast && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold animate-in fade-in">
-                <Check className="w-3.5 h-3.5" />
-                {isRtl ? 'تم الحفظ وتطبيق التغييرات فورا!' : 'Saved & Applied Live!'}
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                {isRtl ? 'لوحة تحكم وإدارة رواء الفن' : 'Riwa Alfan Control Center'}
+              </h2>
+              <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-mono font-semibold border border-blue-500/30">
+                {isRtl ? 'بإشراف كابتن فهد 👑' : 'Capt. Fahad 👑'}
               </span>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              title={isRtl ? 'إغلاق اللوحة والعودة للموقع' : 'Close and return to site'}
-            >
-              <X className="w-6 h-6" />
-            </button>
+            </div>
+            <p className="text-xs text-slate-400 hidden sm:block">
+              {isRtl ? 'تحكم كامل بنسبة 100% في الشعار، النصوص، العروض، الدورات، الأسعار، المواقع، والأسئلة الشائعة' : 'Full 100% control over brand, text, offers, courses, prices, sites, and FAQs'}
+            </p>
           </div>
         </div>
 
-        {/* Main Content Area: Sidebar Tabs + Panel */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {saveToast && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold animate-in fade-in">
+              <Check className="w-3.5 h-3.5" />
+              {isRtl ? 'تم الحفظ وتطبيق التغييرات فورا!' : 'Saved & Applied Live!'}
+            </span>
+          )}
+
+          {isStandalonePage && (
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 hover:text-white border border-blue-500/40 text-xs font-bold transition-all cursor-pointer shadow-sm"
+              title={isRtl ? 'الرجوع للموقع الرئيسي' : 'Return to Public Site'}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>{isRtl ? 'مشاهدة الموقع ↗' : 'Public Site ↗'}</span>
+            </button>
+          )}
+
+          {/* Lock / Logout Button */}
+          <button
+            onClick={() => {
+              try {
+                localStorage.removeItem('riwa_alfan_admin_auth');
+              } catch (e) {}
+              onClose();
+            }}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-950/80 hover:text-red-300 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer"
+            title={isRtl ? 'قفل لوحة التحكم وتسجيل الخروج' : 'Lock & Logout'}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isRtl ? 'قفل اللوحة' : 'Lock'}</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            title={isRtl ? 'الرجوع للموقع' : 'Return to site'}
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Area: Sidebar Tabs + Panel */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Sidebar Tabs */}
           <div className="w-full md:w-64 bg-slate-950/60 border-b md:border-b-0 md:border-e border-slate-800 p-3 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-y-auto shrink-0">
             <button
@@ -362,6 +427,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             >
               <Waves className="w-4 h-4 shrink-0" />
               <span>{isRtl ? 'مواقع وغوصات جدة' : 'Jeddah Dive Sites'}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 ms-auto">
+                {config.diveSites.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('faqs')}
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'faqs' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <HelpCircle className="w-4 h-4 shrink-0" />
+              <span>{isRtl ? 'الأسئلة الشائعة (FAQ)' : 'FAQs'}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 ms-auto">
+                {(config.faqs || []).length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('testimonials')}
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'testimonials' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              <span>{isRtl ? 'آراء وتجارب المتدربين' : 'Reviews & Testimonials'}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 ms-auto">
+                {(config.testimonials || []).length}
+              </span>
             </button>
 
             <button
@@ -1531,42 +1629,517 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
             {/* TAB 4: SITES */}
             {activeTab === 'sites' && (
               <div className="space-y-6 max-w-4xl">
-                <div className="pb-4 border-b border-slate-800">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Waves className="w-5 h-5 text-blue-400" />
-                    {isRtl ? 'مواقع وغوصات جدة البحرية' : 'Jeddah Dive Destinations'}
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    {isRtl 
-                      ? 'عرض المواقع المعتمدة لرحلات وغوصات المركز في مياه جدة (شرم أبحر، أبو طير، المسماري، البويلر).'
-                      : 'Active dive sites off Jeddah waters managed by the center.'}
-                  </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Waves className="w-5 h-5 text-blue-400" />
+                      {isRtl ? 'مواقع وغوصات جدة البحرية والرحلات' : 'Jeddah Dive Destinations'}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {isRtl 
+                        ? 'إدارة وتعديل المواقع المعتمدة لرحلات وغوصات المركز في مياه جدة (شرم أبحر، أبو طير، المسماري، البويلر).'
+                        : 'Active dive sites off Jeddah waters managed by the center.'}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newId = `site-${Date.now()}`;
+                      const emptySite: DiveSite = {
+                        id: newId,
+                        name: { ar: 'موقع غوص جديد بجدة', en: 'New Jeddah Dive Site' },
+                        location: { ar: 'شمال جدة - البحر الأحمر', en: 'North Jeddah - Red Sea' },
+                        depth: { ar: '10 - 30 متر', en: '10 - 30 meters' },
+                        level: { ar: 'جميع المستويات', en: 'All Levels' },
+                        visibility: { ar: '25 - 35 متر', en: '25 - 35 meters' },
+                        current: { ar: 'خفيف', en: 'Gentle' },
+                        marineLife: {
+                          ar: ['شِعاب مرجانية', 'أسماك الببغاء', 'سلاحف بحرية'],
+                          en: ['Coral Reefs', 'Parrotfish', 'Sea Turtles']
+                        },
+                        description: {
+                          ar: 'وصف تفصيلي لموقع الغوص والحياة البحرية والعمق.',
+                          en: 'Detailed description of the dive destination.'
+                        }
+                      };
+                      addDiveSite(emptySite);
+                      setEditingSite(emptySite);
+                      showToast(isRtl ? 'تمت إضافة موقع جديد، يمكنك تعديله الآن' : 'New site added, edit details now');
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 cursor-pointer transition-all self-start sm:self-auto shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isRtl ? 'إضافة موقع غوص جديد' : 'Add New Site'}</span>
+                  </button>
                 </div>
+
+                {/* Edit Site Inline Form */}
+                {editingSite && (
+                  <div className="p-5 rounded-2xl bg-blue-950/20 border-2 border-blue-500/40 space-y-4 animate-in fade-in">
+                    <div className="flex items-center justify-between pb-3 border-b border-blue-900/50">
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Edit3 className="w-4 h-4 text-blue-400" />
+                        <span>{isRtl ? 'تعديل بيانات موقع الغوص:' : 'Edit Dive Site:'}</span>
+                        <span className="text-blue-300 font-mono text-xs">{editingSite.name.ar}</span>
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setEditingSite(null)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-white"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          {isRtl ? 'اسم الموقع (بالعربية):' : 'Site Name (Arabic):'}
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSite.name.ar}
+                          onChange={(e) => setEditingSite({
+                            ...editingSite,
+                            name: { ...editingSite.name, ar: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          {isRtl ? 'الموقع الجغرافي:' : 'Location Area:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSite.location.ar}
+                          onChange={(e) => setEditingSite({
+                            ...editingSite,
+                            location: { ...editingSite.location, ar: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          {isRtl ? 'العمق:' : 'Depth Range:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSite.depth.ar}
+                          onChange={(e) => setEditingSite({
+                            ...editingSite,
+                            depth: { ...editingSite.depth, ar: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          {isRtl ? 'مستوى الغواصين المطلوب:' : 'Required Diver Level:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={editingSite.level.ar}
+                          onChange={(e) => setEditingSite({
+                            ...editingSite,
+                            level: { ...editingSite.level, ar: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        {isRtl ? 'وصف الموقع ومميزاته:' : 'Description & Features:'}
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={editingSite.description.ar}
+                        onChange={(e) => setEditingSite({
+                          ...editingSite,
+                          description: { ...editingSite.description, ar: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateDiveSite(editingSite.id, editingSite);
+                          setEditingSite(null);
+                          showToast(isRtl ? 'تم حفظ تعديلات الموقع بنجاح!' : 'Site updated successfully!');
+                        }}
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/30"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>{isRtl ? 'حفظ تعديل الموقع' : 'Save Site'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingSite(null)}
+                        className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                      >
+                        {isRtl ? 'إلغاء' : 'Cancel'}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {config.diveSites.map((site) => (
-                    <div key={site.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="text-sm font-bold text-white">{site.name.ar}</h4>
-                          <span className="text-xs text-blue-400 block mt-0.5">{site.location.ar}</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">
-                          {site.depth.ar}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        {site.description.ar}
-                      </p>
-
-                      <div className="pt-2 border-t border-slate-850 flex flex-wrap gap-1.5">
-                        {site.marineLife.ar.slice(0, 3).map((animal, i) => (
-                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-800">
-                            {animal}
+                    <div key={site.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 hover:border-slate-700 transition-all flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="text-sm font-bold text-white">{site.name.ar}</h4>
+                            <span className="text-xs text-blue-400 block mt-0.5">{site.location.ar}</span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">
+                            {site.depth.ar}
                           </span>
-                        ))}
+                        </div>
+
+                        <p className="text-xs text-slate-400 leading-relaxed mt-2.5">
+                          {site.description.ar}
+                        </p>
+
+                        <div className="pt-2 border-t border-slate-850 flex flex-wrap gap-1.5 mt-2">
+                          {site.marineLife.ar.slice(0, 4).map((animal, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-800">
+                              {animal}
+                            </span>
+                          ))}
+                        </div>
                       </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-850">
+                        <button
+                          type="button"
+                          onClick={() => setEditingSite(site)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>{isRtl ? 'تعديل' : 'Edit'}</span>
+                        </button>
+                        {config.diveSites.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              deleteDiveSite(site.id);
+                              if (editingSite?.id === site.id) setEditingSite(null);
+                              showToast(isRtl ? 'تم حذف الموقع' : 'Site removed');
+                            }}
+                            className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer"
+                            title={isRtl ? 'حذف الموقع' : 'Delete'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: FAQS */}
+            {activeTab === 'faqs' && (
+              <div className="space-y-6 max-w-4xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <HelpCircle className="w-5 h-5 text-blue-400" />
+                      {isRtl ? 'إدارة الأسئلة الشائعة وإجاباتها' : 'FAQ Management'}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {isRtl 
+                        ? 'إضافة وتعديل وحذف أي سؤال وإجابة تظهر للزوار في قسم الأسئلة الشائعة.'
+                        : 'Add, update or delete frequently asked questions and answers displayed to visitors.'}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentFaqs = config.faqs && config.faqs.length > 0 ? config.faqs : [];
+                      const updated = [
+                        ...currentFaqs,
+                        {
+                          question: { ar: 'سؤال جديد يهم المتدربين؟', en: 'New Frequently Asked Question?' },
+                          answer: { ar: 'إجابة مفصلة وواضحة من كابتن فهد هنا.', en: 'Detailed clear answer from Captain Fahad.' }
+                        }
+                      ];
+                      updateFaqs(updated);
+                      setEditingFaqIndex(updated.length - 1);
+                      showToast(isRtl ? 'تمت إضافة سؤال جديد، يمكنك تعديله بالأسفل' : 'New FAQ added');
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 cursor-pointer transition-all self-start sm:self-auto shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isRtl ? 'إضافة سؤال جديد' : 'Add FAQ'}</span>
+                  </button>
+                </div>
+
+                {/* FAQ List */}
+                <div className="space-y-3">
+                  {(config.faqs || []).map((faq, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                      {editingFaqIndex === idx ? (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1">
+                              {isRtl ? 'نص السؤال:' : 'Question:'}
+                            </label>
+                            <input
+                              type="text"
+                              value={faq.question.ar}
+                              onChange={(e) => {
+                                const updated = [...(config.faqs || [])];
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  question: { ...updated[idx].question, ar: e.target.value, en: e.target.value }
+                                };
+                                updateFaqs(updated);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none font-bold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1">
+                              {isRtl ? 'نص الإجابة:' : 'Answer:'}
+                            </label>
+                            <textarea
+                              rows={3}
+                              value={faq.answer.ar}
+                              onChange={(e) => {
+                                const updated = [...(config.faqs || [])];
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  answer: { ...updated[idx].answer, ar: e.target.value, en: e.target.value }
+                                };
+                                updateFaqs(updated);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingFaqIndex(null);
+                                showToast();
+                              }}
+                              className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>{isRtl ? 'تم الحفظ' : 'Done'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="space-y-1.5">
+                            <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                              <span className="text-blue-400 font-mono text-xs">#{idx + 1}</span>
+                              <span>{faq.question.ar}</span>
+                            </h4>
+                            <p className="text-xs text-slate-300 leading-relaxed ps-5">
+                              {faq.answer.ar}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setEditingFaqIndex(idx)}
+                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                              title={isRtl ? 'تعديل السؤال' : 'Edit'}
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            {(config.faqs || []).length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = (config.faqs || []).filter((_, i) => i !== idx);
+                                  updateFaqs(updated);
+                                  showToast(isRtl ? 'تم حذف السؤال' : 'FAQ removed');
+                                }}
+                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-600 text-red-400 hover:text-white transition-colors cursor-pointer"
+                                title={isRtl ? 'حذف السؤال' : 'Delete'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: TESTIMONIALS */}
+            {activeTab === 'testimonials' && (
+              <div className="space-y-6 max-w-4xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-blue-400" />
+                      {isRtl ? 'إدارة آراء وتجارب المتدربين والخرجين' : 'Student Testimonials & Reviews'}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {isRtl 
+                        ? 'إضافة وتعديل تجارب الغواصين والخريجين الحقيقية مع كابتن فهد.'
+                        : 'Manage verified student experiences and feedback quotes.'}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = config.testimonials || [];
+                      const newT: Testimonial = {
+                        id: `t-${Date.now()}`,
+                        name: { ar: 'متدرب جديد', en: 'New Graduate' },
+                        role: { ar: 'غواص مياه مفتوحة مرخص', en: 'Certified Diver' },
+                        course: { ar: 'دورة غواص المياه المفتوحة', en: 'Open Water Diver' },
+                        quote: { ar: 'تجربة تدريب استثنائية مع كابتن فهد تميزت بالصبر العالي والأمان.', en: 'Great diving experience!' },
+                        date: { ar: '2026', en: '2026' },
+                        avatarSeed: 'diver'
+                      };
+                      const updated = [...current, newT];
+                      updateTestimonials(updated);
+                      setEditingTestimonialIndex(updated.length - 1);
+                      showToast(isRtl ? 'تمت إضافة رأي جديد، يمكنك تعديله بالأسفل' : 'New testimonial added');
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 cursor-pointer transition-all self-start sm:self-auto shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isRtl ? 'إضافة رأي متدرب جديد' : 'Add Review'}</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(config.testimonials || []).map((testi, idx) => (
+                    <div key={testi.id || idx} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 flex flex-col justify-between">
+                      {editingTestimonialIndex === idx ? (
+                        <div className="space-y-2.5">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-300">
+                              {isRtl ? 'اسم المتدرب:' : 'Student Name:'}
+                            </label>
+                            <input
+                              type="text"
+                              value={testi.name.ar}
+                              onChange={(e) => {
+                                const updated = [...(config.testimonials || [])];
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  name: { ...updated[idx].name, ar: e.target.value, en: e.target.value }
+                                };
+                                updateTestimonials(updated);
+                              }}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-300">
+                              {isRtl ? 'الدورة التدريبية التي تخرج منها:' : 'Graduated Course:'}
+                            </label>
+                            <input
+                              type="text"
+                              value={testi.course.ar}
+                              onChange={(e) => {
+                                const updated = [...(config.testimonials || [])];
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  course: { ...updated[idx].course, ar: e.target.value, en: e.target.value }
+                                };
+                                updateTestimonials(updated);
+                              }}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-300">
+                              {isRtl ? 'نص التجربة أو الرأي:' : 'Quote / Review:'}
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={testi.quote.ar}
+                              onChange={(e) => {
+                                const updated = [...(config.testimonials || [])];
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  quote: { ...updated[idx].quote, ar: e.target.value, en: e.target.value }
+                                };
+                                updateTestimonials(updated);
+                              }}
+                              className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white outline-none"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTestimonialIndex(null);
+                              showToast();
+                            }}
+                            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg cursor-pointer"
+                          >
+                            {isRtl ? 'حفظ' : 'Done'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-xs text-slate-200 italic leading-relaxed">
+                            &ldquo;{testi.quote.ar}&rdquo;
+                          </p>
+
+                          <div className="pt-3 border-t border-slate-850 flex items-center justify-between mt-3 text-xs">
+                            <div>
+                              <div className="font-bold text-white text-xs">{testi.name.ar}</div>
+                              <div className="text-[10px] text-blue-400 font-medium">{testi.course.ar}</div>
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setEditingTestimonialIndex(idx)}
+                                className="p-1 rounded-md bg-slate-900 hover:bg-blue-600 text-slate-300 hover:text-white"
+                                title={isRtl ? 'تعديل' : 'Edit'}
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              {(config.testimonials || []).length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = (config.testimonials || []).filter((_, i) => i !== idx);
+                                    updateTestimonials(updated);
+                                    showToast(isRtl ? 'تم حذف الرأي' : 'Review removed');
+                                  }}
+                                  className="p-1 rounded-md bg-red-950/40 hover:bg-red-600 text-red-400 hover:text-white"
+                                  title={isRtl ? 'حذف' : 'Delete'}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1888,6 +2461,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose 
           </div>
         </div>
       </div>
+    );
+
+  if (isStandalonePage) {
+    return content;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+      {content}
     </div>
   );
 };

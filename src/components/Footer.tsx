@@ -9,7 +9,7 @@ interface FooterProps {
   onOpenAdmin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
+export const Footer: React.FC<FooterProps> = () => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
@@ -77,17 +77,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
               <li>
                 <a href="#faq" className="hover:text-blue-400 transition-colors">{t.navFaq}</a>
               </li>
-              {onOpenAdmin && (
-                <li className="pt-2 border-t border-slate-900">
-                  <button
-                    onClick={onOpenAdmin}
-                    className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-semibold transition-colors cursor-pointer"
-                  >
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>{isRtl ? 'لوحة تحكم الكابتن (Admin)' : 'Captain Admin Portal'}</span>
-                  </button>
-                </li>
-              )}
             </ul>
           </div>
 

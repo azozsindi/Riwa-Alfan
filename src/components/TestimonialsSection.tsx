@@ -2,11 +2,15 @@ import React from 'react';
 import { TESTIMONIALS } from '../data/divingData';
 import { Quote } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 export const TestimonialsSection: React.FC = () => {
   const { language, isRtl } = useLanguage();
+  const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
+
+  const testimonialsList = config.testimonials && config.testimonials.length > 0 ? config.testimonials : TESTIMONIALS;
 
   return (
     <section className="py-24 bg-slate-950 relative border-t border-slate-800/80">
@@ -27,7 +31,7 @@ export const TestimonialsSection: React.FC = () => {
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {TESTIMONIALS.map((testimonial) => (
+          {testimonialsList.map((testimonial) => (
             <div
               key={testimonial.id}
               className={`p-7 rounded-3xl bg-slate-900 border border-slate-800 hover:border-blue-500/30 transition-colors flex flex-col justify-between space-y-6 ${
