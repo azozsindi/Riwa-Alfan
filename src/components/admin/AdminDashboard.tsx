@@ -4,7 +4,7 @@ import {
   Save, RotateCcw, Plus, Trash2, Edit3, Check, ExternalLink, 
   Upload, Image as ImageIcon, Sparkles, MessageCircle, Phone, 
   Calendar, Award, Download, FileUp, Eye, UserCheck, User,
-  AlertTriangle, HelpCircle, MessageSquare, LogOut
+  AlertTriangle, HelpCircle, MessageSquare, LogOut, Database
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
@@ -43,7 +43,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose,
     resetToDefaults,
     exportBackupJson,
     importBackupJson,
-    updateAdminPin
+    updateAdminPin,
+    restorePreviousPrices
   } = useSiteConfig();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('offers');
@@ -1338,33 +1339,117 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isOpen, onClose,
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      const newId = `course-${Date.now()}`;
-                      const freshCourse: Course = {
-                        id: newId,
-                        category: 'specialty',
-                        certAgency: 'PADI',
-                        seaDives: 2,
-                        poolSessions: 1,
-                        title: { ar: 'دورة تدريبية جديدة', en: 'New Diving Course' },
-                        price: { ar: '1,500 ر.س', en: '1,500 SAR' },
-                        duration: { ar: 'يومين', en: '2 Days' },
-                        depth: { ar: 'حتى 20 متر', en: 'Up to 20m' },
-                        summary: { ar: 'وصف وموجز الدورة...', en: 'Course overview...' },
-                        prerequisites: { ar: 'غواص مياه مفتوحة مرخص', en: 'Open Water Diver' },
-                        highlights: { ar: ['تدريب عملي بجدة', 'شهادة PADI رقمية'], en: ['Practical training in Jeddah', 'PADI digital eCard'] },
-                        curriculum: { ar: ['الجانب النظري', 'الغوص في البحر'], en: ['Theory session', 'Open water dives'] }
-                      };
-                      addCourse(freshCourse);
-                      setEditingCourse(freshCourse);
-                      showToast();
-                    }}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/30 shrink-0 self-start"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{isRtl ? 'إضافة دورة جديدة' : 'Add New Course'}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const ok = restorePreviousPrices();
+                        if (ok) {
+                          setToastMessage(isRtl ? 'تم استرجاع أسعارك وتعديلاتك السابقة بنجاح!' : 'Previous prices restored successfully!');
+                          showToast();
+                        } else {
+                          setToastMessage(isRtl ? 'الأسعار الحالية هي أحدث نسخة محفوظة' : 'Current prices are up to date');
+                          showToast();
+                        }
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                      title={isRtl ? 'استرجاع تعديلات الأسعار من الذاكرة المحلية السابقة' : 'Restore previous prices from memory'}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{isRtl ? 'استرجاع أسعاري السابقة' : 'Restore Previous Prices'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const newId = `course-${Date.now()}`;
+                        const freshCourse: Course = {
+                          id: newId,
+                          category: 'specialty',
+                          certAgency: 'PADI',
+                          seaDives: 2,
+                          poolSessions: 1,
+                          title: { ar: 'دورة تدريبية جديدة', en: 'New Diving Course' },
+                          price: { ar: '1,500 ر.س', en: '1,500 SAR' },
+                          duration: { ar: 'يومين', en: '2 Days' },
+                          depth: { ar: 'حتى 20 متر', en: 'Up to 20m' },
+                          summary: { ar: 'وصف وموجز الدورة...', en: 'Course overview...' },
+                          prerequisites: { ar: 'غواص مياه مفتوحة مرخص', en: 'Open Water Diver' },
+                          highlights: { ar: ['تدريب عملي بجدة', 'شهادة PADI رقمية'], en: ['Practical training in Jeddah', 'PADI digital eCard'] },
+                          curriculum: { ar: ['الجانب النظري', 'الغوص في البحر'], en: ['Theory session', 'Open water dives'] }
+                        };
+                        addCourse(freshCourse);
+                        setEditingCourse(freshCourse);
+                        showToast();
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/30 shrink-0 self-start"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{isRtl ? 'إضافة دورة جديدة' : 'Add New Course'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cloud Sync & Quick Price Matrix */}
+                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Database className="w-4 h-4 text-emerald-400" />
+                        <span>{isRtl ? 'تعديل أسعار الدورات السريع (مباشر وسحابي):' : 'Fast Live Price Matrix:'}</span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                        {isRtl ? 'سحابي ومحفوظ دائماً' : 'Cloud Saved'}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-400">
+                      {isRtl ? 'اكتب السعر واضغط حفظ للتطبيق المباشر' : 'Edit price & save live'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {config.courses.map((course) => (
+                      <div 
+                        key={course.id}
+                        className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 hover:border-slate-700 transition-colors"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-bold text-white block truncate">
+                            {course.title.ar}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate">
+                            {course.title.en} · {course.duration.ar}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <input 
+                            type="text"
+                            value={course.price.ar}
+                            onChange={(e) => {
+                              const newPriceAr = e.target.value;
+                              const newPriceEn = newPriceAr.replace(/ر\.س/g, 'SAR');
+                              updateCourse(course.id, {
+                                price: {
+                                  ar: newPriceAr,
+                                  en: newPriceEn
+                                }
+                              });
+                            }}
+                            className="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-lg text-xs text-white font-mono font-bold text-center outline-none"
+                            placeholder="1,850 ر.س"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setEditingCourse(course)}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                            title={isRtl ? 'تعديل باقي تفاصيل الدورة' : 'Edit full details'}
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Course Edit Modal / Panel */}

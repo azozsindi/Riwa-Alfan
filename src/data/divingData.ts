@@ -59,7 +59,7 @@ export const INSTRUCTOR_INFO = {
   safetyRecord: "100%",
   phone: "+966530549675",
   whatsappNumber: "966530549675",
-  email: "Fahad.Alhuwaimli@gmail.com",
+  email: "Riwaalfan@gmail.com",
   location: {
     ar: "جدة - ساحل البحر الأحمر، المملكة العربية السعودية",
     en: "Jeddah - Red Sea Coast, Saudi Arabia"

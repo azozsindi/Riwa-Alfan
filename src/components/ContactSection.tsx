@@ -15,7 +15,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
 
   const phone = config.brand.phone || '+966530549675';
   const whatsappNumber = config.brand.whatsappNumber || '966530549675';
-  const email = config.brand.email || 'Fahad.Alhuwaimli@gmail.com';
+  const email = config.brand.email || 'Riwaalfan@gmail.com';
 
   const whatsAppText = isRtl
     ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل التدريب بجدة`

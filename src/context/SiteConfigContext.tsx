@@ -13,8 +13,8 @@ import {
   getDocFromServer 
 } from 'firebase/firestore';
 
-const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v11';
-const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v11';
+const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v12';
+const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v12';
 
 const DEFAULT_CONFIG: SiteConfig = {
   brand: {
@@ -28,7 +28,7 @@ const DEFAULT_CONFIG: SiteConfig = {
     logoSubtext: 'رواء الفن',
     phone: '+966530549675',
     whatsappNumber: '966530549675',
-    email: INSTRUCTOR_INFO.email,
+    email: 'Riwaalfan@gmail.com',
     city: 'جدة',
     locationAr: 'جدة - ساحل البحر الأحمر، المملكة العربية السعودية',
     locationEn: 'Jeddah - Red Sea Coast, Saudi Arabia',
@@ -171,6 +171,7 @@ interface SiteConfigContextType {
   importBackupJson: (jsonString: string) => boolean;
   verifyPin: (pin: string) => boolean;
   updateAdminPin: (newPin: string) => void;
+  restorePreviousPrices: () => boolean;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
@@ -178,20 +179,88 @@ const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undef
 export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<SiteConfig>(() => {
     try {
-      const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_CONFIG,
-          ...parsed,
-          brand: { ...DEFAULT_CONFIG.brand, ...(parsed.brand || {}) },
-          hero: { ...DEFAULT_CONFIG.hero, ...(parsed.hero || {}) },
-          instructor: { ...DEFAULT_CONFIG.instructor, ...(parsed.instructor || {}) },
-          announcement: { ...DEFAULT_CONFIG.announcement, ...(parsed.announcement || {}) },
-          courses: Array.isArray(parsed.courses) && parsed.courses.length > 0 ? parsed.courses : DEFAULT_CONFIG.courses,
-          diveSites: Array.isArray(parsed.diveSites) && parsed.diveSites.length > 0 ? parsed.diveSites : DEFAULT_CONFIG.diveSites
-        };
+      const olderKeys = [
+        'riwa_alfan_site_config_v11',
+        'riwa_alfan_site_config_v10',
+        'riwa_alfan_site_config_v9',
+        'riwa_alfan_site_config_v8',
+        'riwa_alfan_site_config_v7',
+        'riwa_alfan_site_config_v6',
+        'riwa_alfan_site_config_v5',
+        'riwa_alfan_site_config_v4',
+        'riwa_alfan_site_config_v3',
+        'riwa_alfan_site_config_v2',
+        'riwa_alfan_site_config_v1',
+        'riwa_alfan_site_config'
+      ];
+
+      // Check if courses list has customized prices
+      const hasCustomCourses = (coursesList: any[]): boolean => {
+        if (!Array.isArray(coursesList) || coursesList.length === 0) return false;
+        return coursesList.some(c => {
+          const def = DEFAULT_CONFIG.courses.find(d => d.id === c.id);
+          if (!def) return true; // custom course added by captain
+          return def.price?.ar !== c.price?.ar || def.price?.en !== c.price?.en;
+        });
+      };
+
+      // Check v12 first
+      let v12Config: any = null;
+      const v12Raw = localStorage.getItem(CONFIG_STORAGE_KEY);
+      if (v12Raw) {
+        try {
+          v12Config = JSON.parse(v12Raw);
+        } catch {}
       }
+
+      // Check if older version has user-customized courses & prices
+      let recoveredCourses: Course[] | null = null;
+      let recoveredBrand: any = null;
+      let recoveredAnnouncement: any = null;
+
+      if (v12Config && hasCustomCourses(v12Config.courses)) {
+        recoveredCourses = v12Config.courses;
+      } else {
+        // Search previous storage keys (v11, v10, etc.)
+        for (const k of olderKeys) {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            try {
+              const p = JSON.parse(raw);
+              if (p) {
+                if (!recoveredCourses && hasCustomCourses(p.courses)) {
+                  recoveredCourses = p.courses;
+                }
+                if (!recoveredBrand && p.brand) {
+                  recoveredBrand = p.brand;
+                }
+                if (!recoveredAnnouncement && p.announcement) {
+                  recoveredAnnouncement = p.announcement;
+                }
+              }
+            } catch {}
+          }
+        }
+      }
+
+      const base = v12Config || {};
+
+      return {
+        ...DEFAULT_CONFIG,
+        ...base,
+        brand: { 
+          ...DEFAULT_CONFIG.brand, 
+          ...(base.brand || recoveredBrand || {}),
+          email: 'Riwaalfan@gmail.com'
+        },
+        hero: { ...DEFAULT_CONFIG.hero, ...(base.hero || {}) },
+        instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}) },
+        announcement: { ...DEFAULT_CONFIG.announcement, ...(base.announcement || recoveredAnnouncement || {}) },
+        courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
+        diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
+        faqs: Array.isArray(base.faqs) && base.faqs.length > 0 ? base.faqs : DEFAULT_CONFIG.faqs,
+        testimonials: Array.isArray(base.testimonials) && base.testimonials.length > 0 ? base.testimonials : DEFAULT_CONFIG.testimonials
+      };
     } catch (e) {
       console.error('Failed to load site config from storage:', e);
     }
@@ -251,10 +320,45 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
-  // Sync config to localStorage
+  // Real-time Firestore sync for Site Config (Cloud persistence across devices)
+  useEffect(() => {
+    try {
+      const configDocRef = doc(db, 'settings', 'site_config');
+      const unsub = onSnapshot(configDocRef, (snap) => {
+        if (snap.exists()) {
+          const remoteData = snap.data() as Partial<SiteConfig>;
+          if (remoteData && remoteData.courses && remoteData.courses.length > 0) {
+            setConfig(prev => ({
+              ...prev,
+              ...remoteData,
+              brand: {
+                ...prev.brand,
+                ...(remoteData.brand || {}),
+                email: 'Riwaalfan@gmail.com'
+              }
+            }));
+          }
+        }
+      }, (err) => {
+        console.warn('Firestore site_config snapshot notice:', err);
+      });
+      return () => unsub();
+    } catch (e) {
+      console.warn('Firestore site_config sync notice:', e);
+    }
+  }, []);
+
+  // Sync config to localStorage and Firestore
   useEffect(() => {
     try {
       localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+      localStorage.setItem('riwa_alfan_site_config_v11', JSON.stringify(config));
+      
+      // Save to Firestore settings
+      const configDocRef = doc(db, 'settings', 'site_config');
+      setDoc(configDocRef, config, { merge: true }).catch(err => {
+        console.warn('Firestore setDoc site_config notice:', err);
+      });
     } catch (e) {
       console.error('Failed to save site config:', e);
     }
@@ -436,6 +540,41 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({ ...prev, adminPin: newPin }));
   };
 
+  const restorePreviousPrices = (): boolean => {
+    try {
+      const olderKeys = [
+        'riwa_alfan_site_config_v11',
+        'riwa_alfan_site_config_v10',
+        'riwa_alfan_site_config_v9',
+        'riwa_alfan_site_config_v8',
+        'riwa_alfan_site_config_v7',
+        'riwa_alfan_site_config_v6',
+        'riwa_alfan_site_config_v5',
+        'riwa_alfan_site_config_v4',
+        'riwa_alfan_site_config_v3',
+        'riwa_alfan_site_config_v2',
+        'riwa_alfan_site_config_v1',
+        'riwa_alfan_site_config'
+      ];
+      for (const k of olderKeys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.courses) && parsed.courses.length > 0) {
+            setConfig(prev => ({
+              ...prev,
+              courses: parsed.courses
+            }));
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore previous prices:', e);
+    }
+    return false;
+  };
+
   return (
     <SiteConfigContext.Provider value={{
       config,
@@ -464,7 +603,8 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       exportBackupJson,
       importBackupJson,
       verifyPin,
-      updateAdminPin
+      updateAdminPin,
+      restorePreviousPrices
     }}>
       {children}
     </SiteConfigContext.Provider>
