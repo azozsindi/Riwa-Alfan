@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Shield, Lock } from 'lucide-react';
+import { ShieldCheck, Shield, Lock, MapPin, Instagram, Video, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -8,9 +8,17 @@ import { FahadsLogo } from './FahadsLogo';
 interface FooterProps {
   onOpenAdmin?: () => void;
   onOpenPolicies?: () => void;
+  onOpenTools?: () => void;
+  onOpenSites?: () => void;
+  onOpenFaq?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenPolicies }) => {
+export const Footer: React.FC<FooterProps> = ({ 
+  onOpenPolicies, 
+  onOpenTools,
+  onOpenSites,
+  onOpenFaq,
+}) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
@@ -63,10 +71,74 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPolicies }) => {
               {t.footerBio}
             </p>
 
+            {/* Marina Location GPS Link */}
+            {config.locationConfig?.googleMapsUrl && (
+              <a 
+                href={config.locationConfig.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+              >
+                <MapPin className="w-4 h-4 shrink-0 text-cyan-400" />
+                <span>{language === 'ar' ? config.locationConfig.marinaNameAr : config.locationConfig.marinaNameEn}</span>
+                <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+              </a>
+            )}
+
             <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
               <ShieldCheck className="w-4 h-4 text-blue-400" />
               <span>{config.brand.padiNumber || 'PADI Member #482910 · PADI EFR Instructor'}</span>
             </div>
+
+            {/* Social Media Links */}
+            {config.socialLinks && config.socialLinks.showInFooter !== false && (
+              <div className="flex items-center gap-2 pt-1">
+                {config.socialLinks.instagram && (
+                  <a
+                    href={config.socialLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-pink-600/20 text-slate-400 hover:text-pink-400 border border-slate-800 flex items-center justify-center transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {config.socialLinks.tiktok && (
+                  <a
+                    href={config.socialLinks.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-cyan-600/20 text-slate-400 hover:text-cyan-400 border border-slate-800 flex items-center justify-center transition-colors"
+                    aria-label="TikTok"
+                  >
+                    <Video className="w-4 h-4" />
+                  </a>
+                )}
+                {config.socialLinks.snapchat && (
+                  <a
+                    href={config.socialLinks.snapchat}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-yellow-500/20 text-slate-400 hover:text-yellow-400 border border-slate-800 flex items-center justify-center transition-colors text-sm"
+                    aria-label="Snapchat"
+                  >
+                    👻
+                  </a>
+                )}
+                {config.socialLinks.twitter && (
+                  <a
+                    href={config.socialLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-600/20 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition-colors font-bold text-xs"
+                    aria-label="Twitter / X"
+                  >
+                    𝕏
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick links */}
@@ -84,14 +156,45 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPolicies }) => {
               <li>
                 <a href="#courses" className="hover:text-blue-400 transition-colors">{t.navCourses}</a>
               </li>
+              {onOpenTools && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={onOpenTools}
+                    className="hover:text-[#E0BA84] text-[#C59B5F] transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>🧮</span>
+                    <span>{isRtl ? 'حاسبات وأدوات الغواصين' : t.navTools}</span>
+                  </button>
+                </li>
+              )}
               <li>
-                <a href="#diver-tools" className="hover:text-blue-400 transition-colors">{t.navTools}</a>
+                {onOpenSites ? (
+                  <button
+                    type="button"
+                    onClick={onOpenSites}
+                    className="hover:text-cyan-400 transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>🌊</span>
+                    <span>{t.navSites}</span>
+                  </button>
+                ) : (
+                  <a href="#dive-sites" className="hover:text-blue-400 transition-colors">{t.navSites}</a>
+                )}
               </li>
               <li>
-                <a href="#dive-sites" className="hover:text-blue-400 transition-colors">{t.navSites}</a>
-              </li>
-              <li>
-                <a href="#faq" className="hover:text-blue-400 transition-colors">{t.navFaq}</a>
+                {onOpenFaq ? (
+                  <button
+                    type="button"
+                    onClick={onOpenFaq}
+                    className="hover:text-blue-400 transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>❓</span>
+                    <span>{t.navFaq}</span>
+                  </button>
+                ) : (
+                  <a href="#faq" className="hover:text-blue-400 transition-colors">{t.navFaq}</a>
+                )}
               </li>
               <li>
                 <button
@@ -126,10 +229,35 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPolicies }) => {
           </div>
         </div>
 
-        {/* Bottom copyright line */}
+        {/* Bottom copyright & Trust verification line */}
         <div className="pt-8 border-t border-slate-900 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>{t.footerCopyright}</div>
-          <div className="text-slate-400 font-mono">{t.footerCountry}</div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span>{t.footerCopyright}</span>
+            {config.trustBadges?.freelanceDocNumber && (
+              <>
+                <span className="text-slate-600">·</span>
+                <span className="text-slate-400 font-mono">
+                  {isRtl ? `وثيقة العمل الحر: ${config.trustBadges.freelanceDocNumber}` : `Freelance License: ${config.trustBadges.freelanceDocNumber}`}
+                </span>
+              </>
+            )}
+            {config.trustBadges?.crNumber && (
+              <>
+                <span className="text-slate-600">·</span>
+                <span className="text-slate-400 font-mono">
+                  {isRtl ? `سجل تجاري: ${config.trustBadges.crNumber}` : `CR: ${config.trustBadges.crNumber}`}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="text-slate-400 font-mono flex items-center gap-2">
+            <span>{t.footerCountry}</span>
+            {config.trustBadges?.padiFiveStar && (
+              <span className="px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-500/30 text-blue-400 text-[10px] font-bold">
+                PADI Certified
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </footer>

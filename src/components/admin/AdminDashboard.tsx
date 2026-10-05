@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { 
   X, Tag, Building2, Compass, Waves, Inbox, Settings, 
-  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe
+  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe, Eye, Share2, Shield
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
+import { useAuth } from '../../context/AuthContext';
 import { OffersTab } from './tabs/OffersTab';
+import { SectionsVisibilityTab } from './tabs/SectionsVisibilityTab';
+import { SocialAndTrustTab } from './tabs/SocialAndTrustTab';
+import { AdminsTab } from './tabs/AdminsTab';
 import { BrandTab } from './tabs/BrandTab';
 import { DomainTab } from './tabs/DomainTab';
 import { CaptainsTab } from './tabs/CaptainsTab';
@@ -18,7 +22,7 @@ import { TestimonialsTab } from './tabs/TestimonialsTab';
 import { BookingsTab } from './tabs/BookingsTab';
 import { SettingsTab } from './tabs/SettingsTab';
 
-type AdminTab = 'offers' | 'brand' | 'domain' | 'captains' | 'instructor' | 'courses' | 'payment' | 'sites' | 'faqs' | 'testimonials' | 'bookings' | 'settings';
+type AdminTab = 'offers' | 'sections' | 'brand' | 'social' | 'admins' | 'domain' | 'captains' | 'instructor' | 'courses' | 'payment' | 'sites' | 'faqs' | 'testimonials' | 'bookings' | 'settings';
 
 interface AdminDashboardProps {
   isOpen: boolean;
@@ -56,9 +60,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     deleteBooking,
     resetToDefaults,
     exportBackupJson,
-    updateAdminPin,
-    restorePreviousPrices
+    restorePreviousPrices,
+    updateVisibleSections,
+    updateSocialLinks,
+    updateLocationConfig,
+    updateTrustBadges
   } = useSiteConfig();
+  const { user, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('offers');
   const [saveToast, setSaveToast] = useState(false);
@@ -115,6 +123,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </span>
           )}
 
+          {user && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-slate-300 font-mono text-[11px]">{user.email}</span>
+            </div>
+          )}
+
           {isStandalonePage && (
             <button
               onClick={onClose}
@@ -126,19 +141,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
           )}
 
-          {/* Lock / Logout Button */}
+          {/* Secure Firebase Logout Button */}
           <button
-            onClick={() => {
-              try {
-                localStorage.removeItem('riwa_alfan_admin_auth');
-              } catch (e) {}
+            onClick={async () => {
+              await logout();
               onClose();
             }}
             className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-950/80 hover:text-red-300 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer"
-            title={isRtl ? 'قفل لوحة التحكم وتسجيل الخروج' : 'Lock & Logout'}
+            title={isRtl ? 'تسجيل الخروج وقفل اللوحة' : 'Sign Out & Lock'}
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isRtl ? 'قفل اللوحة' : 'Lock'}</span>
+            <span className="hidden sm:inline">{isRtl ? 'تسجيل الخروج' : 'Sign Out'}</span>
           </button>
 
           <button
@@ -171,6 +184,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('sections')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'sections' 
+                ? 'gold-gradient-btn text-slate-950 font-black shadow-lg shadow-[#C59B5F]/20' 
+                : 'text-[#E0BA84] hover:text-white bg-slate-900/60 hover:bg-slate-800/80 border border-[#C59B5F]/30'
+            }`}
+          >
+            <Eye className="w-4 h-4 shrink-0" />
+            <span>{isRtl ? 'إخفاء وظهور الأقسام 👁️' : 'Show / Hide Sections 👁️'}</span>
+            <span className="w-2 h-2 rounded-full bg-cyan-400 ms-auto shrink-0 animate-pulse" />
+          </button>
+
+          <button
             onClick={() => setActiveTab('brand')}
             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'brand' 
@@ -180,6 +206,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             <Building2 className="w-4 h-4 shrink-0" />
             <span>{isRtl ? 'الهوية والشعار ومقر جدة' : 'Brand & Logo'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('social')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'social' 
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Share2 className="w-4 h-4 shrink-0" />
+            <span>{isRtl ? 'التواصل والموقع والتوثيق 🌐' : 'Social, Location & Trust'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'admins' 
+                ? 'gold-gradient-btn text-slate-950 font-black shadow-lg shadow-[#C59B5F]/20' 
+                : 'text-amber-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Shield className="w-4 h-4 shrink-0" />
+            <span>{isRtl ? 'حسابات المدراء 🛡️' : 'Admin Accounts 🛡️'}</span>
           </button>
 
           <button
@@ -337,6 +387,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             />
           )}
 
+          {activeTab === 'sections' && (
+            <SectionsVisibilityTab
+              visibleSections={config.visibleSections}
+              onUpdate={updateVisibleSections}
+              showToast={showToast}
+            />
+          )}
+
           {activeTab === 'brand' && (
             <BrandTab 
               initialBrand={config.brand}
@@ -345,6 +403,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onUpdateHero={updateHero}
               showToast={showToast}
             />
+          )}
+
+          {activeTab === 'social' && (
+            <SocialAndTrustTab
+              initialSocial={config.socialLinks}
+              initialLocation={config.locationConfig}
+              initialTrust={config.trustBadges}
+              onUpdateSocial={updateSocialLinks}
+              onUpdateLocation={updateLocationConfig}
+              onUpdateTrust={updateTrustBadges}
+              showToast={showToast}
+            />
+          )}
+
+          {activeTab === 'admins' && (
+            <AdminsTab showToast={showToast} />
           )}
 
           {activeTab === 'domain' && (
@@ -433,7 +507,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {activeTab === 'settings' && (
             <SettingsTab 
-              onUpdateAdminPin={updateAdminPin}
               onExportBackupJson={exportBackupJson}
               onResetToDefaults={resetToDefaults}
               showToast={showToast}

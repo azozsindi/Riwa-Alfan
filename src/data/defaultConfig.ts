@@ -1,4 +1,13 @@
-import { SiteConfig, BookingRecord, Captain, FemaleInstructorConfig } from '../types/admin';
+import { 
+  SiteConfig, 
+  BookingRecord, 
+  Captain, 
+  FemaleInstructorConfig,
+  VisibleSectionsConfig,
+  SocialLinksConfig,
+  LocationConfig,
+  TrustBadgesConfig
+} from '../types/admin';
 import { COURSES_DATA, DIVE_SITES, FAQS, TESTIMONIALS } from './divingData';
 
 export const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v12';
@@ -105,6 +114,47 @@ export const DEFAULT_CAPTAINS: Captain[] = [
   }
 ];
 
+export const DEFAULT_VISIBLE_SECTIONS: VisibleSectionsConfig = {
+  announcement: true,
+  hero: true,
+  instructor: true,
+  femaleTraining: true,
+  quoteBanner: true,
+  courses: true,
+  quickPortals: true,
+  diveSitesModal: true,
+  diverToolsModal: true,
+  faqModal: true,
+  testimonials: true,
+  contact: true,
+  footer: true,
+};
+
+export const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
+  instagram: 'https://instagram.com/riwaalfan',
+  tiktok: 'https://tiktok.com/@riwaalfan',
+  snapchat: 'https://snapchat.com/add/riwaalfan',
+  twitter: '',
+  youtube: '',
+  showInHeader: true,
+  showInFooter: true,
+};
+
+export const DEFAULT_LOCATION_CONFIG: LocationConfig = {
+  googleMapsUrl: 'https://maps.google.com/?q=North+Obhur+Jeddah+Saudi+Arabia',
+  marinaNameAr: 'مرسى أبحر الشمالية - جدة',
+  marinaNameEn: 'North Obhur Marina - Jeddah',
+  addressAr: 'جدة - أبحر الشمالية، ساحل البحر الأحمر',
+  addressEn: 'Jeddah - North Obhur, Red Sea Coast',
+};
+
+export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
+  crNumber: '',
+  freelanceDocNumber: 'FL-2918401',
+  vatNumber: '',
+  padiFiveStar: true,
+};
+
 export const DEFAULT_CONFIG: SiteConfig = {
   brand: {
     centerNameAr: 'رواء الفن',
@@ -205,7 +255,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     supportCards: true
   },
   announcement: {
-    enabled: true,
+    enabled: false,
     badgeAr: 'عرض خاص بجدة',
     badgeEn: 'Jeddah Special Offer',
     textAr: 'خصم خاص 20% على دورة غواص المياه المفتوحة (Open Water) للحجوزات المبكرة هذا الشهر!',
@@ -219,7 +269,10 @@ export const DEFAULT_CONFIG: SiteConfig = {
   diveSites: DIVE_SITES,
   faqs: FAQS,
   testimonials: TESTIMONIALS,
-  adminPin: '1234'
+  visibleSections: DEFAULT_VISIBLE_SECTIONS,
+  socialLinks: DEFAULT_SOCIAL_LINKS,
+  locationConfig: DEFAULT_LOCATION_CONFIG,
+  trustBadges: DEFAULT_TRUST_BADGES
 };
 
 export const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [
@@ -227,7 +280,7 @@ export const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [
     id: 'BK-1082',
     createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
     name: 'سعود بن ناصر العتيبي',
-    phone: '0555123456',
+    phone: '0555987654',
     interest: 'دورة غواص المياه المفتوحة (Open Water)',
     experience: 'مبتدئ تماماً (أول مرة)',
     timing: 'عطلة نهاية الأسبوع (خميس/جمعة/سبت)',

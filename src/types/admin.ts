@@ -144,6 +144,47 @@ export interface Captain {
   isLead?: boolean;
 }
 
+export interface VisibleSectionsConfig {
+  announcement: boolean;
+  hero: boolean;
+  instructor: boolean;
+  femaleTraining: boolean;
+  quoteBanner: boolean;
+  courses: boolean;
+  quickPortals: boolean;
+  diveSitesModal: boolean;
+  diverToolsModal: boolean;
+  faqModal: boolean;
+  testimonials: boolean;
+  contact: boolean;
+  footer: boolean;
+}
+
+export interface SocialLinksConfig {
+  instagram?: string;
+  tiktok?: string;
+  snapchat?: string;
+  twitter?: string;
+  youtube?: string;
+  showInHeader: boolean;
+  showInFooter: boolean;
+}
+
+export interface LocationConfig {
+  googleMapsUrl: string;
+  marinaNameAr: string;
+  marinaNameEn: string;
+  addressAr: string;
+  addressEn: string;
+}
+
+export interface TrustBadgesConfig {
+  crNumber?: string;
+  freelanceDocNumber?: string;
+  vatNumber?: string;
+  padiFiveStar?: boolean;
+}
+
 export type BrandConfig = CenterBrandConfig;
 export type Booking = BookingRecord;
 export interface SiteConfig {
@@ -158,5 +199,8 @@ export interface SiteConfig {
   diveSites: DiveSite[];
   faqs: FAQItem[];
   testimonials: Testimonial[];
-  adminPin: string;
+  visibleSections?: VisibleSectionsConfig;
+  socialLinks?: SocialLinksConfig;
+  locationConfig?: LocationConfig;
+  trustBadges?: TrustBadgesConfig;
 }

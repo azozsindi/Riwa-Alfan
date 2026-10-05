@@ -13,6 +13,22 @@ export const OffersTab: React.FC<OffersTabProps> = ({ initialConfig, onUpdate, s
   const { isRtl } = useLanguage();
   const [announcementForm, setAnnouncementForm] = useState<AnnouncementConfig>(initialConfig);
 
+  // Sync state whenever initialConfig updates
+  React.useEffect(() => {
+    setAnnouncementForm(initialConfig);
+  }, [initialConfig]);
+
+  const handleToggle = (enabled: boolean) => {
+    const next = { ...announcementForm, enabled };
+    setAnnouncementForm(next);
+    onUpdate(next);
+    showToast(
+      enabled 
+        ? (isRtl ? 'تم تفعيل العرض ونشره لزوار الموقع!' : 'Offer Enabled & Published!') 
+        : (isRtl ? 'تم إيقاف العرض تماماً وحجبه نهائياً!' : 'Offer Completely Disabled & Hidden!')
+    );
+  };
+
   const handleApplyOfferPreset = (type: 'openwater' | 'summer' | 'national' | 'weekend') => {
     let updated: AnnouncementConfig;
     if (type === 'openwater') {
@@ -90,24 +106,31 @@ export const OffersTab: React.FC<OffersTabProps> = ({ initialConfig, onUpdate, s
           </p>
         </div>
 
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input 
-            type="checkbox" 
-            checked={announcementForm.enabled} 
-            onChange={(e) => {
-              const val = e.target.checked;
-              const next = { ...announcementForm, enabled: val };
-              setAnnouncementForm(next);
-              onUpdate(next);
-              showToast();
-            }}
-            className="sr-only peer"
-          />
-          <div className="w-12 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          <span className="ms-2.5 text-xs font-semibold text-slate-300">
-            {announcementForm.enabled ? (isRtl ? 'العرض مفعّل' : 'Active') : (isRtl ? 'العرض معطّل' : 'Disabled')}
-          </span>
-        </label>
+        <div className="flex items-center gap-3">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={announcementForm.enabled} 
+              onChange={(e) => handleToggle(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-12 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => handleToggle(!announcementForm.enabled)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              announcementForm.enabled
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                : 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+            }`}
+          >
+            {announcementForm.enabled 
+              ? (isRtl ? '🟢 العرض مفعّل (اضغط للإيقاف)' : '🟢 Active (Click to Disable)')
+              : (isRtl ? '🔴 العرض متوقف تماماً (اضغط للتفعيل)' : '🔴 Disabled (Click to Enable)')}
+          </button>
+        </div>
       </div>
 
       {/* Quick Presets */}

@@ -8,12 +8,20 @@ import {
   FemaleInstructorConfig,
   AnnouncementConfig,
   Captain,
-  PaymobPaymentConfig
+  PaymobPaymentConfig,
+  VisibleSectionsConfig,
+  SocialLinksConfig,
+  LocationConfig,
+  TrustBadgesConfig
 } from '../types/admin';
 import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 import { 
   DEFAULT_CONFIG, 
   DEFAULT_CAPTAINS,
+  DEFAULT_VISIBLE_SECTIONS,
+  DEFAULT_SOCIAL_LINKS,
+  DEFAULT_LOCATION_CONFIG,
+  DEFAULT_TRUST_BADGES,
   INITIAL_DEMO_BOOKINGS, 
   CONFIG_STORAGE_KEY, 
   BOOKINGS_STORAGE_KEY 
@@ -61,9 +69,11 @@ interface SiteConfigContextType {
   resetToDefaults: () => void;
   exportBackupJson: () => string;
   importBackupJson: (jsonString: string) => boolean;
-  verifyPin: (pin: string) => boolean;
-  updateAdminPin: (newPin: string) => void;
   restorePreviousPrices: () => boolean;
+  updateVisibleSections: (partial: Partial<VisibleSectionsConfig>) => void;
+  updateSocialLinks: (partial: Partial<SocialLinksConfig>) => void;
+  updateLocationConfig: (partial: Partial<LocationConfig>) => void;
+  updateTrustBadges: (partial: Partial<TrustBadgesConfig>) => void;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
@@ -131,6 +141,16 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
 
       const base = v12Config || {};
+      const isOffersExplicitlyDisabled = localStorage.getItem('riwa_offers_explicitly_disabled') === 'true';
+
+      const initialAnnouncement = {
+        ...DEFAULT_CONFIG.announcement,
+        ...(base.announcement || recoveredAnnouncement || {}),
+        enabled: isOffersExplicitlyDisabled 
+          ? false 
+          : (base.announcement?.enabled !== undefined ? base.announcement.enabled : false)
+      };
+
       return {
         ...DEFAULT_CONFIG,
         ...base,
@@ -140,7 +160,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
         captains: Array.isArray(base.captains) && base.captains.length > 0 ? base.captains : DEFAULT_CAPTAINS,
         payment: { ...(DEFAULT_CONFIG.payment || {}), ...(base.payment || {}) },
-        announcement: { ...DEFAULT_CONFIG.announcement, ...(base.announcement || recoveredAnnouncement || {}) },
+        announcement: initialAnnouncement,
         courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
         diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
         faqs: Array.isArray(base.faqs) && base.faqs.length > 0 ? base.faqs : DEFAULT_CONFIG.faqs,
@@ -188,15 +208,33 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Real-time Firestore sync for Site Config
   useEffect(() => {
     const unsub = subscribeToSiteConfig((remoteData) => {
-      setConfig(prev => ({
-        ...prev,
-        ...remoteData,
-        brand: {
-          ...prev.brand,
-          ...(remoteData.brand || {}),
-          email: 'Riwaalfan@gmail.com'
+      setConfig(prev => {
+        const isExplicitlyDisabled = localStorage.getItem('riwa_offers_explicitly_disabled') === 'true';
+        let updatedAnnouncement = prev.announcement;
+
+        if (remoteData.announcement) {
+          updatedAnnouncement = {
+            ...prev.announcement,
+            ...remoteData.announcement,
+            enabled: isExplicitlyDisabled 
+              ? false 
+              : (remoteData.announcement.enabled !== undefined ? remoteData.announcement.enabled : prev.announcement.enabled)
+          };
+        } else if (isExplicitlyDisabled) {
+          updatedAnnouncement = { ...prev.announcement, enabled: false };
         }
-      }));
+
+        return {
+          ...prev,
+          ...remoteData,
+          announcement: updatedAnnouncement,
+          brand: {
+            ...prev.brand,
+            ...(remoteData.brand || {}),
+            email: 'Riwaalfan@gmail.com'
+          }
+        };
+      });
     });
     return () => unsub();
   }, []);
@@ -286,10 +324,24 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateAnnouncement = (partial: Partial<AnnouncementConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      announcement: { ...prev.announcement, ...partial }
-    }));
+    setConfig(prev => {
+      const nextAnnouncement = { ...prev.announcement, ...partial };
+      try {
+        if (nextAnnouncement.enabled === false) {
+          localStorage.setItem('riwa_offers_explicitly_disabled', 'true');
+          localStorage.setItem('riwa_announcement_dismissed', 'true');
+        } else if (nextAnnouncement.enabled === true) {
+          localStorage.setItem('riwa_offers_explicitly_disabled', 'false');
+          localStorage.removeItem('riwa_announcement_dismissed');
+        }
+      } catch {}
+      const updatedConfig = {
+        ...prev,
+        announcement: nextAnnouncement
+      };
+      saveSiteConfigToFirestore(updatedConfig);
+      return updatedConfig;
+    });
   };
 
   const updateCourses = (courses: Course[]) => {
@@ -350,6 +402,34 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({ ...prev, testimonials }));
   };
 
+  const updateVisibleSections = (partial: Partial<VisibleSectionsConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      visibleSections: { ...(prev.visibleSections || DEFAULT_VISIBLE_SECTIONS), ...partial }
+    }));
+  };
+
+  const updateSocialLinks = (partial: Partial<SocialLinksConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      socialLinks: { ...(prev.socialLinks || DEFAULT_SOCIAL_LINKS), ...partial }
+    }));
+  };
+
+  const updateLocationConfig = (partial: Partial<LocationConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      locationConfig: { ...(prev.locationConfig || DEFAULT_LOCATION_CONFIG), ...partial }
+    }));
+  };
+
+  const updateTrustBadges = (partial: Partial<TrustBadgesConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      trustBadges: { ...(prev.trustBadges || DEFAULT_TRUST_BADGES), ...partial }
+    }));
+  };
+
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
@@ -400,14 +480,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.error('Import error:', e);
     }
     return false;
-  };
-
-  const verifyPin = (pin: string) => {
-    return (pin || '').trim() === (config.adminPin || '1234').trim();
-  };
-
-  const updateAdminPin = (newPin: string) => {
-    setConfig(prev => ({ ...prev, adminPin: newPin }));
   };
 
   const restorePreviousPrices = (): boolean => {
@@ -478,9 +550,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       resetToDefaults,
       exportBackupJson,
       importBackupJson,
-      verifyPin,
-      updateAdminPin,
-      restorePreviousPrices
+      restorePreviousPrices,
+      updateVisibleSections,
+      updateSocialLinks,
+      updateLocationConfig,
+      updateTrustBadges
     }}>
       {children}
     </SiteConfigContext.Provider>

@@ -75,7 +75,9 @@ export const subscribeToSiteConfig = (
 export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<void> => {
   try {
     const configDocRef = doc(db, 'settings', 'site_config');
-    await setDoc(configDocRef, config, { merge: true });
+    // Sanitize object to strip undefined values that cause Firestore setDoc to fail
+    const cleanConfig = JSON.parse(JSON.stringify(config));
+    await setDoc(configDocRef, cleanConfig, { merge: true });
   } catch (err) {
     console.warn('Firestore setDoc site_config notice:', err);
   }

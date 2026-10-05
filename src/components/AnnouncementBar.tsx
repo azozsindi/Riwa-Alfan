@@ -10,7 +10,13 @@ interface AnnouncementBarProps {
 export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('riwa_announcement_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   const { announcement } = config;
 
@@ -62,8 +68,13 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }
 
         {/* Dismiss button */}
         <button
-          onClick={() => setIsDismissed(true)}
-          className="p-1 rounded-md text-blue-200 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+          onClick={() => {
+            setIsDismissed(true);
+            try {
+              localStorage.setItem('riwa_announcement_dismissed', 'true');
+            } catch {}
+          }}
+          className="p-1 rounded-md text-blue-200 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
           title={isRtl ? 'إغلاق الإعلان' : 'Dismiss'}
         >
           <X className="w-3.5 h-3.5" />

@@ -1,5 +1,8 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Award, ShieldCheck, Users, CalendarCheck } from 'lucide-react';
+import { 
+  ArrowLeft, ArrowRight, Award, ShieldCheck, Users, CalendarCheck,
+  Sparkles, Waves, Compass, HelpCircle, MapPin
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -17,6 +20,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
 
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const whatsAppText = isRtl
     ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل دورات الغوص والرحلات القادمة بجدة`
     : `Hello Captain Fahad, I would like to inquire about certified scuba courses and upcoming boat expeditions in Jeddah.`;
@@ -25,6 +35,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
   const heroHeadline = language === 'ar' ? config.hero.headlineAr : config.hero.headlineEn;
   const heroHighlight = language === 'ar' ? config.hero.headlineHighlightAr : config.hero.headlineHighlightEn;
   const heroSubhead = language === 'ar' ? config.hero.subheadAr : config.hero.subheadEn;
+
 
   return (
     <section id="home" className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden ocean-gradient-hero caustics-pattern pt-8 sm:pt-12 pb-14 sm:pb-20">
@@ -194,3 +205,4 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
     </section>
   );
 };
+

@@ -11,7 +11,6 @@ export const DEFAULT_CONTACT = {
   locationAr: 'جدة، المملكة العربية السعودية - أبحر الشمالية',
   locationEn: 'Jeddah, Saudi Arabia - North Obhur',
   padiMemberNumber: '482910',
-  defaultPin: '1234',
 } as const;
 
 export const generateWhatsAppLink = (number: string, message: string): string => {

@@ -3,7 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Global Safety Net: default deny
+    // Global Safety Net: default deny all unmapped documents
     match /{document=**} {
       allow read, write: if false;
     }
@@ -16,6 +16,26 @@ service cloud.firestore {
       return request.resource.data;
     }
 
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Secure Enterprise Admin Gate:
+    // 1. Bootstrapped verified superadmin email (AzozSindi23@gmail.com)
+    // 2. Firebase Custom Claims (request.auth.token.admin == true)
+    // 3. Document exists in /admins collection for user UID
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == "AzozSindi23@gmail.com" && request.auth.token.email_verified == true) ||
+        (request.auth.token.admin == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
     function isValidBooking(data) {
       return data.keys().hasAll(['id', 'name', 'phone', 'interest', 'status', 'createdAt'])
         && data.id is string && data.id.size() <= 128
@@ -25,22 +45,41 @@ service cloud.firestore {
         && (!('experience' in data) || (data.experience is string && data.experience.size() <= 100))
         && (!('timing' in data) || (data.timing is string && data.timing.size() <= 100))
         && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
-        && data.status in ['new', 'contacted', 'confirmed', 'completed', 'cancelled']
+        && data.status in ['new', 'contacted', 'confirmed', 'completed', 'cancelled', 'paid', 'pending_payment']
         && data.createdAt is string && data.createdAt.size() <= 50;
     }
 
-    // Bookings collection
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['uid', 'email', 'role'])
+        && data.uid is string && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 150
+        && data.role in ['admin', 'superadmin'];
+    }
+
+    // 1. Bookings collection:
+    // - Public site visitors can create their own consultation or course booking.
+    // - ONLY verified admins can view, update status, or delete bookings!
     match /bookings/{bookingId} {
       allow create: if isValidId(bookingId) 
         && isValidBooking(incoming()) 
         && incoming().id == bookingId;
-      allow read, update, delete: if isValidId(bookingId);
+      allow read, update, delete: if isValidId(bookingId) && isAdmin();
     }
 
-    // Public & Admin Settings
+    // 2. Public & Admin Settings:
+    // - Public site visitors can read website settings (course details, prices, contact info).
+    // - ONLY verified admins can modify or write settings!
     match /settings/{settingId} {
       allow read: if isValidId(settingId);
-      allow write: if isValidId(settingId);
+      allow write: if isValidId(settingId) && isAdmin();
+    }
+
+    // 3. Admin whitelist:
+    // - Signed-in users can check their own admin status.
+    // - ONLY existing verified admins can add or edit admin users.
+    match /admins/{adminId} {
+      allow read: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow write: if isValidId(adminId) && isAdmin() && isValidAdminRecord(incoming());
     }
   }
 }

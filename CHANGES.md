@@ -179,6 +179,222 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
 - **Updated `src/components/admin/AdminDashboard.tsx`**:
   - Mounted `DomainTab` in the Admin Dashboard with a prominent sidebar button `ربط الدومين (riwaalfan.com) 🌐`.
 
+---
+
+## Step 12: Reverted to Pristine, Clean Unified Layout (إعادة التنسيق الملكي الأصلي الفخم)
+- **Removed Sub-Navigation Bar & Split Views**:
+  - Removed `SectionBar`, `SectionPageHeader`, and `SectionPageFooter` to eliminate clutter between the header and hero.
+  - Restored the website to its majestic, continuous single-page flow where all sections harmoniously integrate together.
+- **Refined `src/components/Header.tsx`**:
+  - Restored clean, direct smooth-scrolling anchor navigation (`الرئيسية`, `المدرب`, `الدورات`, `أدوات الغواص`, `مواقع الغوص`, `الأسئلة الشائعة`, `السياسات والشروط`) without unnecessary buttons, badges, or counter tags.
+---
+
+## Step 14: Dedicated Multi-Page Architecture (صفحات مستقلة لكل قسم وزر)
+- **Multi-Page State Management in `src/context/RouterContext.tsx`**:
+  - Configured `PageId` (`home`, `courses`, `ladies`, `sites`, `tools`, `faq`, `contact`) with URL hash synchronization (`#courses`, `#ladies`, `#sites`, etc.) and browser back/forward history handling.
+- **Dedicated Page Components**:
+  - **`src/components/common/PageHeader.tsx`**: Luxury page banner with breadcrumb navigation (`الرئيسية / اسم الصفحة`), page kicker badge, and "العودة للرئيسية".
+  - **`src/components/common/OtherPagesFooter.tsx`**: Clean recommendation grid at the end of each page to explore other pages.
+- **Home Page Section Deck (`src/components/SectionDeck.tsx`)**:
+  - Cards placed below the Hero and Instructor philosophy on the Home page, giving visitors large, clear buttons to open the dedicated page of their choice.
+- **Header & Floating Bottom Nav Integration**:
+  - Header links (Desktop and Mobile) and the Floating Bottom Bar now seamlessly switch between dedicated pages with smooth scroll to top.
+
+---
+
+## Step 15: Strict Isolated Page Architecture (فصل كامل: الرئيسية لا تحتوي سوى الواجهة وبطاقات الأزرار)
+- **Purified Home Page (`home`)**:
+  - Completely removed secondary sections (Instructor, Testimonials, Contact) from the Home page view.
+  - The Home page now strictly contains the Hero presentation and the Section Deck (cards and buttons for all pages). Nothing else appears on Home.
+- **Dedicated Independent Pages**:
+  - `home`: Only Welcome Hero + Page Navigation Buttons Deck.
+  - `instructor`: Dedicated Master Instructor (Captain Fahad) profile, credentials & student reviews.
+  - `courses`: Dedicated Certified PADI courses & transparent pricing catalog.
+  - `ladies`: Dedicated 100% Private Women's Diving Training division.
+  - `sites`: Dedicated Jeddah Red Sea reefs, historical wrecks & boat trips.
+  - `tools`: Dedicated Diver calculators (Nitrox, lead weights, SAC, NDL).
+  - `faq`: Dedicated Frequently Asked Questions and official safety policies.
+  - `contact`: Dedicated Jeddah location, direct WhatsApp, and consultation booking.
+---
+
+## Step 16: Restored Original Unified Single-Page Design (إعادة التصميم الملكي الأصلي المتصل)
+- **Eliminated Multi-Page Fragmentation**:
+  - Removed temporary page-splitting components (`SectionDeck`, `FloatingBottomNav`, `LadiesSection`, `PageHeader`, `OtherPagesFooter`).
+- **Restored Unified `src/App.tsx`**:
+  - Restored full, continuous landing page flow:
+    1. Announcement Bar
+    2. Header (clean, smooth-scrolling anchor links)
+    3. Hero (stats, value proposition, Captain Fahad accreditation)
+    4. Instructor Section (Captain Fahad philosophy & Women's training division)
+    5. Courses Section (All certified PADI courses & pricing)
+    6. Diver Tools Section (4 interactive calculators)
+    7. Dive Sites Section (Jeddah dive sites & boat safaris)
+    8. Testimonials Section (Graduate diver reviews)
+    9. FAQ Section (Accordion questions)
+    10. Policies Section (Official rules & safety regulations)
+    11. Contact Section (Jeddah location, map, direct WhatsApp, consultation)
+    12. Footer & Booking/Policies Modals
+---
+
+## Step 17: Fixed Offer & Announcement Persistence (حل مشكلة عودة العروض الترويجية بعد إيقافها)
+- **Root Cause Identified**:
+  - `DEFAULT_CONFIG.announcement.enabled` was defaulted to `true`.
+  - Stale `recoveredAnnouncement` from older localStorage keys was re-activating `enabled: true`.
+  - Cloud Firestore `setDoc` was failing silently on `undefined` object properties, preventing the remote document from updating `enabled: false`.
+  - The real-time Firestore snapshot listener was reading the old remote document and overwriting local state on page load.
+  - In `AnnouncementBar.tsx`, the `X` dismiss button was only state-local without `localStorage` memory.
+---
+
+## Step 18: Compacted Policies Section (ضغط قسم سياسات الحجوزات والاسترداد لتقليص الحيز)
+- **Problem**:
+  - The policies section previously rendered 3 massive cards with 9 long text blocks simultaneously, occupying excessive vertical screen real estate.
+- **Solution**:
+  - Transformed `PoliciesSection.tsx` into an ultra-compact interactive tabbed layout:
+    - 🚢 `1. الرحلات البحرية`
+    - 🎓 `2. دورات التدريب`
+    - 🛡️ `3. السلامة والمسؤولية`
+  - Only the active policy category is shown in a sleek, horizontal 3-column micro-grid, reducing height by over 75%.
+---
+
+## Step 19: Streamlined Landing Page Flow & Reduced Cognitive Load (تبسيط ورشاقة الصفحة الرئيسية)
+- **Problem**:
+  - The landing page was excessively long and crammed with details (diver calculators, 6 full courses, lengthy instructor repetition, FAQs, and policies all stacked vertically).
+- **Solutions Implemented**:
+  1. **Diver Calculators Moved to Modal (`DiverToolsModal.tsx`)**:
+     - Removed `DiverToolsSection` from the vertical scroll.
+     - Added a dedicated, prestigious `🧮 حاسبات الغواص` modal triggered from Header, Mobile Menu, and Footer.
+  2. **Policies Removed from Vertical Scroll**:
+     - Removed in-page policies section. Official `PoliciesModal` is accessible via Footer and BookingModal.
+  3. **Courses Section Sliced to Top 3**:
+     - Slices the catalog to top 3 featured courses by default with an expand toggle: `[عرض باقي التخصصات والمسارات الدولية (+3 دورات) ▼]`.
+  4. **Instructor Section Condensed**:
+     - Unified the 3 Pillars and Quote into a single compact, elegant trust ribbon.
+     - Eliminated duplicate display of Captain Fahad in the secondary team grid.
+  5. **FAQs Sliced to Top 4**:
+     - Sliced FAQ list to top 4 questions with `[عرض باقي الأسئلة الشائعة (+4) ▼]` toggle.
+  6. **Cleaned Header & Navigation**:
+     - Reduced desktop and mobile links from 8 down to 5 core links plus the `🧮 حاسبات الغواص` button.
+---
+
+## Step 20: Converted Dive Sites & FAQs into Interactive Modals (`DiveSitesModal` & `FaqModal`)
+- **User Request**:
+  - Make "أبرز مواقع الغوص في مياه جدة" and "الأسئلة الشائعة حول دورات الغوص" into modals just like the diver tools calculator.
+- **Implementations**:
+  1. **`DiveSitesModal.tsx`**:
+     - Full interactive modal showing Jeddah dive sites, depths, visibility, currents, wildlife, and a direct booking trigger.
+  2. **`FaqModal.tsx`**:
+     - Full interactive modal displaying all FAQs with smooth accordion expansion and direct WhatsApp consultation.
+  3. **`QuickPortalsSection.tsx`**:
+     - Replaced the two bulky sections with a single sleek 3-card portal row:
+       - 🌊 `أبرز مواقع الغوص في جدة`
+       - ❓ `الأسئلة الشائعة حول الغوص`
+       - 🧮 `حاسبات وأدوات الغواصين`
+---
+
+## Step 21: Women's Training Division Side-by-Side Dual Square Layout (`InstructorSection.tsx`)
+- **User Request**:
+  - For Captain Reem Al-Salem (Women's Training Division) and Captain Fahad, ensure the layout is two balanced boxes side-by-side (each taking half the screen).
+  - Inside the cards, make the two action buttons: **[حجز تدريب نسائي خاص]** and **[واتساب مباشر]** two equal square/rectangular buttons side-by-side (each taking 50% / half the card width), not stacked vertically under each other.
+- **Implementations**:
+  1. Updated the grid from `lg:grid-cols-2` to `md:grid-cols-2` so the two instructor cards display side-by-side taking 50% each on tablets and desktop.
+  2. Updated the action buttons inside both cards to `grid grid-cols-2 gap-2 sm:gap-3`, ensuring both buttons appear side-by-side with 50% equal width across all screen sizes without awkward stacking.
+---
+
+## Step 22: Comprehensive Admin Control Panel Expansion & Granular Section Visibility Manager
+- **User Request**:
+  - "لوحة التحكم خليها اكثر خيارا بحيث صلاحية التحكم في جميع البيانات وامكانية اخفاء جميع الاقسام كمان"
+  - Give full granular control over all site data, and provide complete capability to hide/show ANY and ALL sections of the website.
+- **Implementations**:
+  1. **`SectionsVisibilityTab.tsx`**:
+     - Dedicated visual manager tab with iOS-style interactive switches for every single section and modal:
+       - Announcement Bar
+       - Hero Header & Live Stats
+       - Captain Fahad Lead Instructor Card
+       - Women's Training Division (Capt. Reem) Card
+       - Philosophy & 3 Trust Pillars
+       - Courses Catalog
+       - Quick Portals 3-Cards Row
+       - Testimonials Section
+       - Contact & Consultation Section
+       - Footer
+       - Diver Tools & Calculators Modal (and its Header action trigger)
+       - Jeddah Dive Sites Explorer Modal
+       - FAQs Modal
+     - Included one-click presets: `[إظهار الكل 👁️]` and `[وضع الصفحة الرشيقة ⚡]`.
+  2. **`SocialAndTrustTab.tsx`**:
+     - Manage social media links (Instagram, TikTok, Snapchat, Twitter/X).
+     - Configure Google Maps marina GPS link and address.
+     - Add official business verification badges (Freelance License #, Commercial Reg #, VAT #).
+  3. **Real-time App & Component Integration**:
+     - `App.tsx` now conditionally renders all sections and modals based on `config.visibleSections`.
+     - `Header.tsx` and `Footer.tsx` dynamically hide/show links, tools, social channels, and legal numbers.
+---
+
+## Step 23: Complete Zero-Trust Security Hardening with Firebase Authentication & Firestore Rules
+- **User Request**:
+  - Full lockdown of the Admin Control Panel.
+  - Require Firebase Authentication for `#ADMIN` and `/admin`.
+  - Restrict access strictly to authorized manager accounts (`AzozSindi23@gmail.com` and whitelisted admins).
+  - Automatically deny unauthorized accounts and kick them back to public home.
+  - Secure all Firestore database collections (`/bookings`, `/settings`, `/admins`) with strict server-side rules.
+  - Support Firebase Custom Claims (`request.auth.token.admin == true`).
+  - No secret passwords in frontend code.
+- **Implementations**:
+  1. **`firestore.rules` (Deployed to Firebase Cloud)**:
+     - Implemented `isAdmin()` function validating:
+       - Root verified superadmin email: `AzozSindi23@gmail.com`.
+       - Firebase Custom Claims: `request.auth.token.admin == true`.
+       - Whitelisted admin UID in `/admins/{adminUid}` collection.
+     - Protected `/bookings/{bookingId}`:
+       - Public can create bookings.
+       - ONLY verified admins can read, update status, or delete bookings.
+     - Protected `/settings/{settingId}`:
+       - Public can read website config.
+       - ONLY verified admins can write or modify settings.
+     - Protected `/admins/{adminId}`:
+       - Read/write access strictly gated to admins.
+  2. **`AuthContext.tsx`**:
+     - Manages Firebase Auth state, Google Sign-In popup, Email/Password login, and logout.
+     - Executes real-time validation against Superadmin email, custom claims, and Firestore `/admins` records.
+     - Auto-disconnects unauthorized users and logs them out.
+  3. **`AdminPage.tsx`**:
+     - Removed insecure PIN bypass and backdoor buttons.
+     - Rendered official Firebase Authentication portal with 1-click Google Sign-In and Email/Password.
+  4. **`AdminsTab.tsx`**:
+     - Dedicated manager tab in `AdminDashboard` to view and grant admin access to additional manager accounts by UID and email.
+---
+
+## Step 24: Total Elimination of Legacy PIN Code, 1234, and Insecure Modals
+- **User Request**:
+  - Found old PIN portal appearing on published URL.
+  - Requested full audit and complete deletion of: PIN, 1234, ADMIN_PIN, adminPin, verifyPin, "دخول مباشر", localStorage auth flags, and bypasses.
+  - Build clean production bundle and provide transparent report on why the old bundle was live and where it was located.
+- **Implementations**:
+  1. **Deleted `src/components/admin/AdminLoginModal.tsx`**:
+     - Permanently removed the legacy modal that contained the PIN input, 1234 default button, and quick captain bypass button.
+  2. **Purged from `SettingsTab.tsx`**:
+     - Removed PIN change input and replaced it with a Zero-Trust Firebase security status display.
+  3. **Purged from `contact.ts`, `defaultConfig.ts`, `types/admin.ts`, and `SiteConfigContext.tsx`**:
+     - Removed `defaultPin`, `adminPin`, `verifyPin()`, and `updateAdminPin()`.
+  4. **Grep Validation**:
+     - Verified with `grep -rnE "(1234|adminPin|verifyPin|updateAdminPin|riwa_alfan_admin_auth)" src/` yielding 0 matches.
+  5. **Production Build**:
+     - Ran `npm run build` producing clean bundle `dist/assets/index-BpO3xkLl.js` verified free of any PIN strings.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,97 +1,144 @@
-import React from 'react';
-import { ShieldCheck, Ship, GraduationCap, AlertTriangle, FileText, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  ShieldCheck, Ship, GraduationCap, AlertTriangle, 
+  FileText, CheckCircle2, ChevronRight, ChevronLeft, 
+  ExternalLink 
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { POLICIES_DATA } from '../data/policiesData';
 
-export const PoliciesSection: React.FC = () => {
-  const { language, isRtl } = useLanguage();
+interface PoliciesSectionProps {
+  onOpenFullModal?: () => void;
+}
 
-  const renderIcon = (type: 'ship' | 'graduation' | 'shield') => {
-    switch (type) {
-      case 'ship':
-        return <Ship className="w-6 h-6" />;
-      case 'graduation':
-        return <GraduationCap className="w-6 h-6" />;
-      case 'shield':
-        return <AlertTriangle className="w-6 h-6" />;
+export const PoliciesSection: React.FC<PoliciesSectionProps> = ({ onOpenFullModal }) => {
+  const { language, isRtl } = useLanguage();
+  const [activeTabId, setActiveTabId] = useState<'trips' | 'courses' | 'safety'>('trips');
+
+  const activePolicy = POLICIES_DATA.find(p => p.id === activeTabId) || POLICIES_DATA[0];
+
+  const renderTabIcon = (id: string) => {
+    switch (id) {
+      case 'trips':
+        return <Ship className="w-4 h-4 text-cyan-400" />;
+      case 'courses':
+        return <GraduationCap className="w-4 h-4 text-blue-400" />;
+      case 'safety':
+        return <AlertTriangle className="w-4 h-4 text-amber-400" />;
+      default:
+        return <FileText className="w-4 h-4" />;
     }
   };
 
   const renderRuleIcon = (variant: 'emerald' | 'amber' | 'blue') => {
     switch (variant) {
       case 'emerald':
-        return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />;
+        return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />;
       case 'amber':
-        return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />;
+        return <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />;
       case 'blue':
-        return <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />;
+        return <ShieldCheck className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />;
     }
   };
 
   return (
-    <section id="policies" className="py-14 sm:py-20 bg-slate-950 relative border-t border-slate-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="policies" className="py-10 sm:py-14 bg-slate-950 relative border-t border-slate-900">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* Section Header */}
-        <div className={`space-y-3 mb-10 sm:mb-12 ${isRtl ? 'text-right' : 'text-left'}`}>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
-            <FileText className="w-3.5 h-3.5" />
-            <span>{isRtl ? 'اللوائح والسياسات الرسمية' : 'Official Center Regulations'}</span>
+        {/* Compact Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-bold uppercase tracking-wider">
+              <FileText className="w-3.5 h-3.5 text-blue-400" />
+              <span>{isRtl ? 'اللوائح والسياسات الرسمية' : 'Official Policies & Regulations'}</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight font-brand-arabic">
+              {isRtl ? 'سياسة الحجوزات، الاسترداد، والتدريب والسلامة' : 'Booking, Refund & Safety Policy'}
+            </h2>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-            {isRtl ? 'سياسة الحجوزات، الاسترداد، والتدريب والسلامة' : 'Booking, Refund & Safety Policy'}
-          </h2>
-
-          <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-3xl leading-relaxed">
-            {isRtl 
-              ? 'نحرص في رواء الفن على الشفافية التامة لضمان حقوق المتدربين والعملاء وأعلى درجات الأمان في البحر الأحمر وفق أنظمة المملكة العربية السعودية ومعايير منظمة PADI الدولية.'
-              : 'At Riwa Alfan, we prioritize total transparency to safeguard student rights and deliver the highest Red Sea safety standards under Saudi Arabian consumer regulations.'}
-          </p>
+          {onOpenFullModal && (
+            <button
+              type="button"
+              onClick={onOpenFullModal}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E0BA84] hover:text-white bg-slate-900 hover:bg-slate-850 px-3.5 py-1.5 rounded-xl border border-[#C59B5F]/30 hover:border-[#C59B5F] transition-all cursor-pointer w-fit self-start sm:self-auto"
+            >
+              <span>{isRtl ? 'عرض الوثيقة الكاملة 📜' : 'View Full Document 📜'}</span>
+              <ExternalLink className="w-3 h-3 text-[#C59B5F]" />
+            </button>
+          )}
         </div>
 
-        {/* 3 Core Grid Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          {POLICIES_DATA.map((policy) => (
-            <div 
-              key={policy.id}
-              className="p-5 sm:p-6 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/40 transition-all flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                  policy.iconType === 'shield' 
-                    ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' 
-                    : 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
-                }`}>
-                  {renderIcon(policy.iconType)}
+        {/* Compact Segmented Tabs (Takes 1/3 of previous space) */}
+        <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl overflow-x-auto">
+          {POLICIES_DATA.map((policy) => {
+            const isActive = policy.id === activeTabId;
+            return (
+              <button
+                key={policy.id}
+                type="button"
+                onClick={() => setActiveTabId(policy.id as any)}
+                className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-[#DDB67E] via-[#C59B5F] to-[#A4783B] text-slate-950 shadow-md shadow-[#C59B5F]/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                }`}
+              >
+                <span>{renderTabIcon(policy.id)}</span>
+                <span>{policy.title[language]}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Compact Single Tab Content (Horizontal Grid) */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-800/70 pb-3">
+            <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-brand-arabic">
+              <span>{renderTabIcon(activePolicy.id)}</span>
+              <span>{activePolicy.title[language]}</span>
+            </h3>
+            <span className="text-[11px] font-semibold text-[#E0BA84] px-2.5 py-0.5 rounded-full bg-[#C59B5F]/10 border border-[#C59B5F]/20">
+              {activePolicy.badgeNote[language]}
+            </span>
+          </div>
+
+          {/* 3 Rule cards side by side on desktop, stacked on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {activePolicy.rules.map((rule) => (
+              <div
+                key={rule.id}
+                className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800/80 hover:border-slate-700 transition-colors space-y-1.5 flex flex-col justify-start"
+              >
+                <div className="flex items-start gap-1.5">
+                  {renderRuleIcon(rule.variant)}
+                  <strong className="text-xs sm:text-sm font-bold text-white leading-tight">
+                    {rule.label[language]}
+                  </strong>
                 </div>
-
-                <h3 className="text-lg font-bold text-white font-brand-arabic">
-                  {policy.title[language]}
-                </h3>
-
-                <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
-                  {policy.rules.map((rule) => (
-                    <li key={rule.id} className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1">
-                      <span className={`font-bold block flex items-center gap-1.5 ${
-                        rule.variant === 'emerald' ? 'text-emerald-400' : rule.variant === 'amber' ? 'text-amber-400' : 'text-sky-400'
-                      }`}>
-                        {renderRuleIcon(rule.variant)}
-                        {rule.label[language]}
-                      </span>
-                      <p className="text-slate-300 leading-relaxed">{rule.description[language]}</p>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-xs text-slate-300 leading-relaxed ps-5">
+                  {rule.description[language]}
+                </p>
               </div>
+            ))}
+          </div>
 
-              <div className={`pt-2 text-[11px] font-medium ${
-                policy.iconType === 'shield' ? 'text-amber-400' : 'text-blue-400'
-              }`}>
-                {policy.badgeNote[language]}
-              </div>
-            </div>
-          ))}
+          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+            <span>
+              {isRtl 
+                ? 'وفق أنظمة المملكة العربية السعودية ومعايير منظمة PADI الدولية.' 
+                : 'Compliant with Saudi Consumer Laws & PADI International Standards.'}
+            </span>
+            {onOpenFullModal && (
+              <button
+                type="button"
+                onClick={onOpenFullModal}
+                className="text-[#C59B5F] hover:text-[#E0BA84] font-bold underline cursor-pointer transition-colors"
+              >
+                {isRtl ? 'التفاصيل النظامية' : 'Full Legal Terms'}
+              </button>
+            )}
+          </div>
         </div>
 
       </div>

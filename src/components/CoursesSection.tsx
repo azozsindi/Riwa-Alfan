@@ -11,6 +11,7 @@ interface CoursesSectionProps {
 
 export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseForBooking }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [showAllCourses, setShowAllCourses] = useState(false);
   const [selectedCourseDetail, setSelectedCourseDetail] = useState<Course | null>(null);
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
@@ -22,6 +23,10 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
   const filteredCourses = activeCategory === 'all' 
     ? coursesList 
     : coursesList.filter(c => c.category === activeCategory);
+
+  const displayedCourses = (activeCategory === 'all' && !showAllCourses)
+    ? filteredCourses.slice(0, 3)
+    : filteredCourses;
 
   return (
     <section id="courses" className="py-16 sm:py-24 bg-slate-900/50 relative border-t border-slate-800/80">
@@ -96,7 +101,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
 
         {/* Courses Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => (
+          {displayedCourses.map((course) => (
             <div
               key={course.id}
               className={`rounded-3xl bg-slate-950/90 border border-slate-800 hover:border-[#C59B5F]/50 transition-all flex flex-col justify-between overflow-hidden group shadow-lg shadow-black/20 ${
@@ -189,6 +194,23 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
             </div>
           ))}
         </div>
+
+        {/* Expand / Collapse toggle for courses when in 'all' view */}
+        {activeCategory === 'all' && filteredCourses.length > 3 && (
+          <div className="mt-10 text-center">
+            <button
+              type="button"
+              onClick={() => setShowAllCourses(!showAllCourses)}
+              className="px-6 py-3 rounded-2xl border border-[#C59B5F]/40 bg-slate-950/80 hover:bg-slate-900 text-[#E0BA84] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-lg inline-flex items-center gap-2 group"
+            >
+              <span>
+                {showAllCourses 
+                  ? (isRtl ? 'عرض أهم 3 دورات فقط ▲' : 'Show Top 3 Only ▲') 
+                  : (isRtl ? `عرض باقي التخصصات والمسارات الدولية (+${filteredCourses.length - 3} دورات) ▼` : `Explore All Certified Specialties (+${filteredCourses.length - 3}) ▼`)}
+              </span>
+            </button>
+          </div>
+        )}
 
       </div>
 

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { RouterProvider, useRouter } from './context/RouterContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { SiteConfigProvider, useSiteConfig } from './context/SiteConfigContext';
@@ -12,24 +13,29 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { InstructorSection } from './components/InstructorSection';
 import { CoursesSection } from './components/CoursesSection';
-import { DiverToolsSection } from './components/DiverToolsSection';
-import { DiveSitesSection } from './components/DiveSitesSection';
+import { QuickPortalsSection } from './components/QuickPortalsSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
-import { FaqSection } from './components/FaqSection';
-import { PoliciesSection } from './components/PoliciesSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { BookingModal } from './components/BookingModal';
 import { PoliciesModal } from './components/PoliciesModal';
+import { DiverToolsModal } from './components/DiverToolsModal';
+import { DiveSitesModal } from './components/DiveSitesModal';
+import { FaqModal } from './components/FaqModal';
 import { AdminPage } from './pages/AdminPage';
-import { MessageCircle, Phone, Anchor } from 'lucide-react';
+import { DEFAULT_VISIBLE_SECTIONS } from './data/defaultConfig';
 
 function AppContent() {
-  const { isRtl, language } = useLanguage();
+  const { isRtl } = useLanguage();
   const { navigate, isAdmin } = useRouter();
+  const { config } = useSiteConfig();
+  const sections = config.visibleSections || DEFAULT_VISIBLE_SECTIONS;
   
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isSitesOpen, setIsSitesOpen] = useState(false);
+  const [isFaqOpen, setIsFaqOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(undefined);
   const [selectedTripSite, setSelectedTripSite] = useState<string | undefined>(undefined);
 
@@ -80,47 +86,90 @@ function AppContent() {
       isRtl ? 'dir-rtl' : 'dir-ltr'
     }`}>
       {/* Top Promotional Announcement Bar */}
-      <AnnouncementBar onClaimOffer={(courseId) => handleOpenBooking(courseId)} />
+      {sections.announcement && (
+        <AnnouncementBar onClaimOffer={(courseId) => handleOpenBooking(courseId)} />
+      )}
 
-      {/* Top Header (Zero visible admin buttons for visitors) */}
+      {/* Top Header */}
       <Header 
         onOpenBooking={() => handleOpenBooking()} 
+        onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
+        onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
+        onOpenFaq={sections.faqModal ? () => setIsFaqOpen(true) : undefined}
       />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <Hero
-          onOpenBooking={() => handleOpenBooking()}
-          onExploreCourses={handleExploreCourses}
-        />
+        {sections.hero && (
+          <Hero
+            onOpenBooking={() => handleOpenBooking()}
+            onExploreCourses={handleExploreCourses}
+          />
+        )}
 
-        {/* Instructor Credentials & Philosophy */}
-        <InstructorSection onOpenBooking={() => handleOpenBooking()} />
+        {/* Lead Instructor Credentials & Philosophy (Captain Fahad & Ladies Training Division) */}
+        {(sections.instructor || sections.femaleTraining || sections.quoteBanner) && (
+          <InstructorSection 
+            onOpenBooking={() => handleOpenBooking()} 
+            showCaptainFahad={sections.instructor}
+            showFemaleTraining={sections.femaleTraining}
+            showQuote={sections.quoteBanner}
+          />
+        )}
 
-        {/* Certified Courses Catalog */}
-        <CoursesSection onSelectCourseForBooking={(id) => handleOpenBooking(id)} />
+        {/* Certified Courses Catalog (Streamlined Top 3 with Expansion) */}
+        {sections.courses && (
+          <CoursesSection onSelectCourseForBooking={(id) => handleOpenBooking(id)} />
+        )}
 
-        {/* Interactive Diver Tools & Calculators */}
-        <DiverToolsSection />
-
-        {/* Red Sea Dive Sites & Boat Safaris */}
-        <DiveSitesSection onBookTrip={handleBookTrip} />
+        {/* Interactive Quick Portals: Dive Sites, FAQs, Diver Calculators */}
+        {sections.quickPortals && (sections.diveSitesModal || sections.faqModal || sections.diverToolsModal) && (
+          <QuickPortalsSection
+            onOpenSites={() => setIsSitesOpen(true)}
+            onOpenFaq={() => setIsFaqOpen(true)}
+            onOpenTools={() => setIsToolsOpen(true)}
+          />
+        )}
 
         {/* Student Testimonials */}
-        <TestimonialsSection />
-
-        {/* FAQs */}
-        <FaqSection />
-
-        {/* Official Policies & Regulations (Trips, Courses & Safety) */}
-        <PoliciesSection />
+        {sections.testimonials && (
+          <TestimonialsSection />
+        )}
 
         {/* Contact & Consultation */}
-        <ContactSection onOpenBooking={() => handleOpenBooking()} />
+        {sections.contact && (
+          <ContactSection onOpenBooking={() => handleOpenBooking()} />
+        )}
       </main>
 
-      {/* Footer */}
-      <Footer onOpenPolicies={() => setIsPoliciesOpen(true)} />
+      {/* Footer with Modals Triggers */}
+      {sections.footer && (
+        <Footer 
+          onOpenPolicies={() => setIsPoliciesOpen(true)} 
+          onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
+          onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
+          onOpenFaq={sections.faqModal ? () => setIsFaqOpen(true) : undefined}
+        />
+      )}
+
+      {/* Interactive Diver Tools & Calculators Modal */}
+      <DiverToolsModal
+        isOpen={isToolsOpen}
+        onClose={() => setIsToolsOpen(false)}
+      />
+
+      {/* Jeddah Dive Sites & Coral Reefs Modal */}
+      <DiveSitesModal
+        isOpen={isSitesOpen}
+        onClose={() => setIsSitesOpen(false)}
+        onBookTrip={handleBookTrip}
+      />
+
+      {/* FAQs Modal */}
+      <FaqModal
+        isOpen={isFaqOpen}
+        onClose={() => setIsFaqOpen(false)}
+      />
 
       {/* Booking and Consultation Modal */}
       <BookingModal
@@ -141,12 +190,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <RouterProvider>
-      <LanguageProvider>
-        <SiteConfigProvider>
-          <AppContent />
-        </SiteConfigProvider>
-      </LanguageProvider>
-    </RouterProvider>
+    <AuthProvider>
+      <RouterProvider>
+        <LanguageProvider>
+          <SiteConfigProvider>
+            <AppContent />
+          </SiteConfigProvider>
+        </LanguageProvider>
+      </RouterProvider>
+    </AuthProvider>
   );
 }
