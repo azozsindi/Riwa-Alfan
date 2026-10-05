@@ -17,34 +17,47 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
   const t = UI_TRANSLATIONS[language];
 
   const brandName = language === 'ar' ? config.brand.centerNameAr : config.brand.centerNameEn;
-  const brandSub = config.brand.logoSubtext || 'RIWA ALFAN DIVE CENTER · JEDDAH';
+  const brandSub = language === 'ar' 
+    ? (config.brand.subtitleAr || t.brandSubtitle || 'مركز تدريب غوص معتمد · جدة PADI')
+    : (config.brand.subtitleEn || t.brandSubtitle || 'Certified PADI Dive Center · Jeddah');
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 transition-all">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         
         {/* Zone 1: Brand Wordmark & Logo */}
         <a 
           href="#home" 
-          className="flex items-center gap-3 text-slate-100 hover:opacity-90 transition-opacity group"
+          className="flex items-center gap-2.5 sm:gap-3 text-slate-100 hover:opacity-90 transition-opacity group min-w-0 shrink"
           title="Riwa Alfan Dive Center"
         >
           {/* Logo Artwork */}
-          <div className="p-1 rounded-xl bg-slate-900 border border-slate-800 group-hover:border-blue-500/40 transition-colors flex items-center justify-center">
+          <div className="p-1.5 rounded-xl bg-slate-900/90 border border-[#C59B5F]/30 group-hover:border-[#C59B5F]/70 shadow-sm transition-colors flex items-center justify-center shrink-0">
             <FahadsLogo 
               size="sm" 
               theme="dark" 
+              showWordmark={false}
               customImageUrl={config.brand.logoType === 'custom-image' ? config.brand.customLogoUrl : undefined}
               customTitle={config.brand.logoText}
               customSubtext={config.brand.logoSubtext}
             />
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-lg sm:text-xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors font-sans">
-              {brandName}
+          <div className="flex flex-col min-w-0">
+            <span className="text-base sm:text-xl lg:text-2xl font-black tracking-tight text-white transition-colors font-brand-arabic truncate">
+              {language === 'ar' ? (
+                <>
+                  <span className="text-white group-hover:text-blue-300 transition-colors">رواء </span>
+                  <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">الفن</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-white group-hover:text-blue-300 transition-colors">Riwa </span>
+                  <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">Alfan</span>
+                </>
+              )}
             </span>
-            <span className="text-xs text-blue-400 font-medium -mt-0.5 tracking-wide">
+            <span className="text-[10px] sm:text-xs text-[#C59B5F] font-semibold -mt-0.5 tracking-wider uppercase truncate">
               {brandSub}
             </span>
           </div>
@@ -70,10 +83,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
           <a href="#faq" className="hover:text-blue-400 transition-colors whitespace-nowrap">
             {t.navFaq}
           </a>
+          <a href="#policies" className="hover:text-blue-400 transition-colors whitespace-nowrap text-blue-300 font-semibold">
+            {language === 'ar' ? 'السياسات والشروط' : 'Policies'}
+          </a>
         </nav>
 
         {/* Zone 3: Actions + Language */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Language Switcher Toggle */}
           <button
             type="button"
@@ -151,6 +167,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
               className="px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200"
             >
               {t.navFaq}
+            </a>
+            <a 
+              href="#policies" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg hover:bg-slate-900 text-blue-300 font-semibold"
+            >
+              {language === 'ar' ? 'السياسات والشروط الرسمية' : 'Official Policies & Regulations'}
             </a>
           </nav>
 

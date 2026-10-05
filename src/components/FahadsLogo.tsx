@@ -1,31 +1,46 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FahadsLogoProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   theme?: 'dark' | 'light';
   variant?: 'riwa-alfan' | 'dive-family' | 'fahads';
   customImageUrl?: string;
   customTitle?: string;
   customSubtext?: string;
+  fontFamily?: string;
+  showWordmark?: boolean;
+  language?: 'ar' | 'en';
 }
 
 export const FahadsLogo: React.FC<FahadsLogoProps> = ({ 
   className = '', 
   size = 'md',
   theme = 'dark',
-  variant = 'riwa-alfan',
   customImageUrl,
   customTitle,
-  customSubtext
+  showWordmark = true,
+  language
 }) => {
   const isDark = theme === 'dark';
   
-  // Sizing variants
+  let contextLang: 'ar' | 'en' = 'ar';
+  try {
+    const langContext = useLanguage();
+    if (langContext && langContext.language) {
+      contextLang = langContext.language;
+    }
+  } catch {}
+
+  const currentLang = language || contextLang;
+
+  // Responsive height scale
   const heightClasses = {
-    sm: 'h-10',
+    sm: 'h-10 sm:h-11',
     md: 'h-14 sm:h-16',
-    lg: 'h-24 sm:h-28'
+    lg: 'h-20 sm:h-24',
+    xl: 'h-28 sm:h-32'
   };
 
   if (customImageUrl) {
@@ -33,106 +48,133 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
       <div className={`inline-flex items-center justify-center select-none ${heightClasses[size]} ${className}`}>
         <img 
           src={customImageUrl} 
-          alt={customTitle || "Center Logo"} 
+          alt={customTitle || "رواء الفن - Riwa Alfan"} 
           className="h-full w-auto object-contain max-w-[200px]" 
         />
       </div>
     );
   }
 
-  const diverColor = isDark ? '#E2E8F0' : '#2D3748';
-  const textColor = '#256BE4'; // Exact vibrant blue from the logo
-  const subtextColor = isDark ? '#CBD5E1' : '#1A202C';
-  const lineColor = isDark ? '#64748B' : '#718096';
+  // Color values matching user's official brand identity
+  // Primary 1: Warm Antique Sand Gold
+  const goldPrimary = '#C59B5F';
+  const goldLight = '#D8B077';
+  const goldDark = '#A87D43';
 
-  let titleText = customTitle || "RIWA ALFAN";
-  let subText = customSubtext || "رواء الفن";
-  let fontSize = "42";
+  // Primary 2: Deep Red Sea Marine Navy
+  const navyPrimary = isDark ? '#244578' : '#142749';
+  const navySecondary = isDark ? '#18315B' : '#0F1E38';
+  const navyStroke = isDark ? '#3D68A8' : '#1B3666';
 
-  if (variant === 'fahads') {
-    titleText = "FAHAD'S";
-    subText = "DIVING TRAINING";
-    fontSize = "56";
-  } else if (variant === 'dive-family') {
-    titleText = "DIVE FAMILY";
-    subText = "BY CAPT. FAHAD · PADI";
-    fontSize = "44";
-  }
+  const uid = React.useId().replace(/:/g, '');
 
   return (
-    <div className={`inline-flex flex-col items-center justify-center select-none ${heightClasses[size]} ${className}`}>
+    <div className={`inline-flex items-center justify-center select-none ${heightClasses[size]} ${className}`}>
       <svg 
-        viewBox="0 0 320 220" 
+        viewBox={showWordmark ? "0 0 340 130" : "0 0 160 130"} 
         className="h-full w-auto overflow-visible"
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Scuba Diver Silhouette ascending/hovering */}
-        <g transform="translate(132, 10) scale(0.95)">
-          {/* Tank & Back mounted gear */}
-          <rect x="18" y="24" width="13" height="34" rx="6" fill={diverColor} />
-          <rect x="22" y="19" width="5" height="6" rx="2" fill={diverColor} />
-          
-          {/* Diver Head & Mask */}
-          <circle cx="28" cy="12" r="8" fill={diverColor} />
-          <path d="M33 11 C35 11, 37 13, 35 15 C34 16, 32 16, 31 15 Z" fill={textColor} opacity="0.9" />
+        <defs>
+          {/* Metallic Antique Gold Gradient */}
+          <linearGradient id={`goldGrad-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={goldLight} />
+            <stop offset="50%" stopColor={goldPrimary} />
+            <stop offset="100%" stopColor={goldDark} />
+          </linearGradient>
 
-          {/* Diver Torso & Wetsuit */}
-          <path d="M22 24 C25 21, 33 21, 37 25 C40 30, 39 42, 36 50 C33 54, 25 54, 23 48 Z" fill={diverColor} />
+          {/* Luxury Marine Royal Navy Gradient */}
+          <linearGradient id={`navyGrad-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={navyStroke} />
+            <stop offset="60%" stopColor={navyPrimary} />
+            <stop offset="100%" stopColor={navySecondary} />
+          </linearGradient>
 
-          {/* Arms with hand signal */}
-          <path d="M36 28 Q44 26 48 20 Q52 14 50 12 Q48 10 45 15 Q40 22 36 31 Z" fill={diverColor} />
-          {/* Left arm balancing */}
-          <path d="M22 28 Q14 32 16 38 Q18 40 22 36 Z" fill={diverColor} />
+          {/* Subtle Outer Glow Filter for Dark Mode Presence */}
+          {isDark && (
+            <filter id={`goldGlow-${uid}`} x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#C59B5F" floodOpacity="0.35" />
+            </filter>
+          )}
+        </defs>
 
-          {/* Legs & Fins in diving posture */}
-          {/* Left Leg */}
-          <path d="M25 50 Q23 66 18 80 Q16 86 14 96 L21 98 Q24 88 27 75 L31 52 Z" fill={diverColor} />
-          {/* Left Fin */}
-          <path d="M14 96 L6 122 Q12 124 20 114 L21 98 Z" fill={diverColor} />
+        {/* 1. EMBLEM: The Interlocking 'RA' Monogram */}
+        <g transform="translate(10, 8) scale(0.92)">
+          {/* The Navy Blue 'R' component */}
+          {/* Top curve, loop and waist of R */}
+          <path 
+            d="M 12 18 C 36 18 78 22 84 56 C 88 78 70 90 50 92 L 78 126 L 54 126 L 27 94 L 12 94 L 12 75 L 44 75 C 57 75 66 69 64 56 C 62 43 49 37 28 37 L 12 37 Z" 
+            fill={`url(#navyGrad-${uid})`}
+            stroke={isDark ? navyStroke : 'none'}
+            strokeWidth={isDark ? "0.6" : "0"}
+          />
 
-          {/* Right Leg */}
-          <path d="M33 51 Q36 68 40 82 Q42 88 47 96 L53 94 Q48 85 43 72 L37 51 Z" fill={diverColor} />
-          {/* Right Fin */}
-          <path d="M47 96 L62 118 Q55 122 47 114 L53 94 Z" fill={diverColor} />
+          {/* Central bottom wedge of the A counter */}
+          <path 
+            d="M 75 126 L 89 104 C 94 96 102 96 107 104 L 121 126 Z" 
+            fill={`url(#navyGrad-${uid})`} 
+            stroke={isDark ? navyStroke : 'none'}
+            strokeWidth={isDark ? "0.6" : "0"}
+          />
+
+          {/* The Antique Gold 'A' diagonal stroke */}
+          <path 
+            d="M 98 48 L 113 72 L 152 126 L 127 126 L 98 86 L 88 72 Z" 
+            fill={`url(#goldGrad-${uid})`}
+            filter={isDark ? `url(#goldGlow-${uid})` : undefined}
+          />
         </g>
 
-        {/* Wordmark in signature blue */}
-        <text 
-          x="160" 
-          y="155" 
-          textAnchor="middle" 
-          fill={textColor}
-          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif" 
-          fontWeight="900" 
-          fontSize={fontSize}
-          letterSpacing="2"
-        >
-          {titleText}
-        </text>
+        {/* 2. TYPOGRAPHY: Logotype "رواء الفن" / "Riwa Alfan" */}
+        {showWordmark && (
+          <g transform="translate(155, 20)">
+            {/* Main Center Title */}
+            <text 
+              x="0" 
+              y="58" 
+              fontFamily={currentLang === 'ar' ? "'Alexandria', 'Cairo', 'Readex Pro', sans-serif" : "'Plus Jakarta Sans', sans-serif"} 
+              fontSize={currentLang === 'ar' ? "40" : "36"} 
+              fontWeight="900"
+              letterSpacing={currentLang === 'ar' ? "-0.5" : "0.2"}
+            >
+              {currentLang === 'ar' ? (
+                <>
+                  <tspan fill={`url(#navyGrad-${uid})`}>رواء </tspan>
+                  <tspan fill={`url(#goldGrad-${uid})`}>الفن</tspan>
+                </>
+              ) : (
+                <>
+                  <tspan fill={`url(#navyGrad-${uid})`}>Riwa </tspan>
+                  <tspan fill={`url(#goldGrad-${uid})`}>Alfan</tspan>
+                </>
+              )}
+            </text>
 
-        {/* Horizontal rule with subtext */}
-        <g transform="translate(0, 168)">
-          {/* Left Line */}
-          <line x1="16" y1="14" x2="74" y2="14" stroke={lineColor} strokeWidth="2.2" strokeLinecap="round" />
-          
-          {/* Subtext */}
-          <text 
-            x="160" 
-            y="18" 
-            textAnchor="middle" 
-            fill={subtextColor}
-            fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif" 
-            fontWeight="800" 
-            fontSize="12.5"
-            letterSpacing="2"
-          >
-            {subText}
-          </text>
-
-          {/* Right Line */}
-          <line x1="246" y1="14" x2="304" y2="14" stroke={lineColor} strokeWidth="2.2" strokeLinecap="round" />
-        </g>
+            {/* Subtitle */}
+            <text 
+              x="0" 
+              y="86" 
+              fill={isDark ? "#94A3B8" : "#475569"} 
+              fontFamily="'Alexandria', 'Plus Jakarta Sans', sans-serif" 
+              fontSize="12" 
+              fontWeight="700" 
+              letterSpacing="0.8"
+            >
+              {currentLang === 'ar' ? (
+                <>
+                  <tspan fill={`url(#goldGrad-${uid})`}>مركز غوص معتمد</tspan>
+                  <tspan fill={isDark ? "#64748B" : "#94A3B8"}> · كابتن فهد PADI</tspan>
+                </>
+              ) : (
+                <>
+                  <tspan fill={`url(#goldGrad-${uid})`}>PADI DIVE CENTER</tspan>
+                  <tspan fill={isDark ? "#64748B" : "#94A3B8"}> · JEDDAH</tspan>
+                </>
+              )}
+            </text>
+          </g>
+        )}
       </svg>
     </div>
   );

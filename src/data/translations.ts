@@ -421,3 +421,5 @@ export const UI_TRANSLATIONS = {
     footerCountry: "Kingdom of Saudi Arabia · Jeddah Only"
   }
 };
+
+export const translations = UI_TRANSLATIONS;

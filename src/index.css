@@ -2,26 +2,96 @@
 
 @layer base {
   :root {
+    --font-alexandria: 'Alexandria', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-cairo: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-readex: 'Readex Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-almarai: 'Almarai', 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-tajawal: 'Tajawal', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-primary: var(--font-alexandria);
+    --brand-gold: #C59B5F;
+    --brand-gold-light: #E0BA84;
+    --brand-gold-dark: #A4783B;
+    --brand-navy: #162E52;
+    --brand-navy-deep: #0D1C33;
+    --brand-navy-light: #24487D;
     --brand-blue: #256BE4;
     --brand-blue-hover: #1D59C2;
     --brand-charcoal: #1E293B;
   }
 
   html {
-    font-family: var(--font-tajawal);
+    font-family: var(--font-primary);
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+    letter-spacing: -0.015em;
+    word-break: break-word;
   }
 }
 
-/* Custom underwater ambience themed to the logo royal blue and charcoal */
+/* Typography styles for brand & site */
+.font-alexandria {
+  font-family: 'Alexandria', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+.font-cairo {
+  font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+.font-readex {
+  font-family: 'Readex Pro', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+.font-almarai {
+  font-family: 'Almarai', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+.font-tajawal {
+  font-family: 'Tajawal', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+
+.font-brand-arabic {
+  font-family: 'Alexandria', 'Cairo', 'Readex Pro', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Custom underwater ambience themed to the brand gold and royal marine navy */
 .ocean-gradient-hero {
-  background: radial-gradient(circle at 50% 20%, rgba(37, 107, 228, 0.22) 0%, rgba(15, 23, 42, 0.9) 55%, #050B14 100%);
+  background: radial-gradient(circle at 50% 15%, rgba(197, 155, 95, 0.12) 0%, rgba(22, 46, 82, 0.45) 35%, rgba(13, 28, 51, 0.95) 70%, #050811 100%);
+}
+
+.gold-gradient-btn {
+  background: linear-gradient(135deg, #DDB67E 0%, #C59B5F 50%, #A4783B 100%);
+  color: #070D18;
+  font-weight: 800;
+  box-shadow: 0 4px 20px -2px rgba(197, 155, 95, 0.35);
+}
+
+.gold-gradient-btn:hover {
+  filter: brightness(1.08);
+}
+
+.gold-border-glow {
+  border-color: rgba(197, 155, 95, 0.3);
+  box-shadow: 0 0 15px -3px rgba(197, 155, 95, 0.15);
 }
 
 .caustics-pattern {
-  background-image: radial-gradient(rgba(37, 107, 228, 0.09) 1px, transparent 1px),
-    radial-gradient(rgba(96, 165, 250, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(197, 155, 95, 0.1) 1px, transparent 1px),
+    radial-gradient(rgba(36, 72, 125, 0.1) 1px, transparent 1px);
   background-size: 32px 32px;
   background-position: 0 0, 16px 16px;
 }
+

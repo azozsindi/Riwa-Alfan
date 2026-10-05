@@ -16,6 +16,8 @@ export interface CenterBrandConfig {
   locationAr: string;
   locationEn: string;
   padiNumber: string;
+  fontFamily?: 'alexandria' | 'cairo' | 'readex' | 'almarai' | 'tajawal';
+  customDomain?: string;
 }
 
 export interface HeroConfig {
@@ -83,14 +85,75 @@ export interface BookingRecord {
   experience: string;
   timing: string;
   notes?: string;
-  status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled' | 'paid' | 'pending_payment';
+  paymentMethod?: 'paymob' | 'cash' | 'transfer' | 'whatsapp';
+  paymentAmount?: string;
+  paymentReference?: string;
 }
 
+export interface PaymobPaymentConfig {
+  enabled: boolean;
+  paymentUrl: string;
+  depositAmount?: number;
+  requirePaymentBeforeBooking: boolean;
+  paymentInstructionsAr: string;
+  paymentInstructionsEn: string;
+  supportMada: boolean;
+  supportApplePay: boolean;
+  supportCards: boolean;
+}
+
+export interface FemaleInstructorConfig {
+  enabled: boolean;
+  nameAr: string;
+  nameEn: string;
+  titleAr: string;
+  titleEn: string;
+  badgeAr: string;
+  badgeEn: string;
+  bioAr: string;
+  bioEn: string;
+  photoUrl?: string;
+  phone?: string;
+  whatsappNumber?: string;
+  padiNumber?: string;
+  experienceYears?: string;
+  featuresListAr: string[];
+  featuresListEn: string[];
+  specialtiesAr: string[];
+  specialtiesEn: string[];
+}
+
+export interface Captain {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  titleAr: string;
+  titleEn: string;
+  roleAr?: string;
+  roleEn?: string;
+  padiNumber?: string;
+  experienceYears?: string;
+  bioAr: string;
+  bioEn: string;
+  photoUrl?: string;
+  phone?: string;
+  whatsappNumber?: string;
+  specialtiesAr: string[];
+  specialtiesEn: string[];
+  isLead?: boolean;
+}
+
+export type BrandConfig = CenterBrandConfig;
+export type Booking = BookingRecord;
 export interface SiteConfig {
   brand: CenterBrandConfig;
   hero: HeroConfig;
   instructor: InstructorConfig;
+  femaleInstructor?: FemaleInstructorConfig;
+  captains?: Captain[];
   announcement: AnnouncementConfig;
+  payment?: PaymobPaymentConfig;
   courses: Course[];
   diveSites: DiveSite[];
   faqs: FAQItem[];

@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Award, ShieldCheck, Users, CalendarCheck } from 
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
+import { FahadsLogo } from './FahadsLogo';
 
 interface HeroProps {
   onOpenBooking: (courseId?: string) => void;
@@ -26,7 +27,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
   const heroSubhead = language === 'ar' ? config.hero.subheadAr : config.hero.subheadEn;
 
   return (
-    <section id="home" className="relative min-h-[92vh] flex items-center justify-center overflow-hidden ocean-gradient-hero caustics-pattern pt-12 pb-20">
+    <section id="home" className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden ocean-gradient-hero caustics-pattern pt-8 sm:pt-12 pb-14 sm:pb-20">
       {/* Background ambient deep sea light beams themed with logo blue */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-blue-600/20 blur-[130px] rounded-full" />
@@ -47,77 +48,77 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           
           {/* Main Content Column */}
-          <div className={`lg:col-span-7 space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+          <div className={`lg:col-span-7 space-y-5 sm:space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
             
             {/* Clean unboxed editorial metadata kicker */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-blue-400 tracking-wide">
-              <Award className="w-4 h-4 text-blue-400 shrink-0" />
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-[#C59B5F] tracking-wide">
+              <Award className="w-4 h-4 text-[#C59B5F] shrink-0" />
               <span>{heroBadge}</span>
               <span aria-hidden="true" className="text-slate-600">·</span>
               <span className="text-slate-400">{t.heroLocation}</span>
             </div>
 
-            {/* High-impact headline in logo blue & white */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.2] text-balance">
+            {/* High-impact headline in brand gold & white */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.25] text-balance font-brand-arabic">
               {heroHeadline}{' '}
-              <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#E0BA84] via-[#C59B5F] to-[#A4783B] bg-clip-text text-transparent">
                 {heroHighlight}
               </span>
             </h1>
 
             {/* Concrete value proposition */}
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-2xl">
               {heroSubhead}
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-1 sm:pt-2">
               <button
                 onClick={() => onOpenBooking()}
-                className="inline-flex items-center justify-center gap-3 px-7 py-3.5 text-base font-bold text-white bg-blue-600 hover:bg-blue-500 active:scale-[0.98] rounded-xl transition-all shadow-xl shadow-blue-600/30 whitespace-nowrap cursor-pointer"
+                className="gold-gradient-btn inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
               >
-                <CalendarCheck className="w-5 h-5 text-white" />
+                <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
                 <span>{t.heroCtaBook}</span>
               </button>
 
               <button
                 onClick={onExploreCourses}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-medium text-slate-200 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 hover:border-blue-500/50 rounded-xl transition-all whitespace-nowrap cursor-pointer group"
+                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-[#C59B5F]/30 hover:border-[#C59B5F] rounded-xl transition-all whitespace-nowrap cursor-pointer group"
               >
                 <span>{t.heroCtaCourses}</span>
-                <ArrowIcon className={`w-4 h-4 text-blue-400 transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                <ArrowIcon className={`w-4 h-4 text-[#C59B5F] transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
               </button>
             </div>
 
-            {/* Quantitative Proof adjacent to claims (Optionally toggleable) */}
+            {/* Quantitative Proof adjacent to claims */}
             {config.hero.showStats !== false && (
-              <div className={`pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-4 sm:gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className={`pt-6 sm:pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-2.5 sm:gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
                 <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tabular-nums">
+                  <div className="text-xl sm:text-3xl font-black text-white font-mono tabular-nums">
                     {config.hero.divesStat || '1,450+'}
                   </div>
-                  <div className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
                     {language === 'ar' ? (config.hero.divesLabelAr || 'عدد الغوصات الموثقة') : (config.hero.divesLabelEn || 'Logged Dives')}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono tabular-nums">
+                  <div className="text-xl sm:text-3xl font-black text-[#C59B5F] font-mono tabular-nums">
                     {config.hero.studentsStat || '520+'}
                   </div>
-                  <div className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
                     {language === 'ar' ? (config.hero.studentsLabelAr || 'عدد الغواصين الخريجين') : (config.hero.studentsLabelEn || 'Certified Students')}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-sky-400 font-mono tabular-nums">
+                  <div className="text-xl sm:text-3xl font-black text-sky-400 font-mono tabular-nums">
                     {config.hero.safetyStat || '100%'}
                   </div>
-                  <div className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
                     {language === 'ar' ? (config.hero.safetyLabelAr || 'سجل الأمان والسلامة') : (config.hero.safetyLabelEn || 'Safety Record')}
                   </div>
                 </div>
@@ -126,23 +127,25 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
 
           </div>
 
-          {/* Visual Showcase Column (Featuring the official logo & ocean depth monitor) */}
+          {/* Visual Showcase Column (Accreditation & Highlights) */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-3xl p-1 bg-gradient-to-b from-blue-500/40 via-slate-800/40 to-slate-900/60 shadow-2xl shadow-blue-950/50">
+            <div className="relative rounded-3xl p-1 bg-gradient-to-b from-[#C59B5F]/40 via-slate-800/40 to-slate-900/60 shadow-2xl shadow-blue-950/50">
               
-              <div className="relative rounded-[22px] overflow-hidden bg-slate-900 border border-slate-800 p-6 sm:p-8 space-y-6">
+              <div className="relative rounded-[22px] overflow-hidden bg-slate-900/95 border border-slate-800 p-6 sm:p-8 space-y-6">
                 
                 {/* Official Accreditation Header */}
                 <div className={`flex items-center gap-3.5 pb-5 border-b border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 shadow-inner">
+                  <div className="w-12 h-12 rounded-2xl bg-[#C59B5F]/15 border border-[#C59B5F]/30 text-[#C59B5F] flex items-center justify-center shrink-0 shadow-inner">
                     <Award className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block">
+                    <span className="text-xs font-bold text-[#C59B5F] uppercase tracking-wider block">
                       {isRtl ? 'اعتمادات PADI الدولية المعتمدة' : 'Official PADI Accreditations'}
                     </span>
                     <h3 className="text-base font-extrabold text-white">
-                      {config.instructor.titleAr || 'PADI Open Water Scuba Instructor (OWSI)'}
+                      {language === 'ar' 
+                        ? (config.instructor.titleAr || 'PADI Open Water Scuba Instructor (OWSI)') 
+                        : (config.instructor.titleEn || 'PADI Open Water Scuba Instructor (OWSI)')}
                     </h3>
                   </div>
                 </div>

@@ -7,15 +7,18 @@ import { FahadsLogo } from './FahadsLogo';
 
 interface FooterProps {
   onOpenAdmin?: () => void;
+  onOpenPolicies?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = () => {
+export const Footer: React.FC<FooterProps> = ({ onOpenPolicies }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
 
   const brandName = language === 'ar' ? config.brand.centerNameAr : config.brand.centerNameEn;
-  const brandSub = config.brand.logoSubtext || 'RIWA ALFAN DIVE CENTER · JEDDAH';
+  const brandSub = language === 'ar' 
+    ? (config.brand.subtitleAr || t.brandSubtitle || 'مركز تدريب غوص معتمد · جدة PADI')
+    : (config.brand.subtitleEn || t.brandSubtitle || 'Certified PADI Dive Center · Jeddah');
 
   return (
     <footer className={`bg-slate-950 border-t border-slate-900 text-slate-400 py-16 ${
@@ -28,18 +31,31 @@ export const Footer: React.FC<FooterProps> = () => {
           {/* Brand Info with Logo */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3 text-white">
-              <div className="p-1 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+              <div className="p-1.5 rounded-xl bg-slate-900 border border-[#C59B5F]/30 flex items-center justify-center">
                 <FahadsLogo 
                   size="sm" 
                   theme="dark" 
+                  showWordmark={false}
                   customImageUrl={config.brand.logoType === 'custom-image' ? config.brand.customLogoUrl : undefined}
                   customTitle={config.brand.logoText}
                   customSubtext={config.brand.logoSubtext}
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold tracking-tight">{brandName}</span>
-                <span className="text-xs text-blue-400 font-medium">{brandSub}</span>
+                <span className="text-xl font-black tracking-tight text-white font-brand-arabic">
+                  {language === 'ar' ? (
+                    <>
+                      <span>رواء </span>
+                      <span className="text-[#C59B5F]">الفن</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Riwa </span>
+                      <span className="text-[#C59B5F]">Alfan</span>
+                    </>
+                  )}
+                </span>
+                <span className="text-xs text-[#C59B5F] font-semibold tracking-wider uppercase">{brandSub}</span>
               </div>
             </div>
             
@@ -77,6 +93,16 @@ export const Footer: React.FC<FooterProps> = () => {
               <li>
                 <a href="#faq" className="hover:text-blue-400 transition-colors">{t.navFaq}</a>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={onOpenPolicies}
+                  className="hover:text-blue-400 transition-colors text-right cursor-pointer flex items-center gap-1 text-slate-300"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                  <span>{isRtl ? 'سياسة الاسترداد وإلغاء الرحلات' : 'Refund & Cancellation Policy'}</span>
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -88,6 +114,15 @@ export const Footer: React.FC<FooterProps> = () => {
             <p className="text-xs text-slate-400 leading-relaxed">
               {t.footerDisclaimerText}
             </p>
+            {onOpenPolicies && (
+              <button
+                type="button"
+                onClick={onOpenPolicies}
+                className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer mt-1"
+              >
+                <span>{isRtl ? 'عرض اللائحة الرسمية للاسترداد والتدريب والسلامة ❯' : 'View Official Refund & Safety Regulations ❯'}</span>
+              </button>
+            )}
           </div>
         </div>
 

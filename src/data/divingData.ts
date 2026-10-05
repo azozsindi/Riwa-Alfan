@@ -14,6 +14,7 @@ export interface Course {
   prerequisites: Record<Lang, string>;
   highlights: Record<Lang, string[]>;
   curriculum: Record<Lang, string[]>;
+  paymobUrl?: string;
 }
 
 export interface DiveSite {
@@ -779,6 +780,26 @@ export const FAQS: FAQItem[] = [
     answer: {
       ar: "يبدأ الغوص من سن 10 سنوات (يحصل على رخصة غواص مياه مفتوحة ناشئ Junior Open Water حتى سن 15 عاماً ليتحول تلقائياً إلى غواص بالغ). لا يوجد حد أعلى للعمر طالما أن الحالة الصحية والبدنية لائقة.",
       en: "Children as young as 10 can certify (earning a Junior Open Water rating which automatically upgrades at age 15). There is no upper age limit as long as general medical fitness is maintained."
+    }
+  },
+  {
+    question: {
+      ar: "ما هي سياسة إلغاء واسترداد الرحلات البحرية ورحلات الغوص؟",
+      en: "What is the cancellation & refund policy for boat trips and expeditions?"
+    },
+    answer: {
+      ar: "• قبل الموعد بـ 72 ساعة أو أكثر: استرداد كامل للمبلغ المدفوع.\n• أقل من 24 ساعة / عدم الحضور: لا يوجد استرداد، ويتم إعادة الجدولة مع مراعاة الحقوق النظامية.\n• إلغاء الرحلة من قِبل المركز (لسوء الأحوال الجوية مثلاً): يتم تقديم خيار إعادة الجدولة.",
+      en: "• 72+ hours prior: Full 100% refund.\n• Less than 24h / no-show: Non-refundable, with rescheduling offered per statutory rights.\n• Center cancellation (e.g. adverse weather): Free rescheduling is provided."
+    }
+  },
+  {
+    question: {
+      ar: "ما هي سياسة استرداد الدورات والتدريب الإضافي وضوابط السلامة؟",
+      en: "What are the course refund, remedial training and safety rules?"
+    },
+    answer: {
+      ar: "• قبل إصدار الكتب الرقمية ورقم العضوية: يُقيَّم طلب الاسترداد وفق حالة التسجيل والأنظمة.\n• بعد إصدار الكتب الرقمية ورقم العضوية: لا يمكن استرداد المبلغ، ولكن يُتاح طلب إعادة الجدولة وفق ضوابط ومواعيد المركز المتاحة.\n• القصور أو التدريب الإضافي: إذا احتاج المتدرب حصصاً إضافية لعدم إتقانه المهارات، فتكون على حسابه الشخصي خارج رسوم الدورة.\n• السلامة والمسؤولية: الالتزام بالتعليمات والإفصاح عن أي حالات صحية. يحق للمركز أو المدرب منع أي شخص من المشاركة إذا كانت حالته أو سلوكه يمثل خطراً على السلامة، والمركز غير مسؤول عن إهمال المتدرب، مع الالتزام التام بحقوق المستهلك النظامية وفق أنظمة المملكة العربية السعودية.",
+      en: "• Before digital books/ID: Refund evaluated per registration status.\n• After digital books/ID: Non-refundable; rescheduling available.\n• Additional training: Extra sessions needed to master skills are billed separately.\n• Safety: Trainees must obey instructions & disclose medical issues. Instructors may halt unsafe participation. The center is not liable for student negligence, fully respecting Saudi consumer laws."
     }
   }
 ];

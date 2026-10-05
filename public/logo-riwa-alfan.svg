@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" fill="none">
+  <!-- Defs & Filters for Premium Metallic and Deep Navy Finishes -->
+  <defs>
+    <!-- Warm Antique Sand Gold Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D9AF74" />
+      <stop offset="45%" stop-color="#C59B5F" />
+      <stop offset="100%" stop-color="#A87D43" />
+    </linearGradient>
+
+    <!-- Deep Luminous Royal Navy Gradient for Dark Backgrounds -->
+    <linearGradient id="navyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#244578" />
+      <stop offset="50%" stop-color="#18315B" />
+      <stop offset="100%" stop-color="#112242" />
+    </linearGradient>
+
+    <linearGradient id="navyTextGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2B4F8A" />
+      <stop offset="100%" stop-color="#1E3866" />
+    </linearGradient>
+  </defs>
+
+  <!-- Emblem Monogram: Interlocking R & A -->
+  <g id="monogram" transform="translate(45, 15)">
+    <!-- The Navy Blue "R" Component -->
+    <!-- Top arch and loop of the R -->
+    <path 
+      d="M 25 35 C 70 35 155 42 165 110 C 172 155 135 178 95 182 L 155 258 L 105 258 L 52 188 L 25 188 L 25 150 L 85 150 C 112 150 128 138 124 110 C 120 85 95 72 55 72 L 25 72 Z" 
+      fill="url(#navyGradient)" 
+    />
+    
+    <!-- The navy wedge between R and A base -->
+    <path 
+      d="M 152 258 L 180 215 C 190 200 205 200 215 215 L 242 258 Z" 
+      fill="url(#navyGradient)" 
+    />
+
+    <!-- The Antique Gold "A" Stroke -->
+    <!-- Bold diagonal right arm of A with sleek angled cuts matching original logo -->
+    <path 
+      d="M 195 95 L 225 140 L 305 258 L 255 258 L 195 168 L 175 140 Z" 
+      fill="url(#goldGradient)" 
+    />
+  </g>
+
+  <!-- Arabic Typography "رواء الفن" directly underneath -->
+  <g id="arabic-wordmark" transform="translate(0, 275)">
+    <!-- "الفن" in Warm Gold -->
+    <!-- 'ن' -->
+    <path d="M 28 35 C 28 55 44 65 65 65 C 88 65 102 52 102 32 L 115 32 C 115 62 92 78 65 78 C 32 78 14 62 14 35 Z" fill="url(#goldGradient)" />
+    <!-- Nuqta (Dot of Noon) -->
+    <circle cx="65" cy="45" r="5" fill="url(#goldGradient)" />
+    <!-- 'ف' (Fa) -->
+    <path d="M 102 32 L 102 65 L 160 65 L 160 48 C 160 38 152 32 142 32 C 132 32 125 38 125 48 L 125 65 L 115 65 L 115 32 Z" fill="url(#goldGradient)" />
+    <circle cx="142" cy="20" r="5" fill="url(#goldGradient)" />
+    <!-- 'ل' and 'ا' of Al-Fan -->
+    <rect x="175" y="10" width="13" height="55" rx="3" fill="url(#goldGradient)" />
+    <rect x="195" y="10" width="13" height="55" rx="3" fill="url(#goldGradient)" />
+
+    <!-- "رواء" in Deep Marine Navy -->
+    <!-- 'ر' (Raa) -->
+    <path d="M 245 28 L 258 28 L 258 48 C 258 64 245 78 225 80 L 220 70 C 235 68 245 58 245 46 Z" fill="url(#navyTextGradient)" />
+    <!-- 'و' (Waw) -->
+    <path d="M 285 45 C 285 36 292 30 302 30 C 312 30 318 36 318 45 C 318 52 312 58 302 58 L 285 58 Z M 302 20 C 286 20 274 30 274 45 C 274 58 284 66 295 68 L 280 82 L 292 85 L 308 68 C 322 66 331 56 331 43 C 331 30 319 20 302 20 Z" fill="url(#navyTextGradient)" />
+    <!-- 'ا' (Alif) -->
+    <rect x="345" y="10" width="13" height="55" rx="3" fill="url(#navyTextGradient)" />
+    <!-- 'ء' (Hamza) -->
+    <path d="M 375 32 C 375 25 382 20 389 20 C 395 20 400 23 402 27 L 393 30 C 392 28 390 27 388 27 C 385 27 382 29 382 32 C 382 35 385 37 388 38 L 398 42 L 375 42 Z" fill="url(#navyTextGradient)" />
+  </g>
+</svg>

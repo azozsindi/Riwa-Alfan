@@ -22,29 +22,29 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
     : `Hello Captain Fahad, I would like to inquire about certified scuba training in Jeddah.`;
 
   return (
-    <section id="contact" className="py-24 bg-slate-950 relative border-t border-slate-800/80">
+    <section id="contact" className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className={`rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-8 sm:p-12 relative overflow-hidden ${
+        <div className={`rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-6 sm:p-12 relative overflow-hidden ${
           isRtl ? 'text-right' : 'text-left'
         }`}>
           
           {/* Subtle logo blue glow effect */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/15 blur-[110px] pointer-events-none rounded-full" />
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center relative z-10">
             
             {/* Info */}
-            <div className="lg:col-span-7 space-y-5">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-5">
               <div className="text-xs font-semibold text-blue-400 tracking-wider">
                 {t.contactKicker}
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
                 {t.contactTitle}
               </h2>
 
-              <p className="text-base text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
                 {t.contactDesc}
               </p>
 

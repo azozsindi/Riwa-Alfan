@@ -13,18 +13,18 @@ export const TestimonialsSection: React.FC = () => {
   const testimonialsList = config.testimonials && config.testimonials.length > 0 ? config.testimonials : TESTIMONIALS;
 
   return (
-    <section className="py-24 bg-slate-950 relative border-t border-slate-800/80">
+    <section className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className={`max-w-3xl mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+        <div className={`max-w-3xl mb-10 sm:mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
             {t.testiKicker}
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
             {t.testiTitle}
           </h2>
-          <p className="text-base text-slate-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
             {t.testiDesc}
           </p>
         </div>

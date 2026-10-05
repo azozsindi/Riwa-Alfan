@@ -1,147 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SiteConfig, BookingRecord, CenterBrandConfig, HeroConfig, InstructorConfig, AnnouncementConfig } from '../types/admin';
-import { COURSES_DATA, DIVE_SITES, INSTRUCTOR_INFO, FAQS, TESTIMONIALS, Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
-import { db } from '../firebase';
 import { 
-  collection, 
-  doc, 
-  setDoc, 
-  deleteDoc, 
-  updateDoc, 
-  onSnapshot, 
-  getDoc,
-  getDocFromServer 
-} from 'firebase/firestore';
-
-const CONFIG_STORAGE_KEY = 'riwa_alfan_site_config_v12';
-const BOOKINGS_STORAGE_KEY = 'riwa_alfan_bookings_v12';
-
-const DEFAULT_CONFIG: SiteConfig = {
-  brand: {
-    centerNameAr: 'رواء الفن',
-    centerNameEn: 'Riwa Alfan',
-    subtitleAr: 'دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI',
-    subtitleEn: 'Certified PADI Diving Training',
-    logoType: 'vector',
-    customLogoUrl: '',
-    logoText: 'RIWA ALFAN',
-    logoSubtext: 'رواء الفن',
-    phone: '+966530549675',
-    whatsappNumber: '966530549675',
-    email: 'Riwaalfan@gmail.com',
-    city: 'جدة',
-    locationAr: 'جدة - ساحل البحر الأحمر، المملكة العربية السعودية',
-    locationEn: 'Jeddah - Red Sea Coast, Saudi Arabia',
-    padiNumber: 'PADI OWSI #482910'
-  },
-  hero: {
-    badgeAr: 'رواء الفن بجدة · PADI Open Water Scuba Instructor (OWSI)',
-    badgeEn: 'Riwa Alfan in Jeddah · PADI Open Water Scuba Instructor (OWSI)',
-    headlineAr: 'اكتشف أسرار عالم الغوص في ',
-    headlineHighlightAr: 'البحر الأحمر',
-    headlineEn: 'Discover the Secrets of Diving in the ',
-    headlineHighlightEn: 'Red Sea',
-    subheadAr: 'رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في رواء الفن بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.',
-    subheadEn: 'Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.',
-    showStats: true,
-    divesStat: '1,450+',
-    divesLabelAr: 'عدد الغوصات الموثقة',
-    divesLabelEn: 'Logged Dives',
-    studentsStat: '520+',
-    studentsLabelAr: 'عدد الغواصين الخريجين',
-    studentsLabelEn: 'Certified Students',
-    safetyStat: '100%',
-    safetyLabelAr: 'سجل الأمان والسلامة',
-    safetyLabelEn: 'Safety Record'
-  },
-  instructor: {
-    nameAr: 'كابتن فهد الهويملي',
-    nameEn: 'Capt. Fahad Al-Huwaimli',
-    titleAr: 'PADI Open Water Scuba Instructor (OWSI)',
-    titleEn: 'PADI Open Water Scuba Instructor (OWSI)',
-    accreditationAr: 'مدرب معتمد دولياً لدى منظمة PADI (OWSI)',
-    accreditationEn: 'Internationally Certified PADI OWSI Instructor',
-    bioAr: 'مدرب غوص سعودي شغوف بأعماق البحر الأحمر لأكثر من عقد من الزمان. نؤمن بأن الغوص ليس مجرد رياضة، بل رحلة استكشاف وتأمل وتناغم تام مع الطبيعة. نلتزم بأعلى معايير السلامة الدولية وأسلوب تدريب صبور ومحفز يزيل أي توتر ويمنح المتدرب ثقة مطلقة تحت الماء.',
-    bioEn: 'A passionate Saudi diving instructor immersed in the depths of the Red Sea for over a decade. We believe diving is not merely a sport, but a transformative journey of exploration, contemplation, and complete harmony with nature. Committed to the highest international safety standards with a patient, empowering coaching methodology.',
-    quoteAr: 'البحر لا يُعلّمنا فقط كيف نتنفس تحت الماء، بل يُعلّمنا كيف نهدأ ونتأمل ونثق بأنفسنا في عالم أزرق ساحر.',
-    quoteEn: 'The sea does not merely teach us to breathe underwater; it teaches us serenity, mindfulness, and unbreakable inner trust.',
-    padiMemberNumber: 'PADI OWSI Member #482910',
-    owsiNumber: 'PADI Open Water Scuba Instructor (OWSI #482910)',
-    danNumber: 'عضو معتمد في شبكة تنبيه الغواصين (DAN Europe / World)',
-    efrNumber: 'مدرب معتمد للإسعافات الأولية والإنعاش القلبي (EFR Instructor)',
-    certificatesListAr: [
-      'PADI MSDT Member #482910',
-      'PADI Open Water Scuba Instructor (OWSI)',
-      'عضو معتمد في شبكة تنبيه الغواصين (DAN Europe / World)',
-      'مدرب معتمد للإسعافات الأولية والإنعاش القلبي (EFR Instructor)'
-    ],
-    certificatesListEn: [
-      'PADI MSDT Member #482910',
-      'PADI Open Water Scuba Instructor (OWSI)',
-      'Certified Member - Divers Alert Network (DAN Europe / World)',
-      'Certified Emergency First Response (EFR) & CPR Instructor'
-    ],
-    experienceYears: '10+ سنوات خبرة',
-    photoUrl: '',
-    specialtiesAr: [
-      'مدرب غوص المياه المفتوحة والمتقدم (PADI OW & AOW)',
-      'مدرب تخصص الهواء المخصب النيتروكس (Enriched Air Nitrox EANx)',
-      'مدرب غوص الأعماق والغوص الليلي (Deep & Night Diver)',
-      'مدرب الإسعافات الأولية والإنعاش القلبي الرئوي (EFR & CPR)',
-      'مدرب طفو احترافي وحماية البيئة البحرية (Peak Buoyancy)',
-      'تنظيم رحلات السفاري البحرية واليخوت بجدة'
-    ],
-    specialtiesEn: [
-      'PADI Open Water & Advanced Scuba Instructor',
-      'Enriched Air Nitrox (EANx) Specialty Instructor',
-      'Deep Diver & Night Diver Specialty Instructor',
-      'Emergency First Response (EFR) & CPR Instructor',
-      'Peak Performance Buoyancy & Marine Conservation',
-      'Jeddah Boat Expeditions & Liveaboard Organizer'
-    ]
-  },
-  announcement: {
-    enabled: true,
-    badgeAr: 'عرض خاص بجدة',
-    badgeEn: 'Jeddah Special Offer',
-    textAr: 'خصم خاص 20% على دورة غواص المياه المفتوحة (Open Water) للحجوزات المبكرة هذا الشهر!',
-    textEn: 'Special 20% OFF on PADI Open Water Course for early bird bookings this month!',
-    ctaTextAr: 'احجز العرض الآن',
-    ctaTextEn: 'Claim Offer Now',
-    discountPercentage: 20,
-    highlightCourseId: 'open-water'
-  },
-  courses: COURSES_DATA,
-  diveSites: DIVE_SITES,
-  faqs: FAQS,
-  testimonials: TESTIMONIALS,
-  adminPin: '1234'
-};
-
-const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [
-  {
-    id: 'BK-1082',
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    name: 'سعود بن ناصر العتيبي',
-    phone: '0555123456',
-    interest: 'دورة غواص المياه المفتوحة (Open Water)',
-    experience: 'مبتدئ تماماً (أول مرة)',
-    timing: 'عطلة نهاية الأسبوع (خميس/جمعة/سبت)',
-    notes: 'أرغب ببدء التدريب العملي في شرم أبحر الأسبوع القادم إن أمكن.',
-    status: 'new'
-  },
-  {
-    id: 'BK-1079',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    name: 'سارة خالد المنصور',
-    phone: '0509876543',
-    interest: 'دورة غواص المياه المفتوحة المتقدم (Advanced)',
-    experience: 'غواص مياه مفتوحة مرخص',
-    timing: 'أيام الأسبوع (فترات مسائية)',
-    notes: 'معي رخصة أوبن واتر سابقة وأرغب بالتأهيل للغوص العميق حتى 30 متر.',
-    status: 'contacted'
-  }
-];
+  SiteConfig, 
+  BookingRecord, 
+  CenterBrandConfig, 
+  HeroConfig, 
+  InstructorConfig, 
+  FemaleInstructorConfig,
+  AnnouncementConfig,
+  Captain,
+  PaymobPaymentConfig
+} from '../types/admin';
+import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
+import { 
+  DEFAULT_CONFIG, 
+  DEFAULT_CAPTAINS,
+  INITIAL_DEMO_BOOKINGS, 
+  CONFIG_STORAGE_KEY, 
+  BOOKINGS_STORAGE_KEY 
+} from '../data/defaultConfig';
+import { applySiteFont } from '../utils/fontManager';
+import {
+  validateFirestoreConnection,
+  subscribeToBookings,
+  subscribeToSiteConfig,
+  saveSiteConfigToFirestore,
+  saveBookingToFirestore,
+  updateBookingStatusInFirestore,
+  deleteBookingFromFirestore
+} from '../services/firestoreSync';
 
 interface SiteConfigContextType {
   config: SiteConfig;
@@ -151,6 +37,12 @@ interface SiteConfigContextType {
   updateBrand: (partial: Partial<CenterBrandConfig>) => void;
   updateHero: (partial: Partial<HeroConfig>) => void;
   updateInstructor: (partial: Partial<InstructorConfig>) => void;
+  updateFemaleInstructor: (partial: Partial<FemaleInstructorConfig>) => void;
+  updateCaptains: (captains: Captain[]) => void;
+  addCaptain: (captain: Omit<Captain, 'id'>) => void;
+  updateCaptain: (captainId: string, updated: Partial<Captain>) => void;
+  deleteCaptain: (captainId: string) => void;
+  updatePaymentConfig: (partial: Partial<PaymobPaymentConfig>) => void;
   updateAnnouncement: (partial: Partial<AnnouncementConfig>) => void;
   updateCourses: (courses: Course[]) => void;
   updateCourse: (courseId: string, updated: Partial<Course>) => void;
@@ -162,7 +54,7 @@ interface SiteConfigContextType {
   deleteDiveSite: (siteId: string) => void;
   updateFaqs: (faqs: FAQItem[]) => void;
   updateTestimonials: (testimonials: Testimonial[]) => void;
-  addBooking: (booking: Omit<BookingRecord, 'id' | 'createdAt' | 'status'>) => string;
+  addBooking: (booking: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => string;
   updateBookingStatus: (id: string, status: BookingRecord['status']) => void;
   deleteBooking: (id: string) => void;
   clearAllBookings: () => void;
@@ -194,17 +86,15 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         'riwa_alfan_site_config'
       ];
 
-      // Check if courses list has customized prices
       const hasCustomCourses = (coursesList: any[]): boolean => {
         if (!Array.isArray(coursesList) || coursesList.length === 0) return false;
         return coursesList.some(c => {
           const def = DEFAULT_CONFIG.courses.find(d => d.id === c.id);
-          if (!def) return true; // custom course added by captain
+          if (!def) return true;
           return def.price?.ar !== c.price?.ar || def.price?.en !== c.price?.en;
         });
       };
 
-      // Check v12 first
       let v12Config: any = null;
       const v12Raw = localStorage.getItem(CONFIG_STORAGE_KEY);
       if (v12Raw) {
@@ -213,48 +103,43 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         } catch {}
       }
 
-      // Check if older version has user-customized courses & prices
       let recoveredCourses: Course[] | null = null;
       let recoveredBrand: any = null;
       let recoveredAnnouncement: any = null;
 
-      if (v12Config && hasCustomCourses(v12Config.courses)) {
-        recoveredCourses = v12Config.courses;
-      } else {
-        // Search previous storage keys (v11, v10, etc.)
+      if (!v12Config || !hasCustomCourses(v12Config.courses)) {
         for (const k of olderKeys) {
           const raw = localStorage.getItem(k);
           if (raw) {
             try {
-              const p = JSON.parse(raw);
-              if (p) {
-                if (!recoveredCourses && hasCustomCourses(p.courses)) {
-                  recoveredCourses = p.courses;
+              const parsed = JSON.parse(raw);
+              if (parsed) {
+                if (!recoveredCourses && hasCustomCourses(parsed.courses)) {
+                  recoveredCourses = parsed.courses;
                 }
-                if (!recoveredBrand && p.brand) {
-                  recoveredBrand = p.brand;
+                if (!recoveredBrand && parsed.brand) {
+                  recoveredBrand = parsed.brand;
                 }
-                if (!recoveredAnnouncement && p.announcement) {
-                  recoveredAnnouncement = p.announcement;
+                if (!recoveredAnnouncement && parsed.announcement) {
+                  recoveredAnnouncement = parsed.announcement;
                 }
               }
             } catch {}
           }
+          if (recoveredCourses) break;
         }
       }
 
       const base = v12Config || {};
-
       return {
         ...DEFAULT_CONFIG,
         ...base,
-        brand: { 
-          ...DEFAULT_CONFIG.brand, 
-          ...(base.brand || recoveredBrand || {}),
-          email: 'Riwaalfan@gmail.com'
-        },
+        brand: { ...DEFAULT_CONFIG.brand, ...(base.brand || recoveredBrand || {}), email: 'Riwaalfan@gmail.com' },
         hero: { ...DEFAULT_CONFIG.hero, ...(base.hero || {}) },
-        instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}) },
+        instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}), photoUrl: '' },
+        femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
+        captains: Array.isArray(base.captains) && base.captains.length > 0 ? base.captains : DEFAULT_CAPTAINS,
+        payment: { ...(DEFAULT_CONFIG.payment || {}), ...(base.payment || {}) },
         announcement: { ...DEFAULT_CONFIG.announcement, ...(base.announcement || recoveredAnnouncement || {}) },
         courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
         diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
@@ -284,68 +169,36 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Validate Connection to Firestore on boot
   useEffect(() => {
-    async function testConnection() {
-      try {
-        await getDocFromServer(doc(db, 'settings', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.warn("Firestore client is offline.");
-        }
-      }
-    }
-    testConnection();
+    validateFirestoreConnection();
   }, []);
 
   // Real-time Firestore sync for Bookings
   useEffect(() => {
-    try {
-      const unsub = onSnapshot(collection(db, 'bookings'), (snapshot) => {
-        if (!snapshot.empty) {
-          const list: BookingRecord[] = [];
-          snapshot.forEach(d => {
-            const data = d.data() as BookingRecord;
-            if (data && data.id) {
-              list.push(data);
-            }
-          });
-          list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          setBookings(list);
-        }
-      }, (err) => {
-        console.warn('Firestore bookings snapshot error:', err);
-      });
-      return () => unsub();
-    } catch (e) {
-      console.warn('Firestore sync failed to initialize:', e);
-    }
+    const unsub = subscribeToBookings((remoteBookings) => {
+      setBookings(remoteBookings);
+    });
+    return () => unsub();
   }, []);
 
-  // Real-time Firestore sync for Site Config (Cloud persistence across devices)
+  // Apply typography to document body dynamically
   useEffect(() => {
-    try {
-      const configDocRef = doc(db, 'settings', 'site_config');
-      const unsub = onSnapshot(configDocRef, (snap) => {
-        if (snap.exists()) {
-          const remoteData = snap.data() as Partial<SiteConfig>;
-          if (remoteData && remoteData.courses && remoteData.courses.length > 0) {
-            setConfig(prev => ({
-              ...prev,
-              ...remoteData,
-              brand: {
-                ...prev.brand,
-                ...(remoteData.brand || {}),
-                email: 'Riwaalfan@gmail.com'
-              }
-            }));
-          }
+    applySiteFont(config.brand.fontFamily);
+  }, [config.brand.fontFamily]);
+
+  // Real-time Firestore sync for Site Config
+  useEffect(() => {
+    const unsub = subscribeToSiteConfig((remoteData) => {
+      setConfig(prev => ({
+        ...prev,
+        ...remoteData,
+        brand: {
+          ...prev.brand,
+          ...(remoteData.brand || {}),
+          email: 'Riwaalfan@gmail.com'
         }
-      }, (err) => {
-        console.warn('Firestore site_config snapshot notice:', err);
-      });
-      return () => unsub();
-    } catch (e) {
-      console.warn('Firestore site_config sync notice:', e);
-    }
+      }));
+    });
+    return () => unsub();
   }, []);
 
   // Sync config to localStorage and Firestore
@@ -353,12 +206,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
       localStorage.setItem('riwa_alfan_site_config_v11', JSON.stringify(config));
-      
-      // Save to Firestore settings
-      const configDocRef = doc(db, 'settings', 'site_config');
-      setDoc(configDocRef, config, { merge: true }).catch(err => {
-        console.warn('Firestore setDoc site_config notice:', err);
-      });
+      saveSiteConfigToFirestore(config);
     } catch (e) {
       console.error('Failed to save site config:', e);
     }
@@ -391,6 +239,49 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({
       ...prev,
       instructor: { ...prev.instructor, ...partial }
+    }));
+  };
+
+  const updateFemaleInstructor = (partial: Partial<FemaleInstructorConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      femaleInstructor: { ...(prev.femaleInstructor || DEFAULT_CONFIG.femaleInstructor!), ...partial }
+    }));
+  };
+
+  const updateCaptains = (captains: Captain[]) => {
+    setConfig(prev => ({ ...prev, captains }));
+  };
+
+  const addCaptain = (captainData: Omit<Captain, 'id'>) => {
+    const newId = `captain-${Date.now()}`;
+    const newCap: Captain = { ...captainData, id: newId };
+    setConfig(prev => ({
+      ...prev,
+      captains: [...(prev.captains || DEFAULT_CAPTAINS), newCap]
+    }));
+  };
+
+  const updateCaptain = (captainId: string, updated: Partial<Captain>) => {
+    setConfig(prev => ({
+      ...prev,
+      captains: (prev.captains || DEFAULT_CAPTAINS).map(c => 
+        c.id === captainId ? { ...c, ...updated } : c
+      )
+    }));
+  };
+
+  const deleteCaptain = (captainId: string) => {
+    setConfig(prev => ({
+      ...prev,
+      captains: (prev.captains || DEFAULT_CAPTAINS).filter(c => c.id !== captainId)
+    }));
+  };
+
+  const updatePaymentConfig = (partial: Partial<PaymobPaymentConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      payment: { ...(prev.payment || DEFAULT_CONFIG.payment!), ...partial }
     }));
   };
 
@@ -459,48 +350,27 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({ ...prev, testimonials }));
   };
 
-  const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt' | 'status'>) => {
+  const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
       ...bookingData,
+      status: bookingData.status || 'new',
       id,
-      createdAt: new Date().toISOString(),
-      status: 'new'
+      createdAt: new Date().toISOString()
     };
     setBookings(prev => [newRecord, ...prev]);
-
-    // Async sync with Firestore cloud database
-    try {
-      setDoc(doc(db, 'bookings', id), newRecord).catch(err => {
-        console.warn('Firestore booking sync notice:', err);
-      });
-    } catch (e) {
-      console.warn('Firestore save notice:', e);
-    }
-
+    saveBookingToFirestore(newRecord);
     return id;
   };
 
   const updateBookingStatus = (id: string, status: BookingRecord['status']) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
-    try {
-      updateDoc(doc(db, 'bookings', id), { status }).catch(err => {
-        console.warn('Firestore status update notice:', err);
-      });
-    } catch (e) {
-      console.warn('Firestore update notice:', e);
-    }
+    updateBookingStatusInFirestore(id, status);
   };
 
   const deleteBooking = (id: string) => {
     setBookings(prev => prev.filter(b => b.id !== id));
-    try {
-      deleteDoc(doc(db, 'bookings', id)).catch(err => {
-        console.warn('Firestore delete notice:', err);
-      });
-    } catch (e) {
-      console.warn('Firestore delete notice:', e);
-    }
+    deleteBookingFromFirestore(id);
   };
 
   const clearAllBookings = () => {
@@ -584,6 +454,12 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       updateBrand,
       updateHero,
       updateInstructor,
+      updateFemaleInstructor,
+      updateCaptains,
+      addCaptain,
+      updateCaptain,
+      deleteCaptain,
+      updatePaymentConfig,
       updateAnnouncement,
       updateCourses,
       updateCourse,

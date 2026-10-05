@@ -24,29 +24,29 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
     : coursesList.filter(c => c.category === activeCategory);
 
   return (
-    <section id="courses" className="py-24 bg-slate-900/50 relative border-t border-slate-800/80">
+    <section id="courses" className="py-16 sm:py-24 bg-slate-900/50 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className={`max-w-3xl mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+        <div className={`max-w-3xl mb-10 sm:mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
             {t.coursesKicker}
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
             {t.coursesTitle}
           </h2>
-          <p className="text-base text-slate-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
             {t.coursesDesc}
           </p>
         </div>
 
-        {/* Filter Tabs / Segmented Controls with Logo Blue Active State */}
+        {/* Filter Tabs / Segmented Controls with Brand Gold Active State */}
         <div className="flex items-center gap-1.5 p-1.5 bg-slate-950/80 border border-slate-800 rounded-2xl w-fit mb-10 overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeCategory === 'all'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -54,9 +54,9 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('beginner')}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeCategory === 'beginner'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -64,9 +64,9 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('advanced')}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeCategory === 'advanced'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -74,9 +74,9 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('specialty')}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeCategory === 'specialty'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -84,9 +84,9 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('professional')}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeCategory === 'professional'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -99,7 +99,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className={`rounded-3xl bg-slate-950/90 border border-slate-800 hover:border-blue-500/40 transition-all flex flex-col justify-between overflow-hidden group shadow-lg shadow-black/20 ${
+              className={`rounded-3xl bg-slate-950/90 border border-slate-800 hover:border-[#C59B5F]/50 transition-all flex flex-col justify-between overflow-hidden group shadow-lg shadow-black/20 ${
                 isRtl ? 'text-right' : 'text-left'
               }`}
             >
@@ -108,7 +108,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                 
                 {/* Meta header without pills */}
                 <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span className="font-mono text-blue-400 font-semibold">{course.certAgency}</span>
+                  <span className="font-mono text-[#C59B5F] font-semibold">{course.certAgency}</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-slate-500" />
                     <span>{course.duration[language]}</span>
@@ -117,7 +117,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
 
                 {/* Title */}
                 <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-xl font-bold text-white group-hover:text-[#DDB67E] transition-colors">
                     {course.title[language]}
                   </h3>
                 </div>
@@ -149,7 +149,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                 <div className="space-y-2 pt-2">
                   {course.highlights[language].slice(0, 3).map((h, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
-                      <Check className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                      <Check className="w-3.5 h-3.5 text-[#C59B5F] shrink-0 mt-0.5" />
                       <span>{h}</span>
                     </div>
                   ))}
@@ -161,7 +161,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
               <div className="p-6 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between gap-4">
                 <div>
                   <span className="text-[11px] text-slate-400 block">{t.priceLabel}</span>
-                  <span className="text-lg font-extrabold text-blue-400 font-mono">
+                  <span className="text-lg font-extrabold text-[#E0BA84] font-mono">
                     {course.price[language]}
                   </span>
                 </div>
@@ -169,7 +169,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSelectedCourseDetail(course)}
-                    className="p-2.5 rounded-xl border border-slate-700/80 hover:border-blue-500/50 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                    className="p-2.5 rounded-xl border border-slate-700/80 hover:border-[#C59B5F]/50 text-slate-300 hover:text-white transition-colors cursor-pointer"
                     title={t.viewDetails}
                     aria-label={t.viewDetails}
                   >
@@ -178,10 +178,10 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
 
                   <button
                     onClick={() => onSelectCourseForBooking(course.id)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-md shadow-blue-600/30 whitespace-nowrap cursor-pointer"
+                    className="gold-gradient-btn inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap cursor-pointer active:scale-95"
                   >
                     <span>{t.bookCourse}</span>
-                    <ArrowIcon className="w-3.5 h-3.5" />
+                    <ArrowIcon className="w-3.5 h-3.5 text-slate-950" />
                   </button>
                 </div>
               </div>
@@ -281,7 +281,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
             <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-4">
               <div>
                 <span className="text-xs text-slate-400 block">{t.priceLabel}</span>
-                <span className="text-xl font-bold text-blue-400 font-mono">{selectedCourseDetail.price[language]}</span>
+                <span className="text-xl font-bold text-[#E0BA84] font-mono">{selectedCourseDetail.price[language]}</span>
               </div>
               <button
                 onClick={() => {
@@ -289,7 +289,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                   setSelectedCourseDetail(null);
                   onSelectCourseForBooking(id);
                 }}
-                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-colors shadow-lg shadow-blue-600/30 cursor-pointer"
+                className="gold-gradient-btn px-6 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer active:scale-95"
               >
                 {t.confirmBookingCourse}
               </button>
