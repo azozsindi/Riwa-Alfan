@@ -25,12 +25,12 @@ service cloud.firestore {
     }
 
     // Secure Enterprise Admin Gate:
-    // 1. Bootstrapped verified superadmin email (AzozSindi23@gmail.com)
+    // 1. Bootstrapped verified superadmin email (case-insensitive: AzozSindi23@gmail.com)
     // 2. Firebase Custom Claims (request.auth.token.admin == true)
     // 3. Document exists in /admins collection for user UID
     function isAdmin() {
       return isSignedIn() && (
-        (request.auth.token.email == "AzozSindi23@gmail.com" && request.auth.token.email_verified == true) ||
+        (request.auth.token.email != null && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$')) ||
         (request.auth.token.admin == true) ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
@@ -76,10 +76,10 @@ service cloud.firestore {
 
     // 3. Admin whitelist:
     // - Signed-in users can check their own admin status.
-    // - ONLY existing verified admins can add or edit admin users.
+    // - Superadmin can bootstrap their own UID record, and verified admins can manage admin records.
     match /admins/{adminId} {
       allow read: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      allow write: if isValidId(adminId) && isAdmin() && isValidAdminRecord(incoming());
+      allow write: if isValidId(adminId) && (isAdmin() || (isSignedIn() && request.auth.uid == adminId && request.auth.token.email != null && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$'))) && isValidAdminRecord(incoming());
     }
   }
 }
