@@ -281,12 +281,16 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="md:col-span-4 space-y-3">
             <div className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
               <Shield className="w-4 h-4 text-amber-400" />
-              <span>{isRtl ? 'إخلاء مسؤولية ومعايير السلامة' : 'Safety & Regulation Disclaimer'}</span>
+              <span>
+                {language === 'ar'
+                  ? (config.designContent?.footerDisclaimerTitleAr || 'إخلاء مسؤولية ومعايير السلامة')
+                  : (config.designContent?.footerDisclaimerTitleEn || 'Safety & Regulation Disclaimer')}
+              </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed bg-slate-900/50 p-3.5 rounded-2xl border border-slate-900">
-              {isRtl 
-                ? 'رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها. الحاسبات المعروضة هنا هي أدوات مساعدة وتثقيفية ولا تغني عن حاسوب الغوص المعتمد وخطة الغوص الرسمية.'
-                : t.footerDisclaimerText}
+              {language === 'ar'
+                ? (config.designContent?.footerDisclaimerTextAr || 'رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها. الحاسبات المعروضة هنا هي أدوات مساعدة وتثقيفية ولا تغني عن حاسوب الغوص المعتمد وخطة الغوص الرسمية.')
+                : (config.designContent?.footerDisclaimerTextEn || t.footerDisclaimerText)}
             </p>
             {onOpenPolicies && (
               <button
@@ -294,7 +298,11 @@ export const Footer: React.FC<FooterProps> = ({
                 onClick={onOpenPolicies}
                 className="inline-flex items-center gap-1.5 text-xs text-[#C59B5F] hover:text-[#E0BA84] font-bold cursor-pointer mt-1 group"
               >
-                <span>{isRtl ? 'عرض اللائحة الرسمية للاسترداد والتدريب والسلامة ❯' : 'View Official Refund & Safety Regulations ❯'}</span>
+                <span>
+                  {language === 'ar'
+                    ? (config.designContent?.footerPolicyBtnAr || 'عرض اللائحة الرسمية للاسترداد والتدريب والسلامة ❯')
+                    : (config.designContent?.footerPolicyBtnEn || 'View Official Refund & Safety Regulations ❯')}
+                </span>
               </button>
             )}
           </div>

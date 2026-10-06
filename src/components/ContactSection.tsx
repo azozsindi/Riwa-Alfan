@@ -17,6 +17,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
   const whatsappNumber = config.brand.whatsappNumber || '966530549675';
   const email = config.brand.email || 'Riwaalfan@gmail.com';
 
+  const d = config.designContent;
+  const contactKicker = language === 'ar' ? (d?.contactKickerAr || t.contactKicker) : (d?.contactKickerEn || t.contactKicker);
+  const contactTitle = language === 'ar' ? (d?.contactTitleAr || t.contactTitle) : (d?.contactTitleEn || t.contactTitle);
+  const contactDesc = language === 'ar' ? (d?.contactDescAr || t.contactDesc) : (d?.contactDescEn || t.contactDesc);
+  const regionsText = language === 'ar' ? (d?.regionsTextAr || t.regionsText) : (d?.regionsTextEn || t.regionsText);
+  const certAgencyText = language === 'ar' ? (d?.certAgencyTextAr || t.certAgencyText) : (d?.certAgencyTextEn || t.certAgencyText);
+
+  const contactCardTitle = language === 'ar' ? (d?.contactCardTitleAr || t.contactCardTitle) : (d?.contactCardTitleEn || t.contactCardTitle);
+  const contactCardDesc = language === 'ar' ? (d?.contactCardDescAr || t.contactCardDesc) : (d?.contactCardDescEn || t.contactCardDesc);
+  const contactCardBtn = language === 'ar' ? (d?.contactCardBtnAr || t.contactCardBtn) : (d?.contactCardBtnEn || t.contactCardBtn);
+  const availableDaily = language === 'ar' ? (d?.availableDailyAr || t.availableDaily) : (d?.availableDailyEn || t.availableDaily);
+
   const whatsAppText = isRtl
     ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل التدريب بجدة`
     : `Hello Captain Fahad, I would like to inquire about certified scuba training in Jeddah.`;
@@ -37,15 +49,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
             {/* Info */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-5">
               <div className="text-xs font-semibold text-blue-400 tracking-wider">
-                {t.contactKicker}
+                {contactKicker}
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-                {t.contactTitle}
+                {contactTitle}
               </h2>
 
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
-                {t.contactDesc}
+                {contactDesc}
               </p>
 
               {/* Direct Contact Links */}
@@ -104,7 +116,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                   <div>
                     <span className="text-xs text-slate-400 block">{t.regionsLabel}</span>
                     <span className="font-semibold text-white text-xs">
-                      {t.regionsText}
+                      {regionsText}
                     </span>
                   </div>
                 </div>
@@ -116,7 +128,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                   <div>
                     <span className="text-xs text-slate-400 block">{t.certAgencyLabel}</span>
                     <span className="font-semibold text-white text-xs">
-                      {t.certAgencyText}
+                      {certAgencyText}
                     </span>
                   </div>
                 </div>
@@ -126,9 +138,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
 
             {/* Action Card */}
             <div className="lg:col-span-5 text-center p-6 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-4">
-              <h3 className="text-xl font-bold text-white">{t.contactCardTitle}</h3>
+              <h3 className="text-xl font-bold text-white">{contactCardTitle}</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                {t.contactCardDesc}
+                {contactCardDesc}
               </p>
 
               <button
@@ -136,11 +148,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                 className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-xl shadow-blue-600/30 cursor-pointer flex items-center justify-center gap-2"
               >
                 <Calendar className="w-5 h-5" />
-                <span>{t.contactCardBtn}</span>
+                <span>{contactCardBtn}</span>
               </button>
 
               <div className="text-[11px] text-slate-500">
-                {t.availableDaily}
+                {availableDaily}
               </div>
             </div>
 

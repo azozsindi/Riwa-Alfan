@@ -7,7 +7,8 @@ import {
   SocialLinksConfig,
   LocationConfig,
   TrustBadgesConfig,
-  UnderConstructionConfig
+  UnderConstructionConfig,
+  DesignContentConfig
 } from '../types/admin';
 import { COURSES_DATA, DIVE_SITES, FAQS, TESTIMONIALS } from './divingData';
 
@@ -284,6 +285,60 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
   ]
 };
 
+export const DEFAULT_DESIGN_CONTENT: DesignContentConfig = {
+  // 1. Quote & Philosophy
+  quoteTextAr: 'البحر لا يُعلّمنا فقط كيف نتنفس تحت الماء، بل يُعلّمنا كيف نهدأ ونتأمل ونثق بأنفسنا في عالم أزرق ساحر.',
+  quoteTextEn: 'The sea does not merely teach us to breathe underwater; it teaches us serenity, mindfulness, and unbreakable inner trust.',
+  quoteAuthorAr: 'كابتن فهد الهويملي',
+  quoteAuthorEn: 'Capt. Fahad Al-Huwaimli',
+
+  // 2. The 3 Safety & Training Pillars
+  pillar1TitleAr: 'الأمان أولاً وبلا مساومة',
+  pillar1TitleEn: 'Safety First Without Compromise',
+  pillar1DescAr: 'فحص دقيق لكافة المعدات، تطبيق حرفي لإجراءات السلامة، ومرافقة مستمرة خطوة بخطوة.',
+  pillar1DescEn: 'Rigorous inspection of all scuba gear, strict protocol adherence, and continuous step-by-step guidance.',
+
+  pillar2TitleAr: 'الصبر والراحة النفسية',
+  pillar2TitleEn: 'Patience & Emotional Serenity',
+  pillar2DescAr: 'نعلم أن الماء بيئة جديدة؛ لن ننتقل لأي خطوة إلا بعد أن تشعر بالاسترخاء والمتعة التامة.',
+  pillar2DescEn: 'Water is a new environment; we never advance to any new step until you feel fully relaxed and confident.',
+
+  pillar3TitleAr: 'إتقان الطفو وحماية البيئة',
+  pillar3TitleEn: 'Mastering Buoyancy & Reef Conservation',
+  pillar3DescAr: 'تركيز عميق على التحكم بالطفو لتحقيق تجربة انعدام الجاذبية وحماية الشِعاب المرجانية الهشة.',
+  pillar3DescEn: 'Deep focus on peak buoyancy control for weightlessness and protecting fragile Red Sea coral reefs.',
+
+  // 3. Contact Section Texts
+  contactKickerAr: 'تواصل مباشر واستشارة مجانية',
+  contactKickerEn: 'Direct Contact & Free Consultation',
+  contactTitleAr: 'هل أنت جاهز لخوض أول غطسة واستكشاف الأعماق؟',
+  contactTitleEn: 'Ready for Your First Dive & Red Sea Exploration?',
+  contactDescAr: 'يسعدني جداً الإجابة على كافة تساؤلاتك ومساعدتك في اختيار الدورة الأنسب لك وتقديم استشارة مجانية حول جدول التدريب والمعدات بجدة.',
+  contactDescEn: 'Delighted to answer all your inquiries, help select the right PADI course, and provide free guidance on schedule and gear in Jeddah.',
+  regionsTextAr: 'جدة فقط (شرم أبحر وشواطئ جدة البحرية)',
+  regionsTextEn: 'Jeddah only (Sharm Obhur & Marine Coastal Sites)',
+  certAgencyTextAr: 'شهادات PADI معتمدة دولياً',
+  certAgencyTextEn: 'Internationally Accredited PADI Licenses',
+
+  // 4. Booking CTA Card
+  contactCardTitleAr: 'ابدأ رحلتك اليوم بجدة',
+  contactCardTitleEn: 'Begin Your Journey Today in Jeddah',
+  contactCardDescAr: 'املأ نموذج الحجز وسيقوم الكابتن بالتواصل معك لتحديد الجدول الملائم لك وإرسال المواد الدراسية.',
+  contactCardDescEn: 'Fill out the booking form and the Captain will reach out directly to set your schedule and send study materials.',
+  contactCardBtnAr: 'احجز موعد أو استشر الكابتن مجاناً',
+  contactCardBtnEn: 'Book Appointment or Consult Free',
+  availableDailyAr: 'متاح يومياً للرد على استفسارات الغواصين بجدة',
+  availableDailyEn: 'Available daily to support divers in Jeddah',
+
+  // 5. Disclaimer & Policies Modal Text
+  footerDisclaimerTitleAr: 'إخلاء مسؤولية ومعايير السلامة',
+  footerDisclaimerTitleEn: 'Safety Regulations & Liability Disclaimer',
+  footerDisclaimerTextAr: 'رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها. الحاسبات المعروضة هنا هي أدوات مساعدة وتثقيفية ولا تغني عن حاسوب الغوص المعتمد وخطة الغوص الرسمية.',
+  footerDisclaimerTextEn: 'Scuba diving requires official accredited training and international certifications. Digital calculators here are educational guides and do not replace certified dive computers and dive plans.',
+  footerPolicyBtnAr: 'عرض اللائحة الرسمية للاسترداد والتدريب والسلامة ❯',
+  footerPolicyBtnEn: 'View Official Refund & Safety Regulations ❯',
+};
+
 export const DEFAULT_CONFIG: SiteConfig = {
   brand: {
     centerNameAr: 'رواء الفن',
@@ -407,7 +462,8 @@ export const DEFAULT_CONFIG: SiteConfig = {
   visibleSections: DEFAULT_VISIBLE_SECTIONS,
   socialLinks: DEFAULT_SOCIAL_LINKS,
   locationConfig: DEFAULT_LOCATION_CONFIG,
-  trustBadges: DEFAULT_TRUST_BADGES
+  trustBadges: DEFAULT_TRUST_BADGES,
+  designContent: DEFAULT_DESIGN_CONTENT
 };
 
 export const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [

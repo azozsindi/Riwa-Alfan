@@ -518,6 +518,29 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   3. **Build & Lint**:
      - Verified 0 TypeScript errors and compiled bundle `dist/assets/index-Bvshtnu6.js`.
 
+---
+
+## Step 30: Dedicated "التصميم" Tab in Admin Dashboard
+- **User Request**:
+  - Add a dedicated section named **"التصميم"** in the control panel to easily customize:
+    1. Quote and philosophy banner (“البحر لا يُعلّمنا فقط كيف نتنفس تحت الماء...”).
+    2. The 3 core safety & coaching pillars (الأمان أولاً وبلا مساومة، الصبر والراحة النفسية، إتقان الطفو وحماية البيئة).
+    3. Direct contact & free consultation section (تواصل مباشر واستشارة مجانية، هل أنت جاهز لخوض أول غطسة...).
+    4. Booking CTA card (ابدأ رحلتك اليوم بجدة، املأ نموذج الحجز...).
+    5. Footer legal disclaimer and official policies (إخلاء مسؤولية ومعايير السلامة، عرض اللائحة الرسمية...).
+- **Implementations**:
+  1. **Data Model & Synchronization (`admin.ts`, `defaultConfig.ts`, `SiteConfigContext.tsx`)**:
+     - Added `DesignContentConfig` with all requested texts and defaults.
+     - Added `updateDesignContent` synced to Firestore and local storage.
+  2. **Dedicated Component (`DesignTab.tsx`)**:
+     - Built comprehensive live-preview and editing interface organized into 5 intuitive sections.
+  3. **Dashboard Integration (`AdminDashboard.tsx`)**:
+     - Added prominent sidebar tab: `التصميم والنصوص 🎨` with golden accent badge.
+  4. **Frontend Real-time Connection (`InstructorSection.tsx`, `ContactSection.tsx`, `Footer.tsx`)**:
+     - Wired up all public site components to reflect text modifications immediately.
+  5. **Production Build**:
+     - Verified clean compilation with zero warnings (`dist/assets/index-DChcOKwv.js`).
+
 
 
 

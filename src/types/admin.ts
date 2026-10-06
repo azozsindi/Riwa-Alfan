@@ -233,6 +233,60 @@ export interface TrustBadgesConfig {
   countryTextEn?: string;
 }
 
+export interface DesignContentConfig {
+  // 1. Quote & Philosophy
+  quoteTextAr?: string;
+  quoteTextEn?: string;
+  quoteAuthorAr?: string;
+  quoteAuthorEn?: string;
+
+  // 2. The 3 Safety & Training Pillars
+  pillar1TitleAr?: string;
+  pillar1TitleEn?: string;
+  pillar1DescAr?: string;
+  pillar1DescEn?: string;
+
+  pillar2TitleAr?: string;
+  pillar2TitleEn?: string;
+  pillar2DescAr?: string;
+  pillar2DescEn?: string;
+
+  pillar3TitleAr?: string;
+  pillar3TitleEn?: string;
+  pillar3DescAr?: string;
+  pillar3DescEn?: string;
+
+  // 3. Contact Section Texts
+  contactKickerAr?: string;
+  contactKickerEn?: string;
+  contactTitleAr?: string;
+  contactTitleEn?: string;
+  contactDescAr?: string;
+  contactDescEn?: string;
+  regionsTextAr?: string;
+  regionsTextEn?: string;
+  certAgencyTextAr?: string;
+  certAgencyTextEn?: string;
+
+  // 4. Booking CTA Card
+  contactCardTitleAr?: string;
+  contactCardTitleEn?: string;
+  contactCardDescAr?: string;
+  contactCardDescEn?: string;
+  contactCardBtnAr?: string;
+  contactCardBtnEn?: string;
+  availableDailyAr?: string;
+  availableDailyEn?: string;
+
+  // 5. Disclaimer & Policies Modal Text
+  footerDisclaimerTitleAr?: string;
+  footerDisclaimerTitleEn?: string;
+  footerDisclaimerTextAr?: string;
+  footerDisclaimerTextEn?: string;
+  footerPolicyBtnAr?: string;
+  footerPolicyBtnEn?: string;
+}
+
 export type BrandConfig = CenterBrandConfig;
 export type Booking = BookingRecord;
 export interface SiteConfig {
@@ -252,4 +306,5 @@ export interface SiteConfig {
   socialLinks?: SocialLinksConfig;
   locationConfig?: LocationConfig;
   trustBadges?: TrustBadgesConfig;
+  designContent?: DesignContentConfig;
 }

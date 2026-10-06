@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, Tag, Building2, Compass, Waves, Inbox, Settings, 
-  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe, Eye, Share2, Shield, AlertTriangle
+  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe, Eye, Share2, Shield, AlertTriangle, Palette
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
@@ -12,6 +12,7 @@ import { SectionsVisibilityTab } from './tabs/SectionsVisibilityTab';
 import { SocialAndTrustTab } from './tabs/SocialAndTrustTab';
 import { AdminsTab } from './tabs/AdminsTab';
 import { BrandTab } from './tabs/BrandTab';
+import { DesignTab } from './tabs/DesignTab';
 import { DomainTab } from './tabs/DomainTab';
 import { CaptainsTab } from './tabs/CaptainsTab';
 import { PaymentTab } from './tabs/PaymentTab';
@@ -22,8 +23,9 @@ import { FaqsTab } from './tabs/FaqsTab';
 import { TestimonialsTab } from './tabs/TestimonialsTab';
 import { BookingsTab } from './tabs/BookingsTab';
 import { SettingsTab } from './tabs/SettingsTab';
+import { DEFAULT_LOCATION_CONFIG, DEFAULT_TRUST_BADGES } from '../../data/defaultConfig';
 
-type AdminTab = 'offers' | 'sections' | 'brand' | 'social' | 'admins' | 'domain' | 'captains' | 'instructor' | 'courses' | 'payment' | 'sites' | 'faqs' | 'testimonials' | 'bookings' | 'settings';
+type AdminTab = 'offers' | 'sections' | 'brand' | 'design' | 'social' | 'admins' | 'domain' | 'captains' | 'instructor' | 'courses' | 'payment' | 'sites' | 'faqs' | 'testimonials' | 'bookings' | 'settings';
 
 interface AdminDashboardProps {
   isOpen: boolean;
@@ -66,7 +68,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateSocialLinks,
     updateLocationConfig,
     updateTrustBadges,
-    toggleUnderConstruction
+    updateUnderConstruction,
+    toggleUnderConstruction,
+    updateDesignContent
   } = useSiteConfig();
   const { user, logout } = useAuth();
 
@@ -237,6 +241,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             <Building2 className="w-4 h-4 shrink-0" />
             <span>{isRtl ? 'الهوية والشعار ومقر جدة' : 'Brand & Logo'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('design')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'design' 
+                ? 'gold-gradient-btn text-slate-950 font-black shadow-lg shadow-[#C59B5F]/20' 
+                : 'text-[#E0BA84] hover:text-white bg-slate-900/60 hover:bg-slate-800/80 border border-[#C59B5F]/30'
+            }`}
+          >
+            <Palette className="w-4 h-4 shrink-0 text-[#C59B5F]" />
+            <span>{isRtl ? 'التصميم 🎨' : 'Design 🎨'}</span>
+            <span className="w-2 h-2 rounded-full bg-[#C59B5F] ms-auto shrink-0 shadow-sm" />
           </button>
 
           <button
@@ -434,6 +451,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onUpdateHero={updateHero}
               showToast={showToast}
               onNavigateToTrustTab={() => setActiveTab('social')}
+            />
+          )}
+
+          {activeTab === 'design' && (
+            <DesignTab
+              initialDesign={config.designContent}
+              initialBrand={config.brand}
+              initialHero={config.hero}
+              initialAnnouncement={config.announcement}
+              initialUnderConstruction={config.underConstruction}
+              initialLocation={config.locationConfig || DEFAULT_LOCATION_CONFIG}
+              initialTrust={config.trustBadges || DEFAULT_TRUST_BADGES}
+              initialSocial={config.socialLinks}
+              onUpdateDesign={updateDesignContent}
+              onUpdateBrand={updateBrand}
+              onUpdateHero={updateHero}
+              onUpdateAnnouncement={updateAnnouncement}
+              onUpdateUnderConstruction={updateUnderConstruction}
+              onUpdateLocation={updateLocationConfig}
+              onUpdateTrust={updateTrustBadges}
+              onUpdateSocial={updateSocialLinks}
+              showToast={showToast}
             />
           )}
 

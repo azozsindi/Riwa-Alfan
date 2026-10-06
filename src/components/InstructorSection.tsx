@@ -40,6 +40,23 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
     ? (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn)!
     : [inst.padiMemberNumber, inst.owsiNumber, inst.danNumber, inst.efrNumber].filter(Boolean);
 
+  const d = config.designContent;
+  const activeQuote = language === 'ar' 
+    ? (d?.quoteTextAr || inst.quoteAr)
+    : (d?.quoteTextEn || inst.quoteEn);
+  const activeQuoteAuthor = language === 'ar'
+    ? (d?.quoteAuthorAr || name)
+    : (d?.quoteAuthorEn || name);
+
+  const pillar1Title = language === 'ar' ? (d?.pillar1TitleAr || t.pillar1Title) : (d?.pillar1TitleEn || t.pillar1Title);
+  const pillar1Desc = language === 'ar' ? (d?.pillar1DescAr || t.pillar1Desc) : (d?.pillar1DescEn || t.pillar1Desc);
+
+  const pillar2Title = language === 'ar' ? (d?.pillar2TitleAr || t.pillar2Title) : (d?.pillar2TitleEn || t.pillar2Title);
+  const pillar2Desc = language === 'ar' ? (d?.pillar2DescAr || t.pillar2Desc) : (d?.pillar2DescEn || t.pillar2Desc);
+
+  const pillar3Title = language === 'ar' ? (d?.pillar3TitleAr || t.pillar3Title) : (d?.pillar3TitleEn || t.pillar3Title);
+  const pillar3Desc = language === 'ar' ? (d?.pillar3DescAr || t.pillar3Desc) : (d?.pillar3DescEn || t.pillar3Desc);
+
   const femaleInst = config.femaleInstructor || DEFAULT_FEMALE_INSTRUCTOR;
   const femaleName = language === 'ar' ? femaleInst.nameAr : femaleInst.nameEn;
   const femaleTitle = language === 'ar' ? femaleInst.titleAr : femaleInst.titleEn;
@@ -247,10 +264,10 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           <div className={`p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#162E52]/40 via-slate-900 to-[#0C172B] border border-[#C59B5F]/35 space-y-5 shadow-xl ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
             <p className="text-sm sm:text-base text-slate-200 italic leading-relaxed">
-              &ldquo;{quote}&rdquo;
+              &ldquo;{activeQuote}&rdquo;
             </p>
             <span className="text-xs font-bold text-[#E0BA84] shrink-0 font-brand-arabic">
-              — {name}
+              — {activeQuoteAuthor}
             </span>
           </div>
 
@@ -259,24 +276,24 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
               <Shield className="w-4 h-4 text-[#C59B5F] shrink-0" />
               <div>
-                <strong className="text-xs font-bold text-white block">{t.pillar1Title}</strong>
-                <span className="text-[11px] text-slate-400">{t.pillar1Desc}</span>
+                <strong className="text-xs font-bold text-white block">{pillar1Title}</strong>
+                <span className="text-[11px] text-slate-400">{pillar1Desc}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
               <HeartHandshake className="w-4 h-4 text-blue-400 shrink-0" />
               <div>
-                <strong className="text-xs font-bold text-white block">{t.pillar2Title}</strong>
-                <span className="text-[11px] text-slate-400">{t.pillar2Desc}</span>
+                <strong className="text-xs font-bold text-white block">{pillar2Title}</strong>
+                <span className="text-[11px] text-slate-400">{pillar2Desc}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
               <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
               <div>
-                <strong className="text-xs font-bold text-white block">{t.pillar3Title}</strong>
-                <span className="text-[11px] text-slate-400">{t.pillar3Desc}</span>
+                <strong className="text-xs font-bold text-white block">{pillar3Title}</strong>
+                <span className="text-[11px] text-slate-400">{pillar3Desc}</span>
               </div>
             </div>
           </div>

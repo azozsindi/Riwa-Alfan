@@ -13,7 +13,8 @@ import {
   SocialLinksConfig,
   LocationConfig,
   TrustBadgesConfig,
-  UnderConstructionConfig
+  UnderConstructionConfig,
+  DesignContentConfig
 } from '../types/admin';
 import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 import { 
@@ -24,6 +25,7 @@ import {
   DEFAULT_LOCATION_CONFIG,
   DEFAULT_TRUST_BADGES,
   DEFAULT_UNDER_CONSTRUCTION,
+  DEFAULT_DESIGN_CONTENT,
   INITIAL_DEMO_BOOKINGS, 
   CONFIG_STORAGE_KEY, 
   BOOKINGS_STORAGE_KEY 
@@ -78,6 +80,7 @@ interface SiteConfigContextType {
   updateTrustBadges: (partial: Partial<TrustBadgesConfig>) => void;
   updateUnderConstruction: (partial: Partial<UnderConstructionConfig>) => void;
   toggleUnderConstruction: () => void;
+  updateDesignContent: (partial: Partial<DesignContentConfig>) => void;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
@@ -178,7 +181,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
         diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
         faqs: Array.isArray(base.faqs) && base.faqs.length > 0 ? base.faqs : DEFAULT_CONFIG.faqs,
-        testimonials: Array.isArray(base.testimonials) && base.testimonials.length > 0 ? base.testimonials : DEFAULT_CONFIG.testimonials
+        testimonials: Array.isArray(base.testimonials) && base.testimonials.length > 0 ? base.testimonials : DEFAULT_CONFIG.testimonials,
+        designContent: {
+          ...DEFAULT_DESIGN_CONTENT,
+          ...(base.designContent || {})
+        }
       };
     } catch (e) {
       console.error('Failed to load site config from storage:', e);
@@ -282,6 +289,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             ...prev.brand,
             ...(remoteData.brand || {}),
             email: 'Riwaalfan@gmail.com'
+          },
+          designContent: {
+            ...DEFAULT_DESIGN_CONTENT,
+            ...(prev.designContent || {}),
+            ...(remoteData.designContent || {})
           }
         };
       });
@@ -506,6 +518,18 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   };
 
+  const updateDesignContent = (partial: Partial<DesignContentConfig>) => {
+    setConfig(prev => {
+      const updatedDesign = { ...(prev.designContent || DEFAULT_DESIGN_CONTENT), ...partial };
+      const updatedConfig = {
+        ...prev,
+        designContent: updatedDesign
+      };
+      saveSiteConfigToFirestore(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
@@ -632,7 +656,8 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       updateLocationConfig,
       updateTrustBadges,
       updateUnderConstruction,
-      toggleUnderConstruction
+      toggleUnderConstruction,
+      updateDesignContent
     }}>
       {children}
     </SiteConfigContext.Provider>
