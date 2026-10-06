@@ -97,8 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdminUser(authorized);
         if (!authorized) {
           const attemptedEmail = currentUser.email || 'مجهول';
+          await firebaseSignOut(auth);
+          setUser(null);
+          setIsAdminUser(false);
           setAuthError(
-            `عذراً! الحساب (${attemptedEmail}) غير مسجل كمدير مصرح له في رواء الفن.`
+            `عذراً! الحساب (${attemptedEmail}) غير مصرح له كمدير في رواء الفن.`
           );
           setAuthErrorCode('auth/unauthorized-user');
         } else {

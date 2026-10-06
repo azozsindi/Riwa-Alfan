@@ -381,6 +381,31 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   5. **Production Build**:
      - Ran `npm run build` producing clean bundle `dist/assets/index-BpO3xkLl.js` verified free of any PIN strings.
 
+---
+
+## Step 25: Comprehensive Zero-Trust Security Audit & Cloud Rules Hardening
+- **User Request**:
+  - Perform final security audit on Riwa Al Fan administration system.
+  - Verify that no account other than `azozsindi23@gmail.com` can access the admin panel or backend data.
+  - Audit Firestore Security Rules to prevent regular users from elevating privileges, creating/modifying `/admins`, or bypassing authorization.
+  - Verify that security is enforced by Cloud Rules, not solely frontend JavaScript or hidden UI.
+  - Validate Google Sign-In and Email/Password restrictions and auto-signout.
+- **Implementations**:
+  1. **Firestore Security Rules (`firestore.rules`)**:
+     - Deployed hardened enterprise rules via `DeployRules` RPC to cloud project `tenacious-circuit-f07pf`.
+     - `isSuperAdmin()` strictly requires Google-verified email: `azozsindi23@gmail.com` (case-insensitive regex) and `request.auth.token.email_verified == true`.
+     - `isAdmin()` verifies `isSuperAdmin()`, custom claims, or verified role in `/admins/{uid}`.
+     - Protected `/admins/{adminId}`: Only `isSuperAdmin()` can create/update/delete admin documents. Regular users get rejected immediately.
+     - Root superadmin document cannot be deleted.
+     - Protected `/bookings/{bookingId}`: Only `isAdmin()` can read, update, or delete customer bookings.
+     - Protected `/settings/{settingId}`: Only `isAdmin()` can modify website settings.
+  2. **Auth Context & Session Hardening (`AuthContext.tsx`)**:
+     - In `onAuthStateChanged`, unauthorized accounts are immediately expelled via `await firebaseSignOut(auth)`, preventing any stale or token retention.
+     - Clear diagnostic reporting with Firebase error codes.
+  3. **Build & Lint**:
+     - Built fresh production bundle `dist/assets/index-D9IhOiTN.js` with 0 warnings/errors.
+
+
 
 
 

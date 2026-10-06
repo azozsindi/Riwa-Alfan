@@ -24,15 +24,27 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Secure Enterprise Admin Gate:
-    // 1. Bootstrapped verified superadmin email (case-insensitive: AzozSindi23@gmail.com)
-    // 2. Firebase Custom Claims (request.auth.token.admin == true)
-    // 3. Document exists in /admins collection for user UID
+    // Root Super Admin Gate:
+    // Strictly requires Google-verified email: azozsindi23@gmail.com (case-insensitive)
+    function isSuperAdmin() {
+      return isSignedIn() 
+        && request.auth.token.email != null 
+        && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$')
+        && request.auth.token.email_verified == true;
+    }
+
+    // General Admin Gate:
+    // 1. Root Super Admin (azozsindi23@gmail.com)
+    // 2. Firebase Custom Claims (admin == true)
+    // 3. Explicit whitelist document in /admins/{uid} with role admin or superadmin
     function isAdmin() {
       return isSignedIn() && (
-        (request.auth.token.email != null && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$')) ||
+        isSuperAdmin() ||
         (request.auth.token.admin == true) ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        (
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['admin', 'superadmin']
+        )
       );
     }
 
@@ -74,12 +86,17 @@ service cloud.firestore {
       allow write: if isValidId(settingId) && isAdmin();
     }
 
-    // 3. Admin whitelist:
+    // 3. Admin whitelist (/admins collection):
     // - Signed-in users can check their own admin status.
-    // - Superadmin can bootstrap their own UID record, and verified admins can manage admin records.
+    // - ONLY the Root Super Admin (azozsindi23@gmail.com) can add or update admin records.
+    // - Normal users or malicious actors CANNOT grant themselves or others admin rights.
+    // - The root superadmin record cannot be deleted.
     match /admins/{adminId} {
       allow read: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      allow write: if isValidId(adminId) && (isAdmin() || (isSignedIn() && request.auth.uid == adminId && request.auth.token.email != null && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$'))) && isValidAdminRecord(incoming());
+      allow write: if isValidId(adminId) && isSuperAdmin() && isValidAdminRecord(incoming()) && incoming().uid == adminId;
+      allow delete: if isValidId(adminId) && isSuperAdmin() && (
+        resource.data.email == null || !resource.data.email.matches('(?i)^azozsindi23@gmail\\.com$')
+      );
     }
   }
 }
