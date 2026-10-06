@@ -40,6 +40,7 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
   let siteCustomImage: string | undefined;
   let siteTitle: string | undefined;
   let siteSubtext: string | undefined;
+  let siteLogoBg: 'white' | 'dark' | 'transparent' = 'white';
 
   try {
     const siteConfig = useSiteConfig();
@@ -50,6 +51,9 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
       }
       siteTitle = b.logoText || (currentLang === 'ar' ? b.centerNameAr : b.centerNameEn);
       siteSubtext = b.logoSubtext;
+      if (b.logoBg) {
+        siteLogoBg = b.logoBg;
+      }
     }
   } catch {
     // If rendered outside SiteConfigProvider
@@ -68,8 +72,9 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
 
   // If a custom image logo is configured, display it globally with pristine aspect ratio
   if (activeImageUrl) {
+    const isWhiteBg = siteLogoBg !== 'dark' && siteLogoBg !== 'transparent';
     return (
-      <div className={`inline-flex items-center justify-center select-none ${heightClasses[size]} ${className}`}>
+      <div className={`inline-flex items-center justify-center select-none ${isWhiteBg ? 'bg-white rounded-xl p-1 shadow-sm' : ''} ${heightClasses[size]} ${className}`}>
         <img 
           src={activeImageUrl} 
           alt={activeTitle || "رواء الفن - Riwa Alfan"} 

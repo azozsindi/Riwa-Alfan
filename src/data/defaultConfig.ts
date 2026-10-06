@@ -296,6 +296,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     owsiNumber: 'PADI OWSI #482910',
     logoType: 'vector',
     customLogoUrl: '',
+    logoBg: 'white',
     logoText: 'RIWA ALFAN',
     logoSubtext: 'رواء الفن',
     phone: '+966530549675',

@@ -99,10 +99,14 @@ export const AdminPage: React.FC = () => {
           
           {/* Header branding */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="p-2 rounded-2xl bg-slate-950 border border-slate-800 mb-4 shadow-inner">
+            <div className={`p-2.5 rounded-2xl mb-4 transition-all flex items-center justify-center ${
+              config.brand.logoBg === 'dark'
+                ? 'bg-slate-950 border border-slate-800 shadow-inner'
+                : 'bg-white border border-slate-200/90 shadow-md'
+            }`}>
               <FahadsLogo 
                 size="md" 
-                theme="dark" 
+                theme={config.brand.logoBg === 'dark' ? 'dark' : 'light'} 
                 customImageUrl={config.brand.logoType === 'custom-image' ? config.brand.customLogoUrl : undefined}
                 customTitle={config.brand.logoText}
                 customSubtext={config.brand.logoSubtext}

@@ -9,6 +9,7 @@ export interface CenterBrandConfig {
   bioEn?: string;
   logoType: 'vector' | 'custom-image';
   customLogoUrl?: string;
+  logoBg?: 'white' | 'dark' | 'transparent';
   logoText: string;
   logoSubtext: string;
   phone: string;

@@ -159,6 +159,16 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         ...DEFAULT_CONFIG,
         ...base,
         brand: { ...DEFAULT_CONFIG.brand, ...(base.brand || recoveredBrand || {}), email: 'Riwaalfan@gmail.com' },
+        trustBadges: {
+          ...DEFAULT_TRUST_BADGES,
+          ...(base.trustBadges || {}),
+          partnerLogos: (base.trustBadges?.partnerLogos && base.trustBadges.partnerLogos.length > 0)
+            ? base.trustBadges.partnerLogos
+            : DEFAULT_TRUST_BADGES.partnerLogos,
+          certificates: (base.trustBadges?.certificates && base.trustBadges.certificates.length > 0)
+            ? base.trustBadges.certificates
+            : DEFAULT_TRUST_BADGES.certificates
+        },
         hero: { ...DEFAULT_CONFIG.hero, ...(base.hero || {}) },
         instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}), photoUrl: '' },
         femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
@@ -253,6 +263,21 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           ...prev,
           ...remoteData,
           announcement: updatedAnnouncement,
+          trustBadges: {
+            ...DEFAULT_TRUST_BADGES,
+            ...(prev.trustBadges || {}),
+            ...(remoteData.trustBadges || {}),
+            partnerLogos: (remoteData.trustBadges?.partnerLogos && remoteData.trustBadges.partnerLogos.length > 0)
+              ? remoteData.trustBadges.partnerLogos
+              : (prev.trustBadges?.partnerLogos && prev.trustBadges.partnerLogos.length > 0)
+                ? prev.trustBadges.partnerLogos
+                : DEFAULT_TRUST_BADGES.partnerLogos,
+            certificates: (remoteData.trustBadges?.certificates && remoteData.trustBadges.certificates.length > 0)
+              ? remoteData.trustBadges.certificates
+              : (prev.trustBadges?.certificates && prev.trustBadges.certificates.length > 0)
+                ? prev.trustBadges.certificates
+                : DEFAULT_TRUST_BADGES.certificates
+          },
           brand: {
             ...prev.brand,
             ...(remoteData.brand || {}),

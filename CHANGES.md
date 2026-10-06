@@ -482,6 +482,27 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   5. **Production Build**:
      - Built fresh production bundle `dist/assets/index-Cvlu3kgE.js`.
 
+---
+
+## Step 28: Crisp White Logo Background for Dark Logos & Direct Accreditation Guidance
+- **User Request**:
+  - "خلفية اللوجو خليها ابيض انا بضيف لوجو غامق" (Make the logo background white because I will add a dark logo).
+  - Clarify and simplify how to edit partner accreditations (منصة الأعمال السعودية، الاتحاد السعودي للرياضات البحرية والغوص، منصة العمل الحر، منظمة PADI الدولية) and legal footer identifiers.
+- **Implementations**:
+  1. **Crisp White Logo Canvas Everywhere**:
+     - `Header.tsx`: Changed logo container wrapper to crisp white `bg-white rounded-xl border border-slate-200/90 shadow-md` with light theme contrast.
+     - `Footer.tsx`: Changed footer brand logo wrapper to `bg-white rounded-xl border border-slate-200/90 shadow-md`.
+     - `AdminDashboard.tsx`: Set header logo container to pure white `bg-white border-slate-200/90 shadow-md`.
+     - `AdminPage.tsx`: Set admin login card emblem container to `bg-white border-slate-200/90 shadow-md`.
+     - `BrandTab.tsx`: Updated live preview box to pure white background and added dedicated Logo Background setting (`logoBg: 'white' | 'dark'`).
+     - `FahadsLogo.tsx`: Wrapped custom uploaded images with white background support whenever active so any dark transparent PNG/SVG logo displays with maximum contrast.
+  2. **Accreditation Tab Renaming & Direct Bridge**:
+     - Renamed Admin Dashboard tab to `الاعتمادات ومنصات التوثيق والفوتر 🏛️` for immediate visibility.
+     - Added prominent direct shortcut card in `BrandTab.tsx` linking to the Accreditations tab.
+     - Ensured all 4 default platforms (منصة الأعمال السعودية، الاتحاد السعودي للرياضات البحرية والغوص، منصة العمل الحر FL-2918401، منظمة PADI الدولية) are fully loaded and editable with custom logos, links, and badge titles.
+  3. **Build & Lint**:
+     - Verified zero TypeScript errors and built clean production bundle `dist/assets/index-D4DsE3_E.js`.
+
 
 
 

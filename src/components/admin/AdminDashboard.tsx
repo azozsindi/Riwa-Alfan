@@ -101,8 +101,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Top Header */}
       <div className="px-4 sm:px-6 py-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between shrink-0 sticky top-0 z-30 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
-            <FahadsLogo size="sm" theme="dark" showWordmark={false} />
+          <div className={`p-1.5 sm:p-2 rounded-xl transition-all flex items-center justify-center shrink-0 ${
+            config.brand.logoBg === 'dark'
+              ? 'bg-slate-900 border border-slate-800'
+              : 'bg-white border border-slate-200/90 shadow-md'
+          }`}>
+            <FahadsLogo size="sm" theme={config.brand.logoBg === 'dark' ? 'dark' : 'light'} showWordmark={false} />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -243,8 +247,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <Share2 className="w-4 h-4 shrink-0" />
-            <span>{isRtl ? 'التواصل والموقع والتوثيق 🌐' : 'Social, Location & Trust'}</span>
+            <Building2 className="w-4 h-4 shrink-0 text-[#C59B5F]" />
+            <span>{isRtl ? 'الاعتمادات ومنصات التوثيق والفوتر 🏛️' : 'Accreditations & Footer 🏛️'}</span>
           </button>
 
           <button
@@ -429,6 +433,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onUpdateBrand={updateBrand}
               onUpdateHero={updateHero}
               showToast={showToast}
+              onNavigateToTrustTab={() => setActiveTab('social')}
             />
           )}
 

@@ -11,6 +11,7 @@ interface BrandTabProps {
   onUpdateBrand: (brand: BrandConfig | Partial<BrandConfig>) => void;
   onUpdateHero: (hero: HeroConfig | Partial<HeroConfig>) => void;
   showToast: (msg?: string) => void;
+  onNavigateToTrustTab?: () => void;
 }
 
 export const BrandTab: React.FC<BrandTabProps> = ({
@@ -19,6 +20,7 @@ export const BrandTab: React.FC<BrandTabProps> = ({
   onUpdateBrand,
   onUpdateHero,
   showToast,
+  onNavigateToTrustTab,
 }) => {
   const { isRtl } = useLanguage();
   const [brandForm, setBrandForm] = useState<BrandConfig>(initialBrand);
@@ -212,20 +214,31 @@ export const BrandTab: React.FC<BrandTabProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Live Preview Box */}
           <div className="md:col-span-5 p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-            <span className="text-[11px] text-slate-400 font-mono">
-              {isRtl ? 'معاينة الشعار في الموقع' : 'Live Logo Preview'}
-            </span>
-            <div className="w-full py-4 px-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center min-h-[90px]">
+            <div className="flex items-center justify-between w-full px-1">
+              <span className="text-[11px] text-slate-400 font-mono">
+                {isRtl ? 'معاينة الشعار في الموقع' : 'Live Logo Preview'}
+              </span>
+              <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                {isRtl ? 'خلفية بيضاء مفعلة' : 'White Background'}
+              </span>
+            </div>
+            
+            <div className={`w-full py-4 px-3 rounded-xl border flex items-center justify-center min-h-[105px] transition-all ${
+              brandForm.logoBg === 'dark' 
+                ? 'bg-slate-950 border-slate-800' 
+                : 'bg-white border-slate-200 shadow-md'
+            }`}>
               {brandForm.logoType === 'custom-image' && brandForm.customLogoUrl ? (
                 <img 
                   src={brandForm.customLogoUrl} 
                   alt="Custom Logo" 
-                  className="max-h-16 max-w-[200px] object-contain"
+                  className="max-h-20 max-w-[210px] object-contain drop-shadow-sm"
                 />
               ) : (
-                <CustomFahadsLogo size="md" theme="dark" />
+                <CustomFahadsLogo size="md" theme={brandForm.logoBg === 'dark' ? 'dark' : 'light'} />
               )}
             </div>
+
             {brandForm.logoType === 'custom-image' && brandForm.customLogoUrl && (
               <button
                 type="button"
@@ -296,9 +309,90 @@ export const BrandTab: React.FC<BrandTabProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Option 3: Logo Background Color setting */}
+            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-200 block">
+                  {isRtl ? '3. لون خلفية الشعار (Logo Background):' : '3. Logo Background Color:'}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                  {(brandForm.logoBg ?? 'white') === 'white' ? (isRtl ? 'أبيض ناصع مفعل ⚪' : 'White Active') : (isRtl ? 'داكن مفعل ⚫' : 'Dark Active')}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                {isRtl 
+                  ? 'تم تعيين الخلفية إلى الأبيض لضمان وضوح وبروز أي شعار غامق في الهيدر، الفوتر، ولوحة التحكم.' 
+                  : 'White background is active by default so dark logos pop with sharp contrast.'}
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = { ...brandForm, logoBg: 'white' as const };
+                    setBrandForm(updated);
+                    onUpdateBrand({ logoBg: 'white' });
+                    showToast(isRtl ? 'تم تثبيت خلفية الشعار على الأبيض الناصع ⚪' : 'Logo background set to White');
+                  }}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                    (brandForm.logoBg ?? 'white') === 'white'
+                      ? 'bg-white text-slate-950 border-white shadow-md'
+                      : 'bg-slate-950 text-slate-400 border-slate-700 hover:text-white'
+                  }`}
+                >
+                  <span className="w-3.5 h-3.5 rounded-full bg-white border border-slate-400 shadow-sm shrink-0" />
+                  <span>{isRtl ? 'خلفية بيضاء (للشعار الغامق)' : 'White Background'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = { ...brandForm, logoBg: 'dark' as const };
+                    setBrandForm(updated);
+                    onUpdateBrand({ logoBg: 'dark' });
+                    showToast(isRtl ? 'تم ضبط خلفية الشعار على الداكنة ⚫' : 'Logo background set to Dark');
+                  }}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                    brandForm.logoBg === 'dark'
+                      ? 'bg-slate-800 text-white border-blue-500 shadow-md'
+                      : 'bg-slate-950 text-slate-400 border-slate-700 hover:text-white'
+                  }`}
+                >
+                  <span className="w-3.5 h-3.5 rounded-full bg-slate-950 border border-slate-600 shrink-0" />
+                  <span>{isRtl ? 'خلفية داكنة / شفافة' : 'Dark / Transparent'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Quick Link to Accreditations & Footer Tab */}
+      {onNavigateToTrustTab && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-950 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-300 flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5 text-[#C59B5F]" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-white block">
+                {isRtl ? 'تعديل منصات التوثيق الشريكة، الرخص الرسمية، والفوتر 🏛️' : 'Partner Platforms, Licenses & Footer'}
+              </span>
+              <span className="text-[11px] text-slate-400 block mt-0.5">
+                {isRtl 
+                  ? 'منصة الأعمال، الاتحاد السعودي، منصة العمل الحر (FL-2918401)، PADI OWSI #482910، ونصوص التذييل' 
+                  : 'Saudi Business, Saudi Federation, Freelance, PADI certifications & copyright text'}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onNavigateToTrustTab}
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shrink-0 transition-colors cursor-pointer shadow-md flex items-center justify-center gap-1.5"
+          >
+            <span>{isRtl ? 'الانتقال لتبويب التوثيق والفوتر ❯' : 'Go to Accreditations Tab ❯'}</span>
+          </button>
+        </div>
+      )}
 
       {/* Names */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

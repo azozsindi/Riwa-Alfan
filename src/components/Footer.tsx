@@ -78,10 +78,14 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Info with Logo & Legal Identifiers */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3 text-white">
-              <div className="p-1.5 rounded-xl bg-slate-900 border border-[#C59B5F]/30 flex items-center justify-center shrink-0">
+              <div className={`p-1.5 sm:p-2 rounded-xl transition-all flex items-center justify-center shrink-0 ${
+                config.brand.logoBg === 'dark'
+                  ? 'bg-slate-900 border border-[#C59B5F]/30'
+                  : 'bg-white border border-slate-200/90 shadow-md'
+              }`}>
                 <FahadsLogo 
                   size="sm" 
-                  theme="dark" 
+                  theme={config.brand.logoBg === 'dark' ? 'dark' : 'light'} 
                   showWordmark={false}
                 />
               </div>

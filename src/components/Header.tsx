@@ -49,10 +49,14 @@ export const Header: React.FC<HeaderProps> = ({
           title="Riwa Alfan Dive Center"
         >
           {/* Logo Artwork */}
-          <div className="p-1.5 rounded-xl bg-slate-900/90 border border-[#C59B5F]/30 group-hover:border-[#C59B5F]/70 shadow-sm transition-colors flex items-center justify-center shrink-0">
+          <div className={`p-1.5 sm:p-2 rounded-xl transition-all flex items-center justify-center shrink-0 ${
+            config.brand.logoBg === 'dark'
+              ? 'bg-slate-900/90 border border-[#C59B5F]/30 group-hover:border-[#C59B5F]/70 shadow-sm'
+              : 'bg-white border border-slate-200/90 shadow-md group-hover:shadow-lg'
+          }`}>
             <FahadsLogo 
               size="sm" 
-              theme="dark" 
+              theme={config.brand.logoBg === 'dark' ? 'dark' : 'light'} 
               showWordmark={false}
               customImageUrl={config.brand.logoType === 'custom-image' ? config.brand.customLogoUrl : undefined}
               customTitle={config.brand.logoText}
