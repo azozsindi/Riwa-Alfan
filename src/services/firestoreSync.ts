@@ -59,7 +59,7 @@ export const subscribeToSiteConfig = (
     return onSnapshot(configDocRef, (snap) => {
       if (snap.exists()) {
         const remoteData = snap.data() as Partial<SiteConfig>;
-        if (remoteData && remoteData.courses && remoteData.courses.length > 0) {
+        if (remoteData && Object.keys(remoteData).length > 0) {
           onUpdate(remoteData);
         }
       }

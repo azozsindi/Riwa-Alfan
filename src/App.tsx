@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { RouterProvider, useRouter } from './context/RouterContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { SiteConfigProvider, useSiteConfig } from './context/SiteConfigContext';
+import { UnderConstructionBanner } from './components/UnderConstructionBanner';
 import { AnnouncementBar } from './components/AnnouncementBar';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -85,6 +86,9 @@ function AppContent() {
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white ${
       isRtl ? 'dir-rtl' : 'dir-ltr'
     }`}>
+      {/* Top Under Construction Banner (Highest Priority Banner) */}
+      <UnderConstructionBanner />
+
       {/* Top Promotional Announcement Bar */}
       {sections.announcement && (
         <AnnouncementBar onClaimOffer={(courseId) => handleOpenBooking(courseId)} />

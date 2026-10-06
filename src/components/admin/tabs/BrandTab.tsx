@@ -50,12 +50,12 @@ export const BrandTab: React.FC<BrandTabProps> = ({
       <div className="pb-4 border-b border-slate-800">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
           <Building2 className="w-5 h-5 text-blue-400" />
-          {isRtl ? 'هوية مركز الغوص، الشعار، ومعلومات الاتصال' : 'Center Identity, Logo & Contacts'}
+          {isRtl ? 'هوية رواء الفن، الشعار، ومعلومات الاتصال' : 'Riwa Alfan Identity, Logo & Contacts'}
         </h3>
         <p className="text-xs text-slate-400 mt-1">
           {isRtl 
-            ? 'تعديل اسم المركز، الشعار (نصي أو صورة)، أرقام الواتساب والتواصل، ومقر جدة.'
-            : 'Configure center name, logo graphic/text, WhatsApp & Jeddah location.'}
+            ? 'تعديل اسم وهوية رواء الفن، الشعار (نصي أو صورة)، أرقام الواتساب والتواصل، ومقر جدة.'
+            : 'Configure brand name, logo graphic/text, WhatsApp & Jeddah location.'}
         </p>
       </div>
 
@@ -304,7 +304,7 @@ export const BrandTab: React.FC<BrandTabProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            {isRtl ? 'اسم المركز (بالعربية):' : 'Center Name (Arabic):'}
+            {isRtl ? 'الاسم التجاري (بالعربية):' : 'Brand Name (Arabic):'}
           </label>
           <input 
             type="text"
@@ -315,13 +315,28 @@ export const BrandTab: React.FC<BrandTabProps> = ({
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            {isRtl ? 'اسم المركز (بالإنجليزية):' : 'Center Name (English):'}
+            {isRtl ? 'الاسم التجاري (بالإنجليزية):' : 'Brand Name (English):'}
           </label>
           <input 
             type="text"
             value={brandForm.centerNameEn}
             onChange={(e) => setBrandForm((prev: BrandConfig) => ({ ...prev, centerNameEn: e.target.value }))}
             className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none font-bold"
+          />
+        </div>
+      </div>
+
+      {/* Brand Bio in Footer & About */}
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            {isRtl ? 'النبذة التعريفية الرسمية برواء الفن (الفوتر والواجهة):' : 'Official Bio & Summary (Arabic):'}
+          </label>
+          <textarea
+            rows={3}
+            value={brandForm.bioAr || 'رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.'}
+            onChange={(e) => setBrandForm((prev: BrandConfig) => ({ ...prev, bioAr: e.target.value }))}
+            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
           />
         </div>
       </div>

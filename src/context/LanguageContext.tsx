@@ -33,9 +33,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.lang = language;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
     if (language === 'en') {
-      document.title = 'Riwa Alfan Diving Center | Capt. Fahad Al-Huwaimli - Jeddah PADI';
+      document.title = 'Riwa Alfan Diving | Capt. Fahad Al-Huwaimli - Jeddah PADI';
     } else {
-      document.title = 'مركز رواء الفن للغوص (Riwa Alfan) | كابتن فهد الهويملي - جدة PADI';
+      document.title = 'رواء الفن للغوص (Riwa Alfan) | كابتن فهد الهويملي - جدة PADI';
     }
   }, [language, isRtl]);
 

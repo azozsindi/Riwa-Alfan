@@ -202,11 +202,11 @@ export const UI_TRANSLATIONS = {
     errPhone: "يرجى إدخال رقم جوال أو واتساب صحيح للتواصل",
 
     // Footer
-    footerBio: "مركز رواء الفن للغوص (Riwa Alfan Diving Center) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.",
+    footerBio: "رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.",
     footerQuickLinks: "روابط سريعة",
     footerDisclaimerTitle: "إخلاء مسؤولية ومعايير السلامة",
     footerDisclaimerText: "رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها. الحاسبات المعروضة هنا هي أدوات مساعدة وتثقيفية ولا تغني عن حاسوب الغوص المعتمد وخطة الغوص الرسمية.",
-    footerCopyright: `جميع الحقوق محفوظة © ${new Date().getFullYear()} مركز رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي`,
+    footerCopyright: `جميع الحقوق محفوظة © ${new Date().getFullYear()} رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI`,
     footerCountry: "المملكة العربية السعودية · جدة فقط"
   },
 
@@ -413,11 +413,11 @@ export const UI_TRANSLATIONS = {
     errPhone: "Please enter a valid mobile / WhatsApp number",
 
     // Footer
-    footerBio: "Riwa Alfan Diving Center in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest safety and environmental standards in the Saudi Red Sea.",
+    footerBio: "Riwa Alfan Diving in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest safety and professional standards in the Saudi Red Sea.",
     footerQuickLinks: "Quick Navigation",
     footerDisclaimerTitle: "Safety & Medical Disclaimer",
     footerDisclaimerText: "Scuba diving requires formal training, health fitness, and international certification from an accredited agency. The calculators and tools provided on this portal are educational aids and do not replace certified dive computers and official dive tables.",
-    footerCopyright: `All rights reserved © ${new Date().getFullYear()} Riwa Alfan Diving Center · Capt. Fahad Al-Huwaimli (PADI)`,
+    footerCopyright: `All rights reserved © ${new Date().getFullYear()} Riwa Alfan Diving · Capt. Fahad Al-Huwaimli (PADI)`,
     footerCountry: "Kingdom of Saudi Arabia · Jeddah Only"
   }
 };

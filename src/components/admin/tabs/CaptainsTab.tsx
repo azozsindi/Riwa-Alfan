@@ -200,8 +200,8 @@ export const CaptainsTab: React.FC<CaptainsTabProps> = ({
           </h3>
           <p className="text-xs text-slate-400 mt-1">
             {isRtl 
-              ? 'إضافة وتعديل بيانات كباتن ومدربي المركز، رخص PADI، التخصصات، وأرقام التواصل المباشرة.'
-              : 'Add and manage center captains, PADI license numbers, specialties, and contact info.'}
+              ? 'إضافة وتعديل بيانات كباتن ومدربي رواء الفن، رخص PADI، التخصصات، وأرقام التواصل المباشرة.'
+              : 'Add and manage team captains, PADI license numbers, specialties, and contact info.'}
           </p>
         </div>
 
@@ -244,7 +244,7 @@ export const CaptainsTab: React.FC<CaptainsTabProps> = ({
                   {captain.isLead && (
                     <span 
                       className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-[#C59B5F] text-slate-950 shadow-md"
-                      title={isRtl ? 'كبير المدربين ومؤسس المركز' : 'Lead Instructor'}
+                      title={isRtl ? 'كبير المدربين ومؤسس رواء الفن' : 'Lead Instructor & Founder'}
                     >
                       <Star className="w-3 h-3 fill-current" />
                     </span>

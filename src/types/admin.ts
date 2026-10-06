@@ -5,6 +5,8 @@ export interface CenterBrandConfig {
   centerNameEn: string;
   subtitleAr: string;
   subtitleEn: string;
+  bioAr?: string;
+  bioEn?: string;
   logoType: 'vector' | 'custom-image';
   customLogoUrl?: string;
   logoText: string;
@@ -16,6 +18,8 @@ export interface CenterBrandConfig {
   locationAr: string;
   locationEn: string;
   padiNumber: string;
+  owsiNumber?: string;
+  freelanceDocNumber?: string;
   fontFamily?: 'alexandria' | 'cairo' | 'readex' | 'almarai' | 'tajawal';
   customDomain?: string;
 }
@@ -145,6 +149,7 @@ export interface Captain {
 }
 
 export interface VisibleSectionsConfig {
+  underConstructionBar?: boolean;
   announcement: boolean;
   hero: boolean;
   instructor: boolean;
@@ -178,11 +183,43 @@ export interface LocationConfig {
   addressEn: string;
 }
 
+export interface PadiCertificateItem {
+  id: string;
+  titleAr: string;
+  titleEn: string;
+  codeOrNumber?: string;
+  issuer?: string;
+  badgeUrl?: string;
+  active: boolean;
+}
+
+export interface PartnerLogoItem {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  logoUrl?: string;
+  linkUrl?: string;
+  active: boolean;
+}
+
+export interface UnderConstructionConfig {
+  enabled: boolean;
+  badgeAr?: string;
+  badgeEn?: string;
+  textAr: string;
+  textEn: string;
+  showWhatsAppButton?: boolean;
+}
+
 export interface TrustBadgesConfig {
   crNumber?: string;
   freelanceDocNumber?: string;
+  owsiNumber?: string;
+  msdtNumber?: string;
   vatNumber?: string;
   padiFiveStar?: boolean;
+  certificates?: PadiCertificateItem[];
+  partnerLogos?: PartnerLogoItem[];
 }
 
 export type BrandConfig = CenterBrandConfig;
@@ -194,6 +231,7 @@ export interface SiteConfig {
   femaleInstructor?: FemaleInstructorConfig;
   captains?: Captain[];
   announcement: AnnouncementConfig;
+  underConstruction?: UnderConstructionConfig;
   payment?: PaymobPaymentConfig;
   courses: Course[];
   diveSites: DiveSite[];

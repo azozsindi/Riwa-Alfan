@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useSiteConfig } from '../context/SiteConfigContext';
 
 interface FahadsLogoProps {
   className?: string;
@@ -16,12 +17,12 @@ interface FahadsLogoProps {
 
 export const FahadsLogo: React.FC<FahadsLogoProps> = ({ 
   className = '', 
-  size = 'md',
-  theme = 'dark',
-  customImageUrl,
-  customTitle,
-  showWordmark = true,
-  language
+  size = 'md', 
+  theme = 'dark', 
+  customImageUrl, 
+  customTitle, 
+  showWordmark = true, 
+  language 
 }) => {
   const isDark = theme === 'dark';
   
@@ -35,6 +36,28 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
 
   const currentLang = language || contextLang;
 
+  // Global automatic fallback to active site config
+  let siteCustomImage: string | undefined;
+  let siteTitle: string | undefined;
+  let siteSubtext: string | undefined;
+
+  try {
+    const siteConfig = useSiteConfig();
+    if (siteConfig?.config?.brand) {
+      const b = siteConfig.config.brand;
+      if (b.logoType === 'custom-image' && b.customLogoUrl) {
+        siteCustomImage = b.customLogoUrl;
+      }
+      siteTitle = b.logoText || (currentLang === 'ar' ? b.centerNameAr : b.centerNameEn);
+      siteSubtext = b.logoSubtext;
+    }
+  } catch {
+    // If rendered outside SiteConfigProvider
+  }
+
+  const activeImageUrl = customImageUrl !== undefined ? customImageUrl : siteCustomImage;
+  const activeTitle = customTitle !== undefined ? customTitle : siteTitle;
+
   // Responsive height scale
   const heightClasses = {
     sm: 'h-10 sm:h-11',
@@ -43,13 +66,14 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
     xl: 'h-28 sm:h-32'
   };
 
-  if (customImageUrl) {
+  // If a custom image logo is configured, display it globally with pristine aspect ratio
+  if (activeImageUrl) {
     return (
       <div className={`inline-flex items-center justify-center select-none ${heightClasses[size]} ${className}`}>
         <img 
-          src={customImageUrl} 
-          alt={customTitle || "رواء الفن - Riwa Alfan"} 
-          className="h-full w-auto object-contain max-w-[200px]" 
+          src={activeImageUrl} 
+          alt={activeTitle || "رواء الفن - Riwa Alfan"} 
+          className="h-full w-auto object-contain max-w-[260px] drop-shadow-sm transition-all" 
         />
       </div>
     );
@@ -105,24 +129,24 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
           {/* Top curve, loop and waist of R */}
           <path 
             d="M 12 18 C 36 18 78 22 84 56 C 88 78 70 90 50 92 L 78 126 L 54 126 L 27 94 L 12 94 L 12 75 L 44 75 C 57 75 66 69 64 56 C 62 43 49 37 28 37 L 12 37 Z" 
-            fill={`url(#navyGrad-${uid})`}
-            stroke={isDark ? navyStroke : 'none'}
-            strokeWidth={isDark ? "0.6" : "0"}
+            fill={`url(#navyGrad-${uid})`} 
+            stroke={isDark ? navyStroke : 'none'} 
+            strokeWidth={isDark ? "0.6" : "0"} 
           />
 
           {/* Central bottom wedge of the A counter */}
           <path 
             d="M 75 126 L 89 104 C 94 96 102 96 107 104 L 121 126 Z" 
             fill={`url(#navyGrad-${uid})`} 
-            stroke={isDark ? navyStroke : 'none'}
-            strokeWidth={isDark ? "0.6" : "0"}
+            stroke={isDark ? navyStroke : 'none'} 
+            strokeWidth={isDark ? "0.6" : "0"} 
           />
 
           {/* The Antique Gold 'A' diagonal stroke */}
           <path 
             d="M 98 48 L 113 72 L 152 126 L 127 126 L 98 86 L 88 72 Z" 
-            fill={`url(#goldGrad-${uid})`}
-            filter={isDark ? `url(#goldGlow-${uid})` : undefined}
+            fill={`url(#goldGrad-${uid})`} 
+            filter={isDark ? `url(#goldGlow-${uid})` : undefined} 
           />
         </g>
 
@@ -135,8 +159,8 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
               y="58" 
               fontFamily={currentLang === 'ar' ? "'Alexandria', 'Cairo', 'Readex Pro', sans-serif" : "'Plus Jakarta Sans', sans-serif"} 
               fontSize={currentLang === 'ar' ? "40" : "36"} 
-              fontWeight="900"
-              letterSpacing={currentLang === 'ar' ? "-0.5" : "0.2"}
+              fontWeight="900" 
+              letterSpacing={currentLang === 'ar' ? "-0.5" : "0.2"} 
             >
               {currentLang === 'ar' ? (
                 <>
@@ -159,16 +183,16 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
               fontFamily="'Alexandria', 'Plus Jakarta Sans', sans-serif" 
               fontSize="12" 
               fontWeight="700" 
-              letterSpacing="0.8"
+              letterSpacing="0.8" 
             >
               {currentLang === 'ar' ? (
                 <>
-                  <tspan fill={`url(#goldGrad-${uid})`}>مركز غوص معتمد</tspan>
+                  <tspan fill={`url(#goldGrad-${uid})`}>غوص معتمد</tspan>
                   <tspan fill={isDark ? "#64748B" : "#94A3B8"}> · كابتن فهد PADI</tspan>
                 </>
               ) : (
                 <>
-                  <tspan fill={`url(#goldGrad-${uid})`}>PADI DIVE CENTER</tspan>
+                  <tspan fill={`url(#goldGrad-${uid})`}>PADI DIVE</tspan>
                   <tspan fill={isDark ? "#64748B" : "#94A3B8"}> · JEDDAH</tspan>
                 </>
               )}

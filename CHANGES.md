@@ -405,6 +405,69 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   3. **Build & Lint**:
      - Built fresh production bundle `dist/assets/index-D9IhOiTN.js` with 0 warnings/errors.
 
+---
+
+## Step 26: Global Real-Time Unified Logo Synchronization
+- **User Request**:
+  - Whenever the logo is changed from the control panel, it should immediately and automatically update everywhere across the entire application (Navbar header, Footer, Admin Dashboard header, Admin Login page, Browser Favicon tab, etc.).
+- **Implementations**:
+  1. **`FahadsLogo.tsx`**:
+     - Connected `FahadsLogo` directly to `SiteConfigContext` as its global source of truth.
+     - Automatically falls back to `config.brand.customLogoUrl` whenever a custom image logo is configured, ensuring that any component calling `<FahadsLogo />` anywhere instantly displays the active logo.
+  2. **`AdminDashboard.tsx`**:
+     - Embedded dynamic `FahadsLogo` in the dashboard top navigation header, replacing generic static icons.
+  3. **`SiteConfigContext.tsx`**:
+     - Added real-time dynamic `<link rel="icon">` update hook so that changing the brand logo immediately updates the browser tab favicon icon.
+  4. **`firestoreSync.ts`**:
+     - Updated `subscribeToSiteConfig` to dispatch updates whenever any part of `remoteData` (including brand/logo) is modified in Firestore.
+  5. **Production Build**:
+     - Built fresh production bundle `dist/assets/index-CYRYuR8e.js`.
+
+---
+
+## Step 27: Purged "مركز", Dynamic PADI Certifications & Accreditation Logobar
+- **User Request**:
+  - Remove the word "مركز" completely from all brand text, subtitles, bios, and logos across the site.
+  - Implement dynamic PADI Certifications catalog in the Control Panel with ability to add, edit, and delete certificates.
+  - Add explicit inputs for Freelance License (`FL-2918401`), PADI Instructor (`PADI OWSI #482910`), and PADI MSDT.
+  - Configure footer with brand bio: "رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر."
+  - Add Partner & Accreditation logos bar in the footer with dynamic upload/link manager in the admin panel (Saudi Business Platform, Saudi Water Sports & Diving Federation, Freelance Platform, PADI, etc.).
+- **Implementations**:
+  1. **Purged "مركز" across Entire Codebase**:
+     - Updated `defaultConfig.ts`, `translations.ts`, `LanguageContext.tsx`, `FahadsLogo.tsx`, `Header.tsx`, `Footer.tsx`, `PoliciesModal.tsx`, `BookingsTab.tsx`, `BrandTab.tsx`, `CaptainsTab.tsx`, `AdminDashboard.tsx`, and `index.html`.
+     - Subtitle updated to: "دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI" / "Certified PADI Diving Training · Capt. Fahad Al-Huwaimli".
+  2. **Certifications & Accreditations Manager (`SocialAndTrustTab.tsx`)**:
+     - Added dedicated PADI Certifications list manager with add, delete, and toggle controls.
+     - Pre-seeded 8 official ratings: PADI OWSI #482910, PADI MSDT, Freelance License FL-2918401, EFR Instructor, DAN Pro Member, Nitrox Specialty Instructor, Deep Diver Specialty, Wreck Diver Specialty.
+  3. **Partner & Accreditation Footer Logos Manager (`SocialAndTrustTab.tsx` & `Footer.tsx`)**:
+     - Added dynamic partner logo manager with upload or URL, title, link, and delete features.
+     - Displayed official accreditation cards in the footer: منصة الأعمال السعودية، الاتحاد السعودي للرياضات البحرية والغوص، منصة العمل الحر (FL-2918401)، ومنظمة PADI الدولية.
+  4. **Updated Footer (`Footer.tsx`)**:
+     - Aligned with user's exact specification including Marina location (مرسى أبحر الشمالية - جدة), PADI OWSI #482910, FL-2918401, quick links with icons (🧮, 🌊, ❓, 🛡️), and official safety disclaimer.
+  5. **Production Build**:
+     - Built fresh production bundle `dist/assets/index-DtL0oDZT.js` with 0 warnings/errors.
+
+---
+
+## Step 28: Toggleable "Under Construction" Top Banner
+- **User Request**:
+  - Add an "Under Construction / Site in Development" banner at the very top of the screen that the admin can toggle on or off easily from the control panel.
+- **Implementations**:
+  1. **`UnderConstructionBanner.tsx`**:
+     - Created prominent top banner with amber warning theme: `🚧 تنبيه: الموقع قيد الإنشاء والتحديث حالياً · يسعدنا استقبال استفساراتكم وحجوزات دورات الغوص عبر الواتساب مباشرة`.
+     - Integrated direct WhatsApp button and dismiss action.
+  2. **`AdminDashboard.tsx` Header Quick-Toggle**:
+     - Added 1-click toggle button directly in the dashboard top navigation bar: `[ 🚧 قيد الإنشاء: مفعّل 🟢 / معطّل ⚪ ]` for instant on/off switching.
+  3. **`SectionsVisibilityTab.tsx` Customizer**:
+     - Added dedicated control card allowing the admin to toggle the banner on/off, customize the badge text, customize the message, and toggle the WhatsApp action button.
+  4. **State & Realtime Sync**:
+     - Added `underConstruction` to `SiteConfig`, `VisibleSectionsConfig`, `defaultConfig.ts`, and `SiteConfigContext.tsx` with Firestore persistence.
+  5. **Production Build**:
+     - Built fresh production bundle `dist/assets/index-MFkKo6d6.js`.
+
+
+
+
 
 
 

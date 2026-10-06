@@ -6,7 +6,8 @@ import {
   VisibleSectionsConfig,
   SocialLinksConfig,
   LocationConfig,
-  TrustBadgesConfig
+  TrustBadgesConfig,
+  UnderConstructionConfig
 } from '../types/admin';
 import { COURSES_DATA, DIVE_SITES, FAQS, TESTIMONIALS } from './divingData';
 
@@ -115,6 +116,7 @@ export const DEFAULT_CAPTAINS: Captain[] = [
 ];
 
 export const DEFAULT_VISIBLE_SECTIONS: VisibleSectionsConfig = {
+  underConstructionBar: true,
   announcement: true,
   hero: true,
   instructor: true,
@@ -128,6 +130,15 @@ export const DEFAULT_VISIBLE_SECTIONS: VisibleSectionsConfig = {
   testimonials: true,
   contact: true,
   footer: true,
+};
+
+export const DEFAULT_UNDER_CONSTRUCTION: UnderConstructionConfig = {
+  enabled: true,
+  badgeAr: 'الموقع قيد الإنشاء والتحديث 🚧',
+  badgeEn: 'Under Development & Updates 🚧',
+  textAr: 'الموقع قيد التجهيز والتطوير حالياً · يسعدنا استقبال استفساراتكم وحجوزات دورات الغوص عبر الواتساب مباشرة',
+  textEn: 'Website is currently under construction & updates · Welcoming inquiries and course bookings via WhatsApp',
+  showWhatsAppButton: true
 };
 
 export const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
@@ -151,8 +162,110 @@ export const DEFAULT_LOCATION_CONFIG: LocationConfig = {
 export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
   crNumber: '',
   freelanceDocNumber: 'FL-2918401',
+  owsiNumber: 'PADI OWSI #482910',
+  msdtNumber: 'PADI MSDT #482910',
   vatNumber: '',
   padiFiveStar: true,
+  certificates: [
+    {
+      id: 'cert-owsi',
+      titleAr: 'مدرب غوص مياه مفتوحة معتمد (PADI OWSI)',
+      titleEn: 'PADI Open Water Scuba Instructor (OWSI)',
+      codeOrNumber: 'PADI OWSI #482910',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-msdt',
+      titleAr: 'مدرب تخصصات غوص معتمد (PADI MSDT)',
+      titleEn: 'PADI Master Scuba Diver Trainer (MSDT)',
+      codeOrNumber: 'PADI MSDT #482910',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-freelance',
+      titleAr: 'وثيقة العمل الحر الرسمية',
+      titleEn: 'Official Freelance License',
+      codeOrNumber: 'FL-2918401',
+      issuer: 'وزارة الموارد البشرية والتنمية الاجتماعية',
+      active: true
+    },
+    {
+      id: 'cert-efr',
+      titleAr: 'مدرب إسعافات أولية وإنعاش قلبي معتمد (EFR)',
+      titleEn: 'Emergency First Response (EFR) Instructor',
+      codeOrNumber: 'EFR Instructor #482910',
+      issuer: 'Emergency First Response Worldwide',
+      active: true
+    },
+    {
+      id: 'cert-dan',
+      titleAr: 'عضو شبكة تنبيه الغواصين الدولية (DAN Europe/World)',
+      titleEn: 'Diver Alert Network (DAN) Active Member',
+      codeOrNumber: 'DAN Pro Member',
+      issuer: 'Divers Alert Network (DAN)',
+      active: true
+    },
+    {
+      id: 'cert-nitrox',
+      titleAr: 'مدرب غوص الهواء المخصب (Enriched Air Nitrox)',
+      titleEn: 'Enriched Air (Nitrox) Specialty Instructor',
+      codeOrNumber: 'Nitrox Specialist #482910',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-deep',
+      titleAr: 'مدرب غوص الأعماق حتى 40 متر (Deep Diver)',
+      titleEn: 'Deep Diver Specialty Instructor',
+      codeOrNumber: 'Deep Specialist #482910',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-wreck',
+      titleAr: 'مدرب غوص حطام السفن التاريخية (Wreck Diver)',
+      titleEn: 'Wreck Diver Specialty Instructor',
+      codeOrNumber: 'Wreck Specialist #482910',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    }
+  ],
+  partnerLogos: [
+    {
+      id: 'partner-saudi-business',
+      nameAr: 'منصة الأعمال السعودية',
+      nameEn: 'Saudi Business Platform',
+      logoUrl: '',
+      linkUrl: 'https://business.sa',
+      active: true
+    },
+    {
+      id: 'partner-watersports-fed',
+      nameAr: 'الاتحاد السعودي للرياضات البحرية والغوص',
+      nameEn: 'Saudi Water Sports & Diving Federation',
+      logoUrl: '',
+      linkUrl: '',
+      active: true
+    },
+    {
+      id: 'partner-freelance',
+      nameAr: 'منصة العمل الحر (FL-2918401)',
+      nameEn: 'Freelance Platform (FL-2918401)',
+      logoUrl: '',
+      linkUrl: 'https://freelance.sa',
+      active: true
+    },
+    {
+      id: 'partner-padi',
+      nameAr: 'منظمة PADI الدولية للغوص',
+      nameEn: 'PADI Worldwide',
+      logoUrl: '',
+      linkUrl: 'https://www.padi.com',
+      active: true
+    }
+  ]
 };
 
 export const DEFAULT_CONFIG: SiteConfig = {
@@ -160,7 +273,11 @@ export const DEFAULT_CONFIG: SiteConfig = {
     centerNameAr: 'رواء الفن',
     centerNameEn: 'Riwa Alfan',
     subtitleAr: 'دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI',
-    subtitleEn: 'Certified PADI Diving Training',
+    subtitleEn: 'Certified PADI Diving Training · Capt. Fahad Al-Huwaimli',
+    bioAr: 'رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.',
+    bioEn: 'Riwa Alfan Diving in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest safety and professional standards in the Red Sea.',
+    freelanceDocNumber: 'FL-2918401',
+    owsiNumber: 'PADI OWSI #482910',
     logoType: 'vector',
     customLogoUrl: '',
     logoText: 'RIWA ALFAN',
@@ -265,6 +382,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     discountPercentage: 20,
     highlightCourseId: 'open-water'
   },
+  underConstruction: DEFAULT_UNDER_CONSTRUCTION,
   courses: COURSES_DATA,
   diveSites: DIVE_SITES,
   faqs: FAQS,

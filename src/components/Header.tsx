@@ -26,8 +26,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const brandName = language === 'ar' ? config.brand.centerNameAr : config.brand.centerNameEn;
   const brandSub = language === 'ar' 
-    ? (config.brand.subtitleAr || t.brandSubtitle || 'مركز تدريب غوص معتمد · جدة PADI')
-    : (config.brand.subtitleEn || t.brandSubtitle || 'Certified PADI Dive Center · Jeddah');
+    ? (config.brand.subtitleAr || 'دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI')
+    : (config.brand.subtitleEn || 'Certified PADI Diving Training · Capt. Fahad Al-Huwaimli');
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);

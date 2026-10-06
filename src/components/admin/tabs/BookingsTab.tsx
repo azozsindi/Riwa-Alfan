@@ -96,8 +96,8 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
             const cleanPhone = b.phone.replace(/[^0-9]/g, '');
             const waLink = `https://wa.me/966${cleanPhone.startsWith('0') ? cleanPhone.slice(1) : cleanPhone}?text=${encodeURIComponent(
               isRtl 
-                ? `أهلاً بك يا ${b.name}، معك كابتن فهد من مركز رواء الفن للغوص بخصوص طلبك المسجل (${b.interest}) رقم ${b.id}. يسعدني ترتيب مواعيد التدريب معك.`
-                : `Hello ${b.name}, this is Capt. Fahad from Riwa Alfan Dive Center regarding your inquiry (${b.interest}) ref ${b.id}.`
+                ? `أهلاً بك يا ${b.name}، معك كابتن فهد من رواء الفن للغوص بخصوص طلبك المسجل (${b.interest}) رقم ${b.id}. يسعدني ترتيب مواعيد التدريب معك.`
+                : `Hello ${b.name}, this is Capt. Fahad from Riwa Alfan Diving regarding your inquiry (${b.interest}) ref ${b.id}.`
             )}`;
 
             return (

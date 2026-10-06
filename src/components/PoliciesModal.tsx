@@ -53,8 +53,8 @@ export const PoliciesModal: React.FC<PoliciesModalProps> = ({ isOpen, onClose })
             </h2>
             <p className="text-xs text-slate-400">
               {isRtl 
-                ? 'مركز رواء الفن للغوص بجدة · وفقاً لمعايير PADI وأنظمة حماية المستهلك بالمملكة العربية السعودية'
-                : 'Riwa Alfan Dive Center · Jeddah · Compliant with PADI standards & Saudi regulations'}
+                ? 'رواء الفن للغوص بجدة · وفقاً لمعايير PADI وأنظمة حماية المستهلك بالمملكة العربية السعودية'
+                : 'Riwa Alfan Diving · Jeddah · Compliant with PADI standards & Saudi regulations'}
             </p>
           </div>
           <button
@@ -104,7 +104,7 @@ export const PoliciesModal: React.FC<PoliciesModalProps> = ({ isOpen, onClose })
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>{isRtl ? 'معتمدة وموثقة لمركز رواء الفن للغوص' : 'Certified & Enforced at Riwa Alfan'}</span>
+            <span>{isRtl ? 'معتمدة وموثقة لرواء الفن للغوص' : 'Certified & Enforced at Riwa Alfan'}</span>
           </div>
 
           <button

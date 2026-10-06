@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { 
   X, Tag, Building2, Compass, Waves, Inbox, Settings, 
-  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe, Eye, Share2, Shield
+  Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, CreditCard, Globe, Eye, Share2, Shield, AlertTriangle
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 import { useAuth } from '../../context/AuthContext';
+import { FahadsLogo } from '../FahadsLogo';
 import { OffersTab } from './tabs/OffersTab';
 import { SectionsVisibilityTab } from './tabs/SectionsVisibilityTab';
 import { SocialAndTrustTab } from './tabs/SocialAndTrustTab';
@@ -64,9 +65,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateVisibleSections,
     updateSocialLinks,
     updateLocationConfig,
-    updateTrustBadges
+    updateTrustBadges,
+    toggleUnderConstruction
   } = useSiteConfig();
   const { user, logout } = useAuth();
+
+  const isUnderConstruction = (config.underConstruction?.enabled ?? true) && (config.visibleSections?.underConstructionBar !== false);
 
   const [activeTab, setActiveTab] = useState<AdminTab>('offers');
   const [saveToast, setSaveToast] = useState(false);
@@ -97,8 +101,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Top Header */}
       <div className="px-4 sm:px-6 py-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between shrink-0 sticky top-0 z-30 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400">
-            <Compass className="w-6 h-6" />
+          <div className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+            <FahadsLogo size="sm" theme="dark" showWordmark={false} />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -129,6 +133,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="text-slate-300 font-mono text-[11px]">{user.email}</span>
             </div>
           )}
+
+          {/* Quick Toggle Under Construction Banner */}
+          <button
+            type="button"
+            onClick={() => {
+              toggleUnderConstruction();
+              showToast(
+                isUnderConstruction
+                  ? (isRtl ? 'تم إخفاء وتعطيل شريط الموقع قيد الإنشاء' : 'Under construction banner hidden')
+                  : (isRtl ? 'تم تفعيل وإظهار شريط الموقع قيد الإنشاء 🚧' : 'Under construction banner visible')
+              );
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-sm ${
+              isUnderConstruction
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+            }`}
+            title={isRtl ? 'تفعيل أو إخفاء شريط قيد الإنشاء أعلى الموقع' : 'Toggle Under Construction Banner'}
+          >
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">{isRtl ? 'قيد الإنشاء:' : 'In Dev:'}</span>
+            <span>{isUnderConstruction ? (isRtl ? 'مفعّل 🟢' : 'ON 🟢') : (isRtl ? 'معطّل ⚪' : 'OFF ⚪')}</span>
+          </button>
 
           {isStandalonePage && (
             <button
@@ -254,7 +281,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             }`}
           >
             <Users className="w-4 h-4 shrink-0" />
-            <span>{isRtl ? 'كباتن ومدربو المركز 👑' : 'Captains & Team 👑'}</span>
+            <span>{isRtl ? 'كباتن ومدربو رواء الفن 👑' : 'Captains & Team 👑'}</span>
             <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 ms-auto">
               {(config.captains || []).length}
             </span>

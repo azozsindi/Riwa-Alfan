@@ -12,7 +12,8 @@ import {
   VisibleSectionsConfig,
   SocialLinksConfig,
   LocationConfig,
-  TrustBadgesConfig
+  TrustBadgesConfig,
+  UnderConstructionConfig
 } from '../types/admin';
 import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 import { 
@@ -22,6 +23,7 @@ import {
   DEFAULT_SOCIAL_LINKS,
   DEFAULT_LOCATION_CONFIG,
   DEFAULT_TRUST_BADGES,
+  DEFAULT_UNDER_CONSTRUCTION,
   INITIAL_DEMO_BOOKINGS, 
   CONFIG_STORAGE_KEY, 
   BOOKINGS_STORAGE_KEY 
@@ -74,6 +76,8 @@ interface SiteConfigContextType {
   updateSocialLinks: (partial: Partial<SocialLinksConfig>) => void;
   updateLocationConfig: (partial: Partial<LocationConfig>) => void;
   updateTrustBadges: (partial: Partial<TrustBadgesConfig>) => void;
+  updateUnderConstruction: (partial: Partial<UnderConstructionConfig>) => void;
+  toggleUnderConstruction: () => void;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
@@ -204,6 +208,27 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => {
     applySiteFont(config.brand.fontFamily);
   }, [config.brand.fontFamily]);
+
+  // Dynamically update browser tab favicon when logo changes
+  useEffect(() => {
+    try {
+      if (typeof document !== 'undefined') {
+        const isCustom = config.brand.logoType === 'custom-image' && !!config.brand.customLogoUrl;
+        const iconUrl = isCustom ? config.brand.customLogoUrl : '/padi-logo.svg';
+        let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+        if (!link) {
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        if (iconUrl) {
+          link.href = iconUrl;
+        }
+      }
+    } catch (e) {
+      console.warn('Favicon update note:', e);
+    }
+  }, [config.brand.logoType, config.brand.customLogoUrl]);
 
   // Real-time Firestore sync for Site Config
   useEffect(() => {
@@ -430,6 +455,32 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   };
 
+  const updateUnderConstruction = (partial: Partial<UnderConstructionConfig>) => {
+    setConfig(prev => {
+      const current = prev.underConstruction || DEFAULT_UNDER_CONSTRUCTION;
+      const nextUnderConstruction = { ...current, ...partial };
+      const updatedConfig = {
+        ...prev,
+        underConstruction: nextUnderConstruction
+      };
+      saveSiteConfigToFirestore(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
+  const toggleUnderConstruction = () => {
+    setConfig(prev => {
+      const current = prev.underConstruction || DEFAULT_UNDER_CONSTRUCTION;
+      const nextUnderConstruction = { ...current, enabled: !current.enabled };
+      const updatedConfig = {
+        ...prev,
+        underConstruction: nextUnderConstruction
+      };
+      saveSiteConfigToFirestore(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
@@ -554,7 +605,9 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       updateVisibleSections,
       updateSocialLinks,
       updateLocationConfig,
-      updateTrustBadges
+      updateTrustBadges,
+      updateUnderConstruction,
+      toggleUnderConstruction
     }}>
       {children}
     </SiteConfigContext.Provider>
