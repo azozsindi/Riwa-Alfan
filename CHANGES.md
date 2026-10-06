@@ -503,6 +503,21 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   3. **Build & Lint**:
      - Verified zero TypeScript errors and built clean production bundle `dist/assets/index-D4DsE3_E.js`.
 
+---
+
+## Step 29: Removed Admin Email from Public Login Portal
+- **User Request**:
+  - Remove `👑 azozsindi23@gmail.com` and all email displays from the main admin login portal interface.
+- **Implementations**:
+  1. **`AdminPage.tsx`**:
+     - Removed the visible email badge (`👑 azozsindi23@gmail.com`) under the portal title description.
+     - Cleaned up the 1-click Google Sign-In button label, removing the explicit email address.
+     - Replaced the input placeholder with a generic `admin@riwaalfan.com` / `أدخل البريد الإلكتروني للمدير`.
+  2. **`AuthContext.tsx`**:
+     - Updated unauthorized login rejection message to keep the root admin's email confidential.
+  3. **Build & Lint**:
+     - Verified 0 TypeScript errors and compiled bundle `dist/assets/index-Bvshtnu6.js`.
+
 
 
 

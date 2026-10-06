@@ -140,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setIsAdminUser(false);
         setAuthError(
-          `عذراً! البريد الإلكتروني (${attemptedEmail}) غير مصرح له بالوصول إلى لوحة الإدارة. يرجى الدخول بحساب المدير المعتمد (${BOOTSTRAPPED_ADMIN_EMAIL}).`
+          `عذراً! البريد الإلكتروني (${attemptedEmail}) غير مصرح له بالوصول إلى لوحة الإدارة. يرجى الدخول بحساب المدير المعتمد في رواء الفن.`
         );
         setAuthErrorCode('auth/unauthorized-user');
         setIsLoading(false);

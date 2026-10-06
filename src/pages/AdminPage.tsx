@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { useRouter } from '../context/RouterContext';
-import { useAuth, BOOTSTRAPPED_ADMIN_EMAIL } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 import { FahadsLogo } from '../components/FahadsLogo';
 import { Lock, ShieldCheck, Mail, KeyRound, AlertCircle, ArrowLeft, ArrowRight, Globe, LogIn, ExternalLink, Loader2, Info } from 'lucide-react';
@@ -126,10 +126,6 @@ export const AdminPage: React.FC = () => {
                 ? 'الدخول محصور بحساب المدير المعتمد عبر بروتوكول Firebase Authentication.' 
                 : 'Access restricted to authorized administrators via Firebase Authentication.'}
             </p>
-
-            <div className="mt-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-full font-mono">
-              👑 {BOOTSTRAPPED_ADMIN_EMAIL}
-            </div>
           </div>
 
           {/* Diagnostic Security Alert Box */}
@@ -196,7 +192,7 @@ export const AdminPage: React.FC = () => {
               <span>
                 {isRtl 
                   ? 'تسجيل الدخول السريع بحساب Google المعتمد' 
-                  : '1-Click Google Sign-In (AzozSindi23@gmail.com)'}
+                  : '1-Click Google Sign-In'}
               </span>
             </button>
 
@@ -233,7 +229,7 @@ export const AdminPage: React.FC = () => {
                       setEmail(e.target.value);
                       setAuthError(null);
                     }}
-                    placeholder={BOOTSTRAPPED_ADMIN_EMAIL}
+                    placeholder={isRtl ? 'أدخل البريد الإلكتروني للمدير' : 'admin@riwaalfan.com'}
                     required
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl text-xs text-white placeholder-slate-600 outline-none ps-9"
                   />
