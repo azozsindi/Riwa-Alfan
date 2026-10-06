@@ -301,16 +301,26 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
               <Building2 className="w-4 h-4 text-[#C59B5F]" />
-              <span>{isRtl ? 'الاعتمادات الرسمية ومنصات التوثيق الشريكة' : 'Official Accreditations & Partner Platforms'}</span>
+              <span>
+                {language === 'ar' 
+                  ? (config.trustBadges?.sectionTitleAr || 'الاعتمادات الرسمية ومنصات التوثيق الشريكة') 
+                  : (config.trustBadges?.sectionTitleEn || 'Official Accreditations & Partner Platforms')}
+              </span>
             </div>
-            <span className="text-[11px] text-slate-500 font-mono">
-              {isRtl ? 'توثيق رسمي ومعتمد بالمملكة العربية السعودية' : 'Verified & Registered in Saudi Arabia'}
+            <span className="text-[11px] text-slate-400 font-medium">
+              {language === 'ar'
+                ? (config.trustBadges?.sectionSubtitleAr || 'توثيق رسمي ومعتمد بالمملكة العربية السعودية')
+                : (config.trustBadges?.sectionSubtitleEn || 'Officially Verified & Registered in Saudi Arabia')}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {partnerLogos.filter(p => p.active !== false).map((partner) => {
               const partnerName = isRtl ? partner.nameAr : partner.nameEn;
+              const badgeLabel = isRtl 
+                ? (partner.badgeTextAr || 'معتمد رسمي') 
+                : (partner.badgeTextEn || 'Verified');
+
               const content = (
                 <div className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 hover:border-[#C59B5F]/40 transition-all flex items-center gap-2.5 group">
                   {partner.logoUrl ? (
@@ -329,7 +339,7 @@ export const Footer: React.FC<FooterProps> = ({
                       {partnerName}
                     </span>
                     <span className="text-[10px] text-emerald-400 font-mono block">
-                      {isRtl ? 'معتمد رسمي' : 'Verified'}
+                      {badgeLabel}
                     </span>
                   </div>
                 </div>
@@ -357,7 +367,11 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom copyright & Trust verification line */}
         <div className="pt-6 border-t border-slate-900 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <span>{isRtl ? `جميع الحقوق محفوظة © ${new Date().getFullYear()} رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI` : t.footerCopyright}</span>
+            <span>
+              {language === 'ar'
+                ? (config.trustBadges?.copyrightTextAr || `جميع الحقوق محفوظة © ${new Date().getFullYear()} رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI`)
+                : (config.trustBadges?.copyrightTextEn || t.footerCopyright)}
+            </span>
             {freelanceDoc && (
               <>
                 <span className="text-slate-600">·</span>
@@ -376,7 +390,11 @@ export const Footer: React.FC<FooterProps> = ({
             )}
           </div>
           <div className="text-slate-400 font-mono flex items-center gap-2">
-            <span>{t.footerCountry}</span>
+            <span>
+              {language === 'ar'
+                ? (config.trustBadges?.countryTextAr || 'المملكة العربية السعودية')
+                : (config.trustBadges?.countryTextEn || 'Kingdom of Saudi Arabia')}
+            </span>
             <span className="px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-500/30 text-blue-400 text-[10px] font-bold">
               PADI Certified
             </span>

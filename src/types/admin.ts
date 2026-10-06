@@ -197,6 +197,8 @@ export interface PartnerLogoItem {
   id: string;
   nameAr: string;
   nameEn: string;
+  badgeTextAr?: string;
+  badgeTextEn?: string;
   logoUrl?: string;
   linkUrl?: string;
   active: boolean;
@@ -212,6 +214,10 @@ export interface UnderConstructionConfig {
 }
 
 export interface TrustBadgesConfig {
+  sectionTitleAr?: string;
+  sectionTitleEn?: string;
+  sectionSubtitleAr?: string;
+  sectionSubtitleEn?: string;
   crNumber?: string;
   freelanceDocNumber?: string;
   owsiNumber?: string;
@@ -220,6 +226,10 @@ export interface TrustBadgesConfig {
   padiFiveStar?: boolean;
   certificates?: PadiCertificateItem[];
   partnerLogos?: PartnerLogoItem[];
+  copyrightTextAr?: string;
+  copyrightTextEn?: string;
+  countryTextAr?: string;
+  countryTextEn?: string;
 }
 
 export type BrandConfig = CenterBrandConfig;

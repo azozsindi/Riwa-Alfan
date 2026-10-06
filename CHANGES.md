@@ -465,6 +465,24 @@ All refactoring steps are executed with zero behavioral changes, zero UI changes
   5. **Production Build**:
      - Built fresh production bundle `dist/assets/index-MFkKo6d6.js`.
 
+---
+
+## Step 29: Complete Inline Customizer for Accreditations, Partner Badges & Footer Text
+- **User Request**:
+  - Provide a direct way to edit all official accreditations, partner platform titles ("الاعتمادات الرسمية ومنصات التوثيق الشريكة", "توثيق رسمي ومعتمد بالمملكة العربية السعودية"), partner cards ("منصة الأعمال السعودية", "معتمد رسمي", "الاتحاد السعودي للرياضات البحرية والغوص", "منصة العمل الحر", "منظمة PADI الدولية للغوص"), and footer copyright & license lines.
+- **Implementations**:
+  1. **Direct Partner Card Inline Editor (`SocialAndTrustTab.tsx`)**:
+     - Added inline fields for every partner card to edit: platform name, badge subtitle (e.g. "معتمد رسمي"), link URL, upload/change logo, visibility toggle, and delete.
+  2. **Accreditation Header Customizer**:
+     - Added inputs for Section Title (`sectionTitleAr`) and Section Subtitle (`sectionSubtitleAr`).
+  3. **Footer Copyright & Country Customizer**:
+     - Added inputs to edit copyright text line and country/region label.
+  4. **Dynamic Footer Integration (`Footer.tsx`)**:
+     - Updated Footer to pull dynamic titles, badge labels, and copyright texts from `config.trustBadges`.
+  5. **Production Build**:
+     - Built fresh production bundle `dist/assets/index-Cvlu3kgE.js`.
+
+
 
 
 

@@ -160,12 +160,20 @@ export const DEFAULT_LOCATION_CONFIG: LocationConfig = {
 };
 
 export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
+  sectionTitleAr: 'الاعتمادات الرسمية ومنصات التوثيق الشريكة',
+  sectionTitleEn: 'Official Accreditations & Partner Platforms',
+  sectionSubtitleAr: 'توثيق رسمي ومعتمد بالمملكة العربية السعودية',
+  sectionSubtitleEn: 'Officially Verified & Registered in Saudi Arabia',
   crNumber: '',
   freelanceDocNumber: 'FL-2918401',
   owsiNumber: 'PADI OWSI #482910',
   msdtNumber: 'PADI MSDT #482910',
   vatNumber: '',
   padiFiveStar: true,
+  copyrightTextAr: 'جميع الحقوق محفوظة © 2026 رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI',
+  copyrightTextEn: 'All rights reserved © 2026 Riwa Alfan Diving · Capt. Fahad Al-Huwaimli (PADI)',
+  countryTextAr: 'المملكة العربية السعودية',
+  countryTextEn: 'Kingdom of Saudi Arabia',
   certificates: [
     {
       id: 'cert-owsi',
@@ -237,6 +245,8 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       id: 'partner-saudi-business',
       nameAr: 'منصة الأعمال السعودية',
       nameEn: 'Saudi Business Platform',
+      badgeTextAr: 'معتمد رسمي',
+      badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: 'https://business.sa',
       active: true
@@ -245,6 +255,8 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       id: 'partner-watersports-fed',
       nameAr: 'الاتحاد السعودي للرياضات البحرية والغوص',
       nameEn: 'Saudi Water Sports & Diving Federation',
+      badgeTextAr: 'معتمد رسمي',
+      badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: '',
       active: true
@@ -253,6 +265,8 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       id: 'partner-freelance',
       nameAr: 'منصة العمل الحر (FL-2918401)',
       nameEn: 'Freelance Platform (FL-2918401)',
+      badgeTextAr: 'معتمد رسمي',
+      badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: 'https://freelance.sa',
       active: true
@@ -261,6 +275,8 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       id: 'partner-padi',
       nameAr: 'منظمة PADI الدولية للغوص',
       nameEn: 'PADI Worldwide',
+      badgeTextAr: 'معتمد رسمي',
+      badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: 'https://www.padi.com',
       active: true
