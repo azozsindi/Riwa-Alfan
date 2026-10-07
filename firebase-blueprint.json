@@ -34,10 +34,12 @@
         "uid": { "type": "string", "maxLength": 128 },
         "email": { "type": "string", "maxLength": 150 },
         "name": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 50 },
         "role": { "type": "string", "enum": ["superadmin", "admin", "instructor", "viewer"] },
         "status": { "type": "string", "enum": ["active", "suspended"] },
         "notes": { "type": "string", "maxLength": 500 },
-        "createdAt": { "type": "string", "maxLength": 50 }
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "lastLoginAt": { "type": "string", "maxLength": 50 }
       },
       "required": ["email", "role"]
     },

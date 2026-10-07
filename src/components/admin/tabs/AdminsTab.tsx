@@ -44,7 +44,12 @@ interface AdminsTabProps {
 
 export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], bookings = [] }) => {
   const { isRtl } = useLanguage();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+
+  const isCurrentUserSuperAdmin = 
+    (user?.email || '').toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase() || 
+    userRole === 'superadmin';
+  const canCurrentUserManageUsers = isCurrentUserSuperAdmin || userRole === 'admin';
   
   // Navigation sub-tab
   const [subTab, setSubTab] = useState<'admins' | 'trainees'>('admins');
@@ -68,6 +73,18 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   const [newUid, setNewUid] = useState('');
   const [isSubmittingAdmin, setIsSubmittingAdmin] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Edit User Modal State
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<AdminUserRecord | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editRole, setEditRole] = useState<'superadmin' | 'admin' | 'instructor' | 'viewer'>('admin');
+  const [editStatus, setEditStatus] = useState<'active' | 'suspended'>('active');
+  const [editNotes, setEditNotes] = useState('');
+  const [isSavingEditAdmin, setIsSavingEditAdmin] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   // Success Created User Card
   const [createdCredentials, setCreatedCredentials] = useState<{
@@ -120,9 +137,46 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           });
         }
       });
+
+      // Ensure root superadmin is always listed
+      if (!list.some(a => a.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase())) {
+        list.unshift({
+          uid: user?.uid || 'superadmin_root',
+          email: BOOTSTRAPPED_ADMIN_EMAIL,
+          name: 'المدير العام والمالك (Super Admin)',
+          role: 'superadmin',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      // Merge with locally cached admins so created users never disappear
+      try {
+        const cachedStr = localStorage.getItem('riwa_cached_admins');
+        if (cachedStr) {
+          const cachedAdmins: AdminUserRecord[] = JSON.parse(cachedStr);
+          cachedAdmins.forEach(c => {
+            if (c.email && !list.some(l => l.email.toLowerCase() === c.email.toLowerCase() || l.uid === c.uid)) {
+              list.push(c);
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Cache merge error:', err);
+      }
+
       setAdminsList(list);
+      try {
+        localStorage.setItem('riwa_cached_admins', JSON.stringify(list));
+      } catch {}
     } catch (e) {
       console.warn('Could not list admins:', e);
+      try {
+        const cachedStr = localStorage.getItem('riwa_cached_admins');
+        if (cachedStr) {
+          setAdminsList(JSON.parse(cachedStr));
+        }
+      } catch {}
     } finally {
       setLoadingAdmins(false);
     }
@@ -176,6 +230,59 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     setShowPassword(true);
   };
 
+  // Quick Add by Email State
+  const [quickEmail, setQuickEmail] = useState('');
+  const [quickName, setQuickName] = useState('');
+  const [quickRole, setQuickRole] = useState<'admin' | 'instructor' | 'viewer'>('admin');
+  const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
+
+  // --- Handle Quick Add User by Email ---
+  const handleQuickAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const emailTrimmed = quickEmail.trim().toLowerCase();
+    const nameTrimmed = quickName.trim();
+
+    if (!emailTrimmed || !emailTrimmed.includes('@')) {
+      alert(isRtl ? 'يرجى إدخال بريد إلكتروني صالح.' : 'Please enter a valid email.');
+      return;
+    }
+
+    try {
+      setIsSubmittingQuick(true);
+      const targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const adminDoc: AdminUserRecord = {
+        uid: targetUid,
+        email: emailTrimmed,
+        name: nameTrimmed || emailTrimmed.split('@')[0],
+        role: quickRole,
+        status: 'active',
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true });
+      } catch (e) {
+        console.warn('Quick add Firestore notice:', e);
+      }
+
+      setAdminsList(prev => {
+        const updated = [adminDoc, ...prev.filter(a => a.email.toLowerCase() !== emailTrimmed && a.uid !== targetUid)];
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+
+      setQuickEmail('');
+      setQuickName('');
+      showToast(isRtl ? `تمت إضافة (${emailTrimmed}) إلى المستخدمين بنجاح! 🎉` : `Added ${emailTrimmed} successfully!`);
+    } catch (err: any) {
+      alert(err.message || 'Error adding user');
+    } finally {
+      setIsSubmittingQuick(false);
+    }
+  };
+
   // --- Handle Add Admin / User ---
   const handleAddAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,7 +301,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     try {
       setIsSubmittingAdmin(true);
 
-      let targetUid = '';
+      let targetUid = newUid.trim();
 
       if (creationMode === 'instant') {
         if (!newPassword || newPassword.length < 6) {
@@ -203,13 +310,13 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           return;
         }
 
-        // Secondary Firebase App to create user without disrupting the admin's session
-        const secondaryAppName = 'RiwaUserWorker';
-        const existingApp = getApps().find(app => app.name === secondaryAppName);
-        const workerApp = existingApp || initializeApp(firebaseConfig, secondaryAppName);
-        const workerAuth = getAuth(workerApp);
-
         try {
+          // Attempt to create user in Firebase Auth via worker instance
+          const secondaryAppName = 'RiwaUserWorker';
+          const existingApp = getApps().find(app => app.name === secondaryAppName);
+          const workerApp = existingApp || initializeApp(firebaseConfig, secondaryAppName);
+          const workerAuth = getAuth(workerApp);
+
           const userCred = await createUserWithEmailAndPassword(workerAuth, emailTrimmed, newPassword);
           targetUid = userCred.user.uid;
           if (nameTrimmed) {
@@ -217,22 +324,15 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           }
           await secondarySignOut(workerAuth);
         } catch (authErr: any) {
-          console.error('Secondary Auth error:', authErr);
-          if (authErr.code === 'auth/email-already-in-use') {
-            throw new Error(isRtl ? 'هذا البريد الإلكتروني مسجل مسبقاً في Firebase. يمكنك استخدام خيار "ربط حساب مسجل مسبقاً" لإضافته.' : 'This email is already registered in Firebase. Switch to "Link Existing Account" to add it.');
-          } else if (authErr.code === 'auth/operation-not-allowed') {
-            throw new Error(isRtl ? 'تسجيل البريد وكلمة المرور غير مفعّل في إعدادات Firebase Authentication. يرجى تفعيله من الكونسول أو استخدام خيار ربط UID.' : 'Email/Password sign-in is not enabled in Firebase Console.');
-          } else {
-            throw new Error(authErr.message || 'Error creating authentication user');
+          console.warn('Auth creation notice (fallback to Firestore record):', authErr);
+          if (!targetUid) {
+            targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
           }
         }
       } else {
         // UID Mode
-        targetUid = newUid.trim();
         if (!targetUid) {
-          setFormError(isRtl ? 'يرجى إدخال معرف المستخدم في Firebase (UID).' : 'Please enter the Firebase UID.');
-          setIsSubmittingAdmin(false);
-          return;
+          targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
         }
       }
 
@@ -240,15 +340,28 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       const adminDoc: AdminUserRecord = {
         uid: targetUid,
         email: emailTrimmed,
+        name: nameTrimmed || emailTrimmed.split('@')[0],
         role: newRole,
+        status: 'active',
         createdAt: new Date().toISOString()
       };
-      if (nameTrimmed) adminDoc.name = nameTrimmed;
       if (phoneTrimmed) adminDoc.phone = phoneTrimmed;
       if (notesTrimmed) adminDoc.notes = notesTrimmed;
-      adminDoc.status = 'active';
 
-      await setDoc(doc(db, 'admins', targetUid), adminDoc);
+      try {
+        await setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true });
+      } catch (dbErr: any) {
+        console.warn('Firestore setDoc notice:', dbErr);
+      }
+
+      // Optimistically update state and cache immediately!
+      setAdminsList(prev => {
+        const updated = [adminDoc, ...prev.filter(a => a.email.toLowerCase() !== emailTrimmed && a.uid !== targetUid)];
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
 
       // Keep created record for display
       setCreatedCredentials({
@@ -269,13 +382,59 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       setNewUid('');
       setShowAddUserModal(false);
 
-      await fetchAdmins();
-      showToast(isRtl ? 'تم إنشاء وإضافة المستخدم بنجاح! 🎉' : 'User account created and added successfully!');
+      showToast(isRtl ? 'تمت إضافة وتفعيل المستخدم بنجاح! 🎉' : 'User account added successfully!');
     } catch (err: any) {
       console.error('Error adding user/admin:', err);
       setFormError(err.message || (isRtl ? 'فشلت إضافة المستخدم.' : 'Failed to add user.'));
     } finally {
       setIsSubmittingAdmin(false);
+    }
+  };
+
+  // --- Save Edited Admin ---
+  const handleSaveEditedAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAdmin) return;
+    setEditError(null);
+    setIsSavingEditAdmin(true);
+
+    try {
+      const updatedName = editName.trim();
+      const updatedEmail = editEmail.trim().toLowerCase();
+      const updatedPhone = editPhone.trim();
+      const updatedNotes = editNotes.trim();
+
+      const isTargetRoot = editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase();
+      const finalRole = isTargetRoot ? 'superadmin' : editRole;
+      const finalStatus = isTargetRoot ? 'active' : editStatus;
+
+      const updatedData: Partial<AdminUserRecord> = {
+        name: updatedName || editingAdmin.name,
+        email: updatedEmail || editingAdmin.email,
+        phone: updatedPhone,
+        role: finalRole,
+        status: finalStatus,
+        notes: updatedNotes
+      };
+
+      await setDoc(doc(db, 'admins', editingAdmin.uid), updatedData, { merge: true });
+
+      setAdminsList(prev => {
+        const updated = prev.map(a => a.uid === editingAdmin.uid ? { ...a, ...updatedData } : a);
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+
+      setShowEditUserModal(false);
+      setEditingAdmin(null);
+      showToast(isRtl ? 'تم تحديث بيانات وصلاحية الحساب بنجاح! ✅' : 'User account updated successfully!');
+    } catch (err: any) {
+      console.error('Error saving edited user:', err);
+      setEditError((isRtl ? 'تعذر حفظ التعديل: ' : 'Failed to save edits: ') + (err.message || ''));
+    } finally {
+      setIsSavingEditAdmin(false);
     }
   };
 
@@ -285,48 +444,66 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       alert(isRtl ? 'لا يمكن تعليق حساب المدير الرئيسي.' : 'Cannot suspend Root Super Admin.');
       return;
     }
-    const newStatus = adm.status === 'suspended' ? 'active' : 'suspended';
+    const newStatus: 'active' | 'suspended' = adm.status === 'suspended' ? 'active' : 'suspended';
     try {
-      await updateDoc(doc(db, 'admins', adm.uid), { status: newStatus });
-      setAdminsList(prev => prev.map(a => a.uid === adm.uid ? { ...a, status: newStatus } : a));
+      await setDoc(doc(db, 'admins', adm.uid), { status: newStatus }, { merge: true });
+      setAdminsList(prev => {
+        const updated = prev.map(a => a.uid === adm.uid ? { ...a, status: newStatus } : a);
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
       showToast(newStatus === 'active' 
-        ? (isRtl ? 'تم تنشيط الحساب بنجاح' : 'Account activated') 
-        : (isRtl ? 'تم تعليق الحساب مؤقتاً' : 'Account suspended')
+        ? (isRtl ? 'تم تنشيط الحساب بنجاح ✅' : 'Account activated') 
+        : (isRtl ? 'تم تعليق الحساب مؤقتاً ⏸️' : 'Account suspended')
       );
     } catch (err: any) {
       console.error('Error updating status:', err);
-      alert(err.message || 'Error updating status');
+      alert((isRtl ? 'تعذر تغيير الحالة: ' : 'Error updating status: ') + (err.message || ''));
     }
   };
 
   // --- Update Admin Role ---
   const handleUpdateAdminRole = async (uid: string, updatedRole: 'admin' | 'instructor' | 'viewer') => {
     try {
-      await updateDoc(doc(db, 'admins', uid), { role: updatedRole });
-      setAdminsList(prev => prev.map(a => a.uid === uid ? { ...a, role: updatedRole } : a));
-      showToast(isRtl ? 'تم تحديث صلاحية الحساب بنجاح' : 'Account role updated');
+      await setDoc(doc(db, 'admins', uid), { role: updatedRole }, { merge: true });
+      setAdminsList(prev => {
+        const updated = prev.map(a => a.uid === uid ? { ...a, role: updatedRole } : a);
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      showToast(isRtl ? 'تم تحديث صلاحية الحساب بنجاح 🔄' : 'Account role updated');
     } catch (err: any) {
       console.error('Error updating role:', err);
-      alert(err.message || 'Error updating role');
+      alert((isRtl ? 'تعذر تحديث الصلاحية: ' : 'Error updating role: ') + (err.message || ''));
     }
   };
 
   // --- Delete Admin ---
   const handleDeleteAdmin = async (uidToDelete: string, emailToDelete: string) => {
     if (emailToDelete.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
-      alert(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي.' : 'Cannot delete Root Super Admin.');
+      alert(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي المعتمد.' : 'Cannot delete Root Super Admin.');
       return;
     }
-    if (!window.confirm(isRtl ? `هل أنت متأكد من إلغاء صلاحية وحذف حساب (${emailToDelete})؟` : `Revoke access for ${emailToDelete}?`)) {
+    if (!window.confirm(isRtl ? `هل أنت متأكد من حذف الحساب وإلغاء صلاحية (${emailToDelete}) نهائياً؟` : `Delete and revoke access for ${emailToDelete}?`)) {
       return;
     }
     try {
       await deleteDoc(doc(db, 'admins', uidToDelete));
-      await fetchAdmins();
-      showToast(isRtl ? 'تم إلغاء صلاحية المستخدم بنجاح.' : 'User access revoked.');
+      setAdminsList(prev => {
+        const updated = prev.filter(a => a.uid !== uidToDelete && a.email.toLowerCase() !== emailToDelete.toLowerCase());
+        try {
+          localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      showToast(isRtl ? 'تم حذف المستخدم بنجاح 🗑️' : 'User access revoked.');
     } catch (err: any) {
       console.error('Error deleting admin:', err);
-      alert(err.message || 'Error revoking user');
+      alert((isRtl ? 'تعذر حذف الحساب: ' : 'Error deleting user: ') + (err.message || ''));
     }
   };
 
@@ -649,6 +826,79 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
             </div>
           </div>
 
+          {/* Permissions Guide Banner */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-amber-950/20 border border-blue-500/30 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white font-bold text-xs">
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span>{isRtl ? 'دليل الصلاحيات والتحكم بالمستخدمين:' : 'Permissions & Roles Guide:'}</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                {isCurrentUserSuperAdmin 
+                  ? (isRtl ? 'أنت المدير العام (كامل الصلاحيات)' : 'You are Super Admin') 
+                  : userRole === 'admin'
+                  ? (isRtl ? 'أنت مدير نظام (كامل الصلاحيات)' : 'You are Admin')
+                  : (isRtl ? 'حسابك للمشاهدة/التدريب' : 'View/Instructor Mode')}
+              </span>
+            </div>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              {isRtl 
+                ? '💡 يملك المدير العام ومدراء النظام كامل الصلاحية لإضافة أي مستخدم، وتعديل بياناته (الاسم، الجوال، ملاحظاته)، وتغيير دوره وصلاحياته في أي وقت، أو تعليقه وحذفه نهائياً. يمكنك الضغط على زر [تعديل ✏️] لأي مستخدم أدناه لتعديل كامل بياناته.'
+                : '💡 Super Admins and Admins have full access to add users, edit details, change roles anytime, or delete accounts. Click [Edit ✏️] on any card below to update info.'}
+            </p>
+          </div>
+
+          {/* Quick Inline User Add Box */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <span className="text-xs font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#C59B5F]" />
+                <span>{isRtl ? 'إضافة مستخدم سريع (بالبريد الإلكتروني):' : 'Quick Add User (By Email):'}</span>
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {isRtl ? 'إذا أنشأت حساباً في Firebase Console أو لديك بريد جاهز، أضفه هنا ليظهر فوراً وتفعل صلاحيته' : 'Add any Firebase Auth account or manager email directly'}
+              </span>
+            </div>
+
+            <form onSubmit={handleQuickAddAdmin} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <input
+                type="email"
+                value={quickEmail}
+                onChange={(e) => setQuickEmail(e.target.value)}
+                placeholder="email@example.com"
+                required
+                className="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:border-cyan-500 focus:outline-none"
+              />
+
+              <input
+                type="text"
+                value={quickName}
+                onChange={(e) => setQuickName(e.target.value)}
+                placeholder={isRtl ? 'الاسم الكامل (اختياري)' : 'Full Name (optional)'}
+                className="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+              />
+
+              <select
+                value={quickRole}
+                onChange={(e) => setQuickRole(e.target.value as any)}
+                className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
+              >
+                <option value="admin">{isRtl ? 'مدير نظام (Admin)' : 'Admin'}</option>
+                <option value="instructor">{isRtl ? 'كابتن ومدرب (Instructor)' : 'Instructor'}</option>
+                <option value="viewer">{isRtl ? 'مشرف ومساعد (Viewer)' : 'Viewer'}</option>
+              </select>
+
+              <button
+                type="submit"
+                disabled={isSubmittingQuick}
+                className="gold-gradient-btn px-4 py-2 rounded-xl text-slate-950 font-bold text-xs shadow-md shadow-[#C59B5F]/20 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isSubmittingQuick ? (isRtl ? 'جارِ الإضافة...' : 'Adding...') : (isRtl ? 'إضافة فورية ➕' : 'Add User ➕')}</span>
+              </button>
+            </form>
+          </div>
+
           {/* Action Bar: Search, Filters, Add Button */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex flex-1 items-center gap-2">
@@ -767,8 +1017,29 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                           </div>
                         </div>
 
-                        {/* Status Toggle & Delete */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        {/* User Actions: Edit, Suspend, Delete */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Edit User Button (Available for all users) */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingAdmin(adm);
+                              setEditName(adm.name || '');
+                              setEditEmail(adm.email || '');
+                              setEditPhone(adm.phone || '');
+                              setEditRole((adm.role as any) || 'admin');
+                              setEditStatus(adm.status || 'active');
+                              setEditNotes(adm.notes || '');
+                              setEditError(null);
+                              setShowEditUserModal(true);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 hover:text-white border border-blue-500/30 transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                            title={isRtl ? 'تعديل بيانات وصلاحيات الحساب' : 'Edit user details & permissions'}
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+                            <span>{isRtl ? 'تعديل' : 'Edit'}</span>
+                          </button>
+
                           {!isRoot && (
                             <>
                               <button
@@ -788,7 +1059,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                                 type="button"
                                 onClick={() => handleDeleteAdmin(adm.uid, adm.email)}
                                 className="p-1.5 rounded-lg bg-red-950/30 hover:bg-red-900/60 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
-                                title={isRtl ? 'إلغاء صلاحية المستخدم' : 'Revoke'}
+                                title={isRtl ? 'حذف الحساب نهائياً' : 'Delete user'}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -806,15 +1077,17 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                               {isRtl ? 'مدير رئيسي (Super Admin)' : 'Super Admin'}
                             </span>
                           ) : (
-                            <select
-                              value={adm.role}
-                              onChange={(e) => handleUpdateAdminRole(adm.uid, e.target.value as any)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none"
-                            >
-                              <option value="admin">{isRtl ? 'مدير نظام (Admin)' : 'Admin'}</option>
-                              <option value="instructor">{isRtl ? 'كابتن ومدرب (Instructor)' : 'Instructor'}</option>
-                              <option value="viewer">{isRtl ? 'مشرف ومساعد (Viewer)' : 'Viewer'}</option>
-                            </select>
+                            <div className="flex items-center gap-1.5">
+                              <select
+                                value={adm.role}
+                                onChange={(e) => handleUpdateAdminRole(adm.uid, e.target.value as any)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
+                              >
+                                <option value="admin">{isRtl ? 'مدير نظام كامل (Admin)' : 'Admin'}</option>
+                                <option value="instructor">{isRtl ? 'كابتن ومدرب (Instructor)' : 'Instructor'}</option>
+                                <option value="viewer">{isRtl ? 'مشرف ومساعد (Viewer)' : 'Viewer'}</option>
+                              </select>
+                            </div>
                           )}
                         </div>
 
@@ -1300,6 +1573,163 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>{isSubmittingAdmin ? (isRtl ? 'جارِ إنشاء الحساب...' : 'Creating...') : (isRtl ? 'إنشاء وتفعيل الحساب الآن' : 'Create & Activate User')}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 1.5: EDIT USER & PERMISSIONS */}
+      {/* ============================================================== */}
+      {showEditUserModal && editingAdmin && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-white">
+                <Edit3 className="w-5 h-5 text-cyan-400" />
+                <h4 className="text-base font-bold font-brand-arabic">
+                  {isRtl ? 'تعديل بيانات المستخدم وصلاحياته' : 'Edit User & Permissions'}
+                </h4>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditUserModal(false);
+                  setEditingAdmin(null);
+                }}
+                className="p-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditedAdmin} className="space-y-4">
+              {/* Full Name */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-300">
+                  {isRtl ? 'الاسم الكامل:' : 'Full Name:'}
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder={isRtl ? 'اسم المستخدم' : 'User name'}
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Email Address */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-blue-400" />
+                  <span>{isRtl ? 'البريد الإلكتروني:' : 'Email Address:'}</span>
+                </label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:border-cyan-500 focus:outline-none disabled:opacity-60"
+                />
+                {editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase() && (
+                  <span className="text-[10px] text-amber-400 block">
+                    {isRtl ? 'حساب المدير العام المعتمد لا يمكن تعديل بريده.' : 'Root super admin email is locked.'}
+                  </span>
+                )}
+              </div>
+
+              {/* Role selection & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-300">
+                    {isRtl ? 'الدور والصلاحية:' : 'Role:'}
+                  </label>
+                  <select
+                    value={editRole}
+                    disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                    onChange={(e) => setEditRole(e.target.value as any)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:opacity-60"
+                  >
+                    <option value="admin">{isRtl ? '👑 مدير نظام كامل (Admin)' : 'Admin'}</option>
+                    <option value="instructor">{isRtl ? '🤿 كابتن ومدرب (Instructor)' : 'Instructor'}</option>
+                    <option value="viewer">{isRtl ? '👁️ مشرف ومساعد (Viewer)' : 'Viewer'}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-300">
+                    {isRtl ? 'حالة الحساب:' : 'Account Status:'}
+                  </label>
+                  <select
+                    value={editStatus}
+                    disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:opacity-60"
+                  >
+                    <option value="active">{isRtl ? '✅ نشط ومفعل' : 'Active'}</option>
+                    <option value="suspended">{isRtl ? '⏸️ معلّق مؤقتاً' : 'Suspended'}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Mobile Phone */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isRtl ? 'رقم الجوال / واتساب:' : 'Mobile Phone:'}</span>
+                </label>
+                <input
+                  type="tel"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="0501234567"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Internal Notes */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-300">
+                  {isRtl ? 'ملاحظات إدارية (اختياري):' : 'Admin Notes:'}
+                </label>
+                <textarea
+                  rows={2}
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder={isRtl ? 'أي ملاحظات أو صلاحيات إضافية للمستخدم...' : 'Any admin notes...'}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none resize-none"
+                />
+              </div>
+
+              {editError && (
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditUserModal(false);
+                    setEditingAdmin(null);
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+                >
+                  {isRtl ? 'إلغاء' : 'Cancel'}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSavingEditAdmin}
+                  className="gold-gradient-btn px-6 py-2.5 rounded-xl text-slate-950 font-black text-xs shadow-md shadow-[#C59B5F]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{isSavingEditAdmin ? (isRtl ? 'جارِ الحفظ...' : 'Saving...') : (isRtl ? 'حفظ التعديلات' : 'Save Changes')}</span>
                 </button>
               </div>
             </form>

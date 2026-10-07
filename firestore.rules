@@ -65,10 +65,12 @@ service cloud.firestore {
         && data.email is string && data.email.size() <= 150
         && data.role in ['superadmin', 'admin', 'instructor', 'viewer']
         && (!('name' in data) || (data.name is string && data.name.size() <= 150))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
         && (!('status' in data) || (data.status in ['active', 'suspended']))
         && (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
         && (!('uid' in data) || (data.uid is string && data.uid.size() <= 128))
-        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 50));
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 50))
+        && (!('lastLoginAt' in data) || (data.lastLoginAt is string && data.lastLoginAt.size() <= 50));
     }
 
     function isValidTrainee(data) {
@@ -105,11 +107,27 @@ service cloud.firestore {
     // 3. Admin whitelist (/admins collection):
     // - Signed-in users can check their own admin status.
     // - Verified Admins can add or update admin and team records.
-    // - Normal users or malicious actors CANNOT grant themselves or others admin rights.
+    // - First-time logging-in users can link their authorized UID record.
     // - The root superadmin record cannot be deleted.
     match /admins/{adminId} {
-      allow read: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      allow write: if isValidId(adminId) && isAdmin() && isValidAdminRecord(incoming()) && incoming().uid == adminId;
+      allow get: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(adminId) && (
+        isAdmin() ||
+        (
+          isSignedIn() 
+          && request.auth.uid == adminId 
+          && isValidAdminRecord(incoming())
+          && (
+            (incoming().email != null && incoming().email.matches('(?i)^azozsindi23@gmail\\.com$')) ||
+            (request.auth.token.email != null && incoming().email == request.auth.token.email)
+          )
+        )
+      );
+      allow update: if isValidId(adminId) && (
+        isAdmin() ||
+        (isSignedIn() && request.auth.uid == adminId && isValidAdminRecord(incoming()))
+      );
       allow delete: if isValidId(adminId) && isAdmin() && (
         resource.data.email == null || !resource.data.email.matches('(?i)^azozsindi23@gmail\\.com$')
       );

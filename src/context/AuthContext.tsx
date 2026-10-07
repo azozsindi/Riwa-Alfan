@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
 // Primary superadmin email (bootstrapped, case-insensitive)
@@ -17,6 +17,7 @@ export const BOOTSTRAPPED_ADMIN_EMAIL = 'azozsindi23@gmail.com';
 interface AuthContextType {
   user: User | null;
   isAdminUser: boolean;
+  userRole: 'superadmin' | 'admin' | 'instructor' | 'viewer' | null;
   isLoading: boolean;
   authError: string | null;
   authErrorCode: string | null;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<'superadmin' | 'admin' | 'instructor' | 'viewer' | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authErrorCode, setAuthErrorCode] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // 1. Check Bootstrapped Superadmin Email
       if (email === BOOTSTRAPPED_ADMIN_EMAIL) {
+        setUserRole('superadmin');
         // Auto-seed admin document in Firestore /admins/{uid} so UID-based rules also pass
         try {
           const adminDocRef = doc(db, 'admins', currentUser.uid);
@@ -61,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const idTokenResult = await currentUser.getIdTokenResult(true);
         if (idTokenResult?.claims?.admin === true) {
+          setUserRole('admin');
           return true;
         }
       } catch (claimErr) {
@@ -73,7 +77,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const adminDocSnap = await getDoc(adminDocRef);
         if (adminDocSnap.exists()) {
           const data = adminDocSnap.data();
-          if (data && (data.role === 'admin' || data.role === 'superadmin')) {
+          if (data && ['admin', 'superadmin', 'instructor', 'viewer'].includes(data.role)) {
+            setUserRole(data.role as any);
+            return true;
+          }
+        }
+
+        // 4. Check by email in /admins collection (if registered before first login)
+        const emailQuery = query(collection(db, 'admins'), where('email', '==', email));
+        const emailSnap = await getDocs(emailQuery);
+        if (!emailSnap.empty) {
+          const matchedDoc = emailSnap.docs[0].data();
+          if (matchedDoc && ['admin', 'superadmin', 'instructor', 'viewer'].includes(matchedDoc.role)) {
+            setUserRole(matchedDoc.role as any);
+            try {
+              await setDoc(doc(db, 'admins', currentUser.uid), {
+                ...matchedDoc,
+                uid: currentUser.uid,
+                email: email,
+                lastLoginAt: new Date().toISOString()
+              }, { merge: true });
+            } catch (syncErr) {
+              console.warn('Link admin UID notice:', syncErr);
+            }
             return true;
           }
         }
@@ -81,9 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('Firestore admin doc lookup notice:', dbErr);
       }
 
+      setUserRole(null);
       return false;
     } catch (e) {
       console.error('Error verifying admin authorization:', e);
+      setUserRole(null);
       return false;
     }
   };
@@ -265,6 +293,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await firebaseSignOut(auth);
       setUser(null);
       setIsAdminUser(false);
+      setUserRole(null);
       setAuthError(null);
       setAuthErrorCode(null);
     } catch (e) {
@@ -276,6 +305,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider value={{
       user,
       isAdminUser,
+      userRole,
       isLoading,
       authError,
       authErrorCode,
