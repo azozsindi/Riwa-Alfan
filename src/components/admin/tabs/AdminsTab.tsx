@@ -26,7 +26,7 @@ import {
   EyeOff, 
   Sparkles 
 } from 'lucide-react';
-import { collection, doc, getDocs, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, deleteDoc, updateDoc, query, where } from 'firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut as secondarySignOut } from 'firebase/auth';
 import { db } from '../../../firebase';
@@ -85,6 +85,14 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   const [editNotes, setEditNotes] = useState('');
   const [isSavingEditAdmin, setIsSavingEditAdmin] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // In-App Deletion Confirm Dialog States
+  const [userToDelete, setUserToDelete] = useState<AdminUserRecord | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [deleteUserError, setDeleteUserError] = useState<string | null>(null);
+
+  const [traineeToDelete, setTraineeToDelete] = useState<TraineeRecord | null>(null);
+  const [isDeletingTrainee, setIsDeletingTrainee] = useState(false);
 
   // Success Created User Card
   const [createdCredentials, setCreatedCredentials] = useState<{
@@ -460,7 +468,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       );
     } catch (err: any) {
       console.error('Error updating status:', err);
-      alert((isRtl ? 'تعذر تغيير الحالة: ' : 'Error updating status: ') + (err.message || ''));
+      showToast((isRtl ? 'تعذر تغيير الحالة: ' : 'Error updating status: ') + (err.message || ''));
     }
   };
 
@@ -478,32 +486,64 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       showToast(isRtl ? 'تم تحديث صلاحية الحساب بنجاح 🔄' : 'Account role updated');
     } catch (err: any) {
       console.error('Error updating role:', err);
-      alert((isRtl ? 'تعذر تحديث الصلاحية: ' : 'Error updating role: ') + (err.message || ''));
+      showToast((isRtl ? 'تعذر تحديث الصلاحية: ' : 'Error updating role: ') + (err.message || ''));
     }
   };
 
-  // --- Delete Admin ---
-  const handleDeleteAdmin = async (uidToDelete: string, emailToDelete: string) => {
-    if (emailToDelete.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
-      alert(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي المعتمد.' : 'Cannot delete Root Super Admin.');
+  // --- Execute Delete Admin (Called from In-App Modal) ---
+  const confirmExecuteDeleteAdmin = async () => {
+    if (!userToDelete) return;
+    const emailToDelete = userToDelete.email.toLowerCase().trim();
+    const uidToDelete = userToDelete.uid;
+
+    if (emailToDelete === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
+      showToast(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي المعتمد.' : 'Cannot delete Root Super Admin.');
+      setUserToDelete(null);
       return;
     }
-    if (!window.confirm(isRtl ? `هل أنت متأكد من حذف الحساب وإلغاء صلاحية (${emailToDelete}) نهائياً؟` : `Delete and revoke access for ${emailToDelete}?`)) {
-      return;
-    }
+
     try {
-      await deleteDoc(doc(db, 'admins', uidToDelete));
+      setIsDeletingUser(true);
+      setDeleteUserError(null);
+
+      // 1. Delete main document by UID
+      try {
+        await deleteDoc(doc(db, 'admins', uidToDelete));
+      } catch (err1) {
+        console.warn('Delete admin by UID warning:', err1);
+      }
+
+      // 2. Also delete any matching document by email query in /admins
+      try {
+        const q = query(collection(db, 'admins'), where('email', '==', emailToDelete));
+        const qSnap = await getDocs(q);
+        for (const docItem of qSnap.docs) {
+          if (docItem.id !== uidToDelete) {
+            await deleteDoc(docItem.ref);
+          }
+        }
+      } catch (err2) {
+        console.warn('Delete admin by email query warning:', err2);
+      }
+
+      // 3. Update React state immediately
       setAdminsList(prev => {
-        const updated = prev.filter(a => a.uid !== uidToDelete && a.email.toLowerCase() !== emailToDelete.toLowerCase());
+        const updated = prev.filter(
+          a => a.uid !== uidToDelete && a.email.toLowerCase() !== emailToDelete
+        );
         try {
           localStorage.setItem('riwa_cached_admins', JSON.stringify(updated));
         } catch {}
         return updated;
       });
-      showToast(isRtl ? 'تم حذف المستخدم بنجاح 🗑️' : 'User access revoked.');
+
+      setUserToDelete(null);
+      showToast(isRtl ? `تم حذف حساب (${userToDelete.name || emailToDelete}) نهائياً بنجاح 🗑️` : 'User account deleted successfully.');
     } catch (err: any) {
-      console.error('Error deleting admin:', err);
-      alert((isRtl ? 'تعذر حذف الحساب: ' : 'Error deleting user: ') + (err.message || ''));
+      console.error('Error deleting user:', err);
+      setDeleteUserError((isRtl ? 'تعذر إتمام الحذف: ' : 'Error deleting user: ') + (err.message || ''));
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -530,7 +570,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     const nameTrimmed = tName.trim();
     const phoneTrimmed = tPhone.trim();
     if (!nameTrimmed || !phoneTrimmed) {
-      alert(isRtl ? 'يرجى إدخال اسم المتدرب ورقم الجوال.' : 'Please enter trainee name and phone.');
+      showToast(isRtl ? 'يرجى إدخال اسم المتدرب ورقم الجوال.' : 'Please enter trainee name and phone.');
       return;
     }
 
@@ -567,24 +607,27 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       showToast(isRtl ? 'تم حفظ بيانات المتدرب بنجاح! 🤿' : 'Trainee saved successfully!');
     } catch (err: any) {
       console.error('Error saving trainee:', err);
-      alert(err.message || 'Error saving trainee');
+      showToast((isRtl ? 'تعذر حفظ المتدرب: ' : 'Error saving trainee: ') + (err.message || ''));
     } finally {
       setIsSubmittingTrainee(false);
     }
   };
 
-  // --- Delete Trainee ---
-  const handleDeleteTrainee = async (id: string, name: string) => {
-    if (!window.confirm(isRtl ? `هل أنت متأكد من حذف المتدرب (${name})؟` : `Delete trainee ${name}?`)) {
-      return;
-    }
+  // --- Execute Delete Trainee (Called from In-App Modal) ---
+  const confirmExecuteDeleteTrainee = async () => {
+    if (!traineeToDelete) return;
     try {
-      await deleteDoc(doc(db, 'trainees', id));
-      setTraineesList(prev => prev.filter(t => t.id !== id));
-      showToast(isRtl ? 'تم حذف المتدرب.' : 'Trainee deleted.');
+      setIsDeletingTrainee(true);
+      await deleteDoc(doc(db, 'trainees', traineeToDelete.id));
+      setTraineesList(prev => prev.filter(t => t.id !== traineeToDelete.id));
+      const deletedName = traineeToDelete.name;
+      setTraineeToDelete(null);
+      showToast(isRtl ? `تم حذف المتدرب (${deletedName}) بنجاح 🗑️` : 'Trainee deleted.');
     } catch (err: any) {
       console.error('Error deleting trainee:', err);
-      alert(err.message || 'Error deleting trainee');
+      showToast((isRtl ? 'تعذر حذف المتدرب: ' : 'Error deleting trainee: ') + (err.message || ''));
+    } finally {
+      setIsDeletingTrainee(false);
     }
   };
 
@@ -1057,8 +1100,11 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
 
                               <button
                                 type="button"
-                                onClick={() => handleDeleteAdmin(adm.uid, adm.email)}
-                                className="p-1.5 rounded-lg bg-red-950/30 hover:bg-red-900/60 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  setDeleteUserError(null);
+                                  setUserToDelete(adm);
+                                }}
+                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/70 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
                                 title={isRtl ? 'حذف الحساب نهائياً' : 'Delete user'}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1348,9 +1394,10 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                           </button>
 
                           <button
-                            onClick={() => handleDeleteTrainee(trainee.id, trainee.name)}
-                            className="p-1.5 rounded-lg bg-red-950/30 hover:bg-red-900/60 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
-                            title={isRtl ? 'حذف' : 'Delete'}
+                            type="button"
+                            onClick={() => setTraineeToDelete(trainee)}
+                            className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/70 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
+                            title={isRtl ? 'حذف المتدرب' : 'Delete'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1950,6 +1997,116 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 4: IN-APP CONFIRM DELETE ADMIN / USER */}
+      {/* ============================================================== */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-base font-bold text-white font-brand-arabic">
+                  {isRtl ? 'تأكيد حذف الحساب نهائياً' : 'Confirm Permanent Deletion'}
+                </h4>
+                <p className="text-xs text-slate-400 font-mono truncate">{userToDelete.email}</p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-red-950/25 border border-red-500/25 text-xs text-slate-300 space-y-2">
+              <p className="font-bold text-white leading-relaxed">
+                {isRtl 
+                  ? `هل أنت متأكد من رغبتك في حذف حساب (${userToDelete.name || userToDelete.email}) وإلغاء صلاحيته بالكامل؟`
+                  : `Are you sure you want to permanently delete (${userToDelete.name || userToDelete.email}) and revoke all permissions?`}
+              </p>
+              <p className="text-[11px] text-red-300">
+                {isRtl 
+                  ? '⚠️ لا يمكن التراجع عن هذا الإجراء وسيتم مسح الحساب من النظام فوراً.' 
+                  : '⚠️ This action is permanent and cannot be undone.'}
+              </p>
+            </div>
+
+            {deleteUserError && (
+              <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{deleteUserError}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingUser}
+                onClick={() => setUserToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+              >
+                {isRtl ? 'إلغاء الأمر' : 'Cancel'}
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeletingUser}
+                onClick={confirmExecuteDeleteAdmin}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-red-600/30 disabled:opacity-50 active:scale-95"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeletingUser ? (isRtl ? 'جارِ الحذف...' : 'Deleting...') : (isRtl ? 'نعم، احذف الحساب الآن 🗑️' : 'Yes, Delete Now')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 5: IN-APP CONFIRM DELETE TRAINEE */}
+      {/* ============================================================== */}
+      {traineeToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-base font-bold text-white font-brand-arabic">
+                  {isRtl ? 'تأكيد حذف المتدرب' : 'Confirm Delete Trainee'}
+                </h4>
+                <p className="text-xs text-slate-400 truncate">{traineeToDelete.name}</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              {isRtl
+                ? `هل أنت متأكد من حذف المتدرب (${traineeToDelete.name}) من سجل المتدربين؟`
+                : `Are you sure you want to delete trainee (${traineeToDelete.name})?`}
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingTrainee}
+                onClick={() => setTraineeToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+              >
+                {isRtl ? 'إلغاء الأمر' : 'Cancel'}
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeletingTrainee}
+                onClick={confirmExecuteDeleteTrainee}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-red-600/30 disabled:opacity-50 active:scale-95"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeletingTrainee ? (isRtl ? 'جارِ الحذف...' : 'Deleting...') : (isRtl ? 'حذف المتدرب 🗑️' : 'Delete Trainee')}</span>
+              </button>
             </div>
           </div>
         </div>
