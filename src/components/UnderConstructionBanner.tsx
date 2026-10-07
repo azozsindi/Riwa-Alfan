@@ -17,12 +17,16 @@ export const UnderConstructionBanner: React.FC = () => {
   }
 
   const badge = language === 'ar' 
-    ? (uc?.badgeAr || 'الموقع قيد الإنشاء والتحديث 🚧') 
-    : (uc?.badgeEn || 'Under Development & Updates 🚧');
+    ? (uc?.badgeTextAr || uc?.badgeAr || 'الموقع قيد الإنشاء والتحديث 🚧') 
+    : (uc?.badgeTextEn || uc?.badgeEn || 'Under Development & Updates 🚧');
 
   const message = language === 'ar'
-    ? (uc?.textAr || 'الموقع قيد التجهيز والتطوير حالياً · يسعدنا استقبال استفساراتكم وحجوزات دورات الغوص عبر الواتساب مباشرة')
-    : (uc?.textEn || 'Website is currently under development & updates · Welcoming inquiries and course bookings via WhatsApp');
+    ? (uc?.messageAr || uc?.textAr || 'الموقع قيد التجهيز والتطوير حالياً · يسعدنا استقبال استفساراتكم وحجوزات دورات الغوص عبر الواتساب مباشرة')
+    : (uc?.messageEn || uc?.textEn || 'Website is currently under development & updates · Welcoming inquiries and course bookings via WhatsApp');
+
+  const whatsappBtnText = language === 'ar'
+    ? (uc?.whatsappBtnTextAr || 'تواصل عبر واتساب')
+    : (uc?.whatsappBtnTextEn || 'Chat on WhatsApp');
 
   const cleanPhone = (config.brand.whatsappNumber || '966530549675').replace(/[^0-9]/g, '');
   const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
@@ -63,7 +67,7 @@ export const UnderConstructionBanner: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all whitespace-nowrap shadow-sm shrink-0"
             >
               <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isRtl ? 'تواصل عبر واتساب' : 'Chat on WhatsApp'}</span>
+              <span>{whatsappBtnText}</span>
             </a>
           )}
         </div>

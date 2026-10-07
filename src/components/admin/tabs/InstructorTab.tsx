@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
-import { UserCheck, User, Upload, Check, Trash2, Plus, Award, Save, Sparkles, Lock, PhoneCall, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  UserCheck, User, Upload, Check, Trash2, Plus, Award, Save, Sparkles, 
+  Lock, PhoneCall, ShieldCheck, Quote, Shield, HeartHandshake 
+} from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { InstructorConfig, FemaleInstructorConfig } from '../../../types/admin';
-import { DEFAULT_FEMALE_INSTRUCTOR } from '../../../data/defaultConfig';
+import { InstructorConfig, FemaleInstructorConfig, DesignContentConfig } from '../../../types/admin';
+import { DEFAULT_FEMALE_INSTRUCTOR, DEFAULT_DESIGN_CONTENT } from '../../../data/defaultConfig';
 
 interface InstructorTabProps {
   initialInstructor: InstructorConfig;
   initialFemaleInstructor?: FemaleInstructorConfig;
+  initialDesign?: DesignContentConfig;
   onUpdateInstructor: (instructor: InstructorConfig | Partial<InstructorConfig>) => void;
   onUpdateFemaleInstructor?: (femaleInst: Partial<FemaleInstructorConfig>) => void;
+  onUpdateDesign?: (design: Partial<DesignContentConfig>) => void;
   showToast: (msg?: string) => void;
 }
 
 export const InstructorTab: React.FC<InstructorTabProps> = ({
   initialInstructor,
   initialFemaleInstructor,
+  initialDesign,
   onUpdateInstructor,
   onUpdateFemaleInstructor,
+  onUpdateDesign,
   showToast,
 }) => {
   const { isRtl } = useLanguage();
   
-  // Sub-tabs: Lead Instructor (Capt. Fahad) vs. Female Training Division
-  const [activeSubTab, setActiveSubTab] = useState<'lead' | 'female'>('lead');
+  // Sub-tabs: Lead Instructor (Capt. Fahad) vs. Female Training Division vs. Philosophy & 3 Pillars
+  const [activeSubTab, setActiveSubTab] = useState<'lead' | 'female' | 'philosophy'>('lead');
 
   // Lead Instructor Form
   const [instructorForm, setInstructorForm] = useState<InstructorConfig>(initialInstructor);
@@ -36,6 +43,21 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
   const [newFeatureEn, setNewFeatureEn] = useState('');
   const [newFemaleSpecAr, setNewFemaleSpecAr] = useState('');
   const [newFemaleSpecEn, setNewFemaleSpecEn] = useState('');
+
+  // Philosophy & 3 Pillars Form
+  const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign || DEFAULT_DESIGN_CONTENT);
+
+  useEffect(() => {
+    setInstructorForm(initialInstructor);
+  }, [initialInstructor]);
+
+  useEffect(() => {
+    if (initialFemaleInstructor) setFemaleForm(initialFemaleInstructor);
+  }, [initialFemaleInstructor]);
+
+  useEffect(() => {
+    if (initialDesign) setDesignForm(initialDesign);
+  }, [initialDesign]);
 
   // Handlers for Lead Instructor
   const handleInstructorPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +180,19 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
           <span>🧕</span>
           <span>{isRtl ? 'قسم التدريب النسائي (المدربة النسائية)' : 'Women\'s Training Division'}</span>
           <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('philosophy')}
+          className={`flex-1 min-w-[200px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            activeSubTab === 'philosophy'
+              ? 'gold-gradient-btn text-slate-950 shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <span>💬</span>
+          <span>{isRtl ? 'مقولة الكابتن وركائز التدريب والسلامة' : 'Quote & 3 Safety Pillars'}</span>
         </button>
       </div>
 
@@ -757,6 +792,358 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
             >
               <Save className="w-4 h-4" />
               <span>{isRtl ? 'حفظ وتحديث بيانات قسم التدريب النسائي 🧕' : 'Save Women\'s Division Details'}</span>
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* TAB 3: Philosophy, Captain's Quote & 3 Safety Pillars */}
+      {activeSubTab === 'philosophy' && (
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            onUpdateDesign?.(designForm);
+            showToast(isRtl ? 'تم حفظ مقولة وفلسفة الكابتن وركائز التدريب بنجاح! 💬' : 'Quote & 3 Pillars saved successfully!');
+          }} 
+          className="space-y-6"
+        >
+          <div className="pb-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Quote className="w-5 h-5 text-[#C59B5F]" />
+                <span>{isRtl ? 'مقولة وفلسفة كابتن فهد وركائز التدريب والسلامة' : 'Captain Fahad Quote & 3 Pillars'}</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                {isRtl 
+                  ? 'التحكم بنص المقولة واسم القائل، وركائز التدريب الثلاثة الظاهرة في شريط فلسفة التدريب بالواجهة.' 
+                  : 'Customize the captain quote, author attribution, and the 3 training & safety pillars.'}
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              className="gold-gradient-btn px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 flex items-center gap-2 shadow-lg cursor-pointer shrink-0"
+            >
+              <Save className="w-4 h-4 text-slate-950" />
+              <span>{isRtl ? 'حفظ الفلسفة والركائز 💾' : 'Save Philosophy 💾'}</span>
+            </button>
+          </div>
+
+          {/* Section Header & Intro */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <span className="text-xs font-bold text-[#E0BA84] uppercase tracking-wider block">
+              {isRtl ? 'عنوان ومقدمة قسم التدريب والكباتن (Section Header & Intro)' : 'Training Section Header & Intro'}
+            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'الشارة العلوية (بالعربية):' : 'Section Kicker (Arabic):'}
+                </label>
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.instSectionKickerAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionKickerAr: e.target.value }))}
+                  placeholder="مدرب معتمد دولياً · خبرة وشغف بالبحر"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'الشارة العلوية (بالإنجليزية):' : 'Section Kicker (English):'}
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.instSectionKickerEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionKickerEn: e.target.value }))}
+                  placeholder="Certified PADI Professional · Passion & Mastery"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'العنوان الرئيسي للقسم (بالعربية):' : 'Main Section Title (Arabic):'}
+                </label>
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.instSectionTitleAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionTitleAr: e.target.value }))}
+                  placeholder="تعلم مع نخبة مدربي الغوص في جدة"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'العنوان الرئيسي للقسم (بالإنجليزية):' : 'Main Section Title (English):'}
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.instSectionTitleEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionTitleEn: e.target.value }))}
+                  placeholder="Train with Premier Diving Instructors in Jeddah"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'الوصف التوضيحي للقسم (بالعربية):' : 'Section Description (Arabic):'}
+                </label>
+                <textarea
+                  dir="rtl"
+                  rows={2}
+                  value={designForm.instSectionDescAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionDescAr: e.target.value }))}
+                  placeholder="تدريب مخصص يراعي سرعتك وقدراتك مع فريق محترف يضع أمانك وثقتك في المقام الأول."
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none leading-relaxed"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'الوصف التوضيحي للقسم (بالإنجليزية):' : 'Section Description (English):'}
+                </label>
+                <textarea
+                  dir="ltr"
+                  rows={2}
+                  value={designForm.instSectionDescEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, instSectionDescEn: e.target.value }))}
+                  placeholder="Tailored training that matches your pace with professionals prioritizing your safety and comfort."
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Captain's Quote */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <span className="text-xs font-bold text-[#E0BA84] uppercase tracking-wider block">
+              {isRtl ? 'مقولة كابتن فهد عن البحر والتدريب' : 'Captain Fahad\'s Quote on Sea & Diving'}
+            </span>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {isRtl ? 'نص المقولة (بالعربية):' : 'Quote Text (Arabic):'}
+              </label>
+              <textarea
+                dir="rtl"
+                rows={3}
+                value={designForm.quoteTextAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, quoteTextAr: e.target.value }))}
+                placeholder="البحر لا يُعلّمنا فقط كيف نتنفس تحت الماء، بل يُعلّمنا كيف نهدأ ونتأمل ونثق بأنفسنا في عالم أزرق ساحر."
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none leading-relaxed italic"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {isRtl ? 'نص المقولة (بالإنجليزية):' : 'Quote Text (English):'}
+              </label>
+              <textarea
+                dir="ltr"
+                rows={3}
+                value={designForm.quoteTextEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, quoteTextEn: e.target.value }))}
+                placeholder="The sea does not merely teach us to breathe underwater; it teaches us serenity, mindfulness, and unbreakable inner trust."
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none leading-relaxed italic"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'اسم صاحب المقولة (بالعربية):' : 'Author Attribution (Arabic):'}
+                </label>
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.quoteAuthorAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, quoteAuthorAr: e.target.value }))}
+                  placeholder="كابتن فهد الهويملي · كبير المدربين"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {isRtl ? 'اسم صاحب المقولة (بالإنجليزية):' : 'Author Attribution (English):'}
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.quoteAuthorEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, quoteAuthorEn: e.target.value }))}
+                  placeholder="Capt. Fahad Al-Huwaimli · Lead Instructor"
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3 Safety & Training Pillars */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-5">
+            <div>
+              <span className="text-xs font-bold text-[#E0BA84] uppercase tracking-wider block">
+                {isRtl ? 'ركائز التدريب والسلامة الثلاثة' : 'The 3 Safety & Training Pillars'}
+              </span>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {isRtl ? 'الركائز الثلاثة الظاهرة أسفل المقولة في شريط فلسفة التدريب.' : 'The three core pillars displayed below the quote banner.'}
+              </p>
+            </div>
+
+            {/* Pillar 1 */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <span className="text-xs font-bold text-white flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#C59B5F]" />
+                <span>{isRtl ? 'الركيزة 1: السلامة فوق كل اعتبار' : 'Pillar 1: Safety Above All'}</span>
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.pillar1TitleAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar1TitleAr: e.target.value }))}
+                  placeholder="عنوان الركيزة 1 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.pillar1TitleEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar1TitleEn: e.target.value }))}
+                  placeholder="Pillar 1 Title (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <textarea
+                  dir="rtl"
+                  rows={2}
+                  value={designForm.pillar1DescAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar1DescAr: e.target.value }))}
+                  placeholder="وصف الركيزة 1 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+                <textarea
+                  dir="ltr"
+                  rows={2}
+                  value={designForm.pillar1DescEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar1DescEn: e.target.value }))}
+                  placeholder="Pillar 1 Description (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Pillar 2 */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <span className="text-xs font-bold text-white flex items-center gap-2">
+                <HeartHandshake className="w-4 h-4 text-blue-400" />
+                <span>{isRtl ? 'الركيزة 2: الصبر والراحة النفسية' : 'Pillar 2: Patience & Emotional Comfort'}</span>
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.pillar2TitleAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar2TitleAr: e.target.value }))}
+                  placeholder="عنوان الركيزة 2 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.pillar2TitleEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar2TitleEn: e.target.value }))}
+                  placeholder="Pillar 2 Title (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <textarea
+                  dir="rtl"
+                  rows={2}
+                  value={designForm.pillar2DescAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar2DescAr: e.target.value }))}
+                  placeholder="وصف الركيزة 2 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+                <textarea
+                  dir="ltr"
+                  rows={2}
+                  value={designForm.pillar2DescEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar2DescEn: e.target.value }))}
+                  placeholder="Pillar 2 Description (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <span className="text-xs font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>{isRtl ? 'الركيزة 3: إتقان الطفو وحماية البيئة' : 'Pillar 3: Buoyancy & Marine Conservation'}</span>
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={designForm.pillar3TitleAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar3TitleAr: e.target.value }))}
+                  placeholder="عنوان الركيزة 3 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={designForm.pillar3TitleEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar3TitleEn: e.target.value }))}
+                  placeholder="Pillar 3 Title (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <textarea
+                  dir="rtl"
+                  rows={2}
+                  value={designForm.pillar3DescAr || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar3DescAr: e.target.value }))}
+                  placeholder="وصف الركيزة 3 (عربي)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+                <textarea
+                  dir="ltr"
+                  rows={2}
+                  value={designForm.pillar3DescEn || ''}
+                  onChange={(e) => setDesignForm(prev => ({ ...prev, pillar3DescEn: e.target.value }))}
+                  placeholder="Pillar 3 Description (English)"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:border-[#C59B5F] outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              className="gold-gradient-btn px-7 py-3 rounded-xl font-bold text-sm text-slate-950 flex items-center gap-2 shadow-xl cursor-pointer"
+            >
+              <Save className="w-4 h-4 text-slate-950" />
+              <span>{isRtl ? 'حفظ وتثبيت الفلسفة والركائز 💾' : 'Save Philosophy Settings 💾'}</span>
             </button>
           </div>
         </form>

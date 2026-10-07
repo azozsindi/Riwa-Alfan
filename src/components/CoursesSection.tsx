@@ -28,6 +28,11 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
     ? filteredCourses.slice(0, 3)
     : filteredCourses;
 
+  const d = config.designContent;
+  const coursesKicker = language === 'ar' ? (d?.coursesKickerAr || t.coursesKicker) : (d?.coursesKickerEn || t.coursesKicker);
+  const coursesTitle = language === 'ar' ? (d?.coursesTitleAr || t.coursesTitle) : (d?.coursesTitleEn || t.coursesTitle);
+  const coursesDesc = language === 'ar' ? (d?.coursesDescAr || t.coursesDesc) : (d?.coursesDescEn || t.coursesDesc);
+
   return (
     <section id="courses" className="py-16 sm:py-24 bg-slate-900/50 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,13 +40,13 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
         {/* Section Header */}
         <div className={`max-w-3xl mb-10 sm:mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
-            {t.coursesKicker}
+            {coursesKicker}
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-            {t.coursesTitle}
+            {coursesTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {t.coursesDesc}
+            {coursesDesc}
           </p>
         </div>
 

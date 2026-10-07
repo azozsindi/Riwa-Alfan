@@ -66,17 +66,18 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div className="flex flex-col min-w-0">
             <span className="text-base sm:text-xl lg:text-2xl font-black tracking-tight text-white transition-colors font-brand-arabic truncate">
-              {language === 'ar' ? (
-                <>
-                  <span className="text-white group-hover:text-blue-300 transition-colors">رواء </span>
-                  <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">الفن</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-white group-hover:text-blue-300 transition-colors">Riwa </span>
-                  <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">Alfan</span>
-                </>
-              )}
+              {(() => {
+                const words = (brandName || '').trim().split(' ');
+                if (words.length > 1) {
+                  return (
+                    <>
+                      <span className="text-white group-hover:text-blue-300 transition-colors">{words[0]} </span>
+                      <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">{words.slice(1).join(' ')}</span>
+                    </>
+                  );
+                }
+                return <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">{brandName}</span>;
+              })()}
             </span>
             <span className="text-[10px] sm:text-xs text-[#C59B5F] font-semibold -mt-0.5 tracking-wider uppercase truncate">
               {brandSub}

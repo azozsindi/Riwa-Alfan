@@ -19,6 +19,11 @@ export const FaqSection: React.FC = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const d = config.designContent;
+  const faqKicker = language === 'ar' ? (d?.faqKickerAr || t.faqKicker) : (d?.faqKickerEn || t.faqKicker);
+  const faqTitle = language === 'ar' ? (d?.faqTitleAr || t.faqTitle) : (d?.faqTitleEn || t.faqTitle);
+  const faqDesc = language === 'ar' ? (d?.faqDescAr || t.faqDesc) : (d?.faqDescEn || t.faqDesc);
+
   return (
     <section id="faq" className="py-14 sm:py-20 bg-slate-900/40 relative border-t border-slate-800/80">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,13 +31,13 @@ export const FaqSection: React.FC = () => {
         {/* Section Header */}
         <div className={`space-y-3 mb-8 sm:mb-10 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
-            {t.faqKicker}
+            {faqKicker}
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-            {t.faqTitle}
+            {faqTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {t.faqDesc}
+            {faqDesc}
           </p>
         </div>
 

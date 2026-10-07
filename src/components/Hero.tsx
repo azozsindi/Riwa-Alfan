@@ -35,6 +35,30 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
   const heroHeadline = language === 'ar' ? config.hero.headlineAr : config.hero.headlineEn;
   const heroHighlight = language === 'ar' ? config.hero.headlineHighlightAr : config.hero.headlineHighlightEn;
   const heroSubhead = language === 'ar' ? config.hero.subheadAr : config.hero.subheadEn;
+  const heroLocationKicker = language === 'ar' 
+    ? (config.hero.locationKickerAr || t.heroLocation) 
+    : (config.hero.locationKickerEn || t.heroLocation);
+  const heroCtaBook = language === 'ar'
+    ? (config.hero.ctaBookAr || t.heroCtaBook)
+    : (config.hero.ctaBookEn || t.heroCtaBook);
+  const heroCtaCourses = language === 'ar'
+    ? (config.hero.ctaCoursesAr || t.heroCtaCourses)
+    : (config.hero.ctaCoursesEn || t.heroCtaCourses);
+  const heroWhyTitle = language === 'ar'
+    ? (config.hero.whyTitleAr || t.heroWhyTitle)
+    : (config.hero.whyTitleEn || t.heroWhyTitle);
+  const heroWhy1 = language === 'ar'
+    ? (config.hero.why1Ar || t.heroWhy1)
+    : (config.hero.why1En || t.heroWhy1);
+  const heroWhy2 = language === 'ar'
+    ? (config.hero.why2Ar || t.heroWhy2)
+    : (config.hero.why2En || t.heroWhy2);
+  const heroWhy3 = language === 'ar'
+    ? (config.hero.why3Ar || t.heroWhy3)
+    : (config.hero.why3En || t.heroWhy3);
+  const heroChatWhatsApp = language === 'ar'
+    ? (config.hero.whatsappBtnAr || t.heroChatWhatsApp)
+    : (config.hero.whatsappBtnEn || t.heroChatWhatsApp);
 
 
   return (
@@ -69,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
               <Award className="w-4 h-4 text-[#C59B5F] shrink-0" />
               <span>{heroBadge}</span>
               <span aria-hidden="true" className="text-slate-600">·</span>
-              <span className="text-slate-400">{t.heroLocation}</span>
+              <span className="text-slate-400">{heroLocationKicker}</span>
             </div>
 
             {/* High-impact headline in brand gold & white */}
@@ -92,14 +116,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                 className="gold-gradient-btn inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
               >
                 <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
-                <span>{t.heroCtaBook}</span>
+                <span>{heroCtaBook}</span>
               </button>
 
               <button
                 onClick={onExploreCourses}
                 className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-[#C59B5F]/30 hover:border-[#C59B5F] rounded-xl transition-all whitespace-nowrap cursor-pointer group"
               >
-                <span>{t.heroCtaCourses}</span>
+                <span>{heroCtaCourses}</span>
                 <ArrowIcon className={`w-4 h-4 text-[#C59B5F] transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
               </button>
             </div>
@@ -164,21 +188,21 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                 {/* Instructor Highlights list */}
                 <div className={`space-y-3.5 ${isRtl ? 'text-right' : 'text-left'}`}>
                   <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    {t.heroWhyTitle}
+                    {heroWhyTitle}
                   </div>
 
                   <div className="space-y-3 text-sm text-slate-300">
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                       <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                      <span className="leading-snug">{t.heroWhy1}</span>
+                      <span className="leading-snug">{heroWhy1}</span>
                     </div>
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                       <Award className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                      <span className="leading-snug">{t.heroWhy2}</span>
+                      <span className="leading-snug">{heroWhy2}</span>
                     </div>
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                       <Users className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
-                      <span className="leading-snug">{t.heroWhy3}</span>
+                      <span className="leading-snug">{heroWhy3}</span>
                     </div>
                   </div>
                 </div>
@@ -193,7 +217,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                   <svg className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
                   </svg>
-                  <span>{t.heroChatWhatsApp}</span>
+                  <span>{heroChatWhatsApp}</span>
                 </a>
 
               </div>

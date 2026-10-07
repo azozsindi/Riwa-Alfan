@@ -21,6 +21,11 @@ export const DiveSitesSection: React.FC<DiveSitesSectionProps> = ({ onBookTrip }
 
   if (!activeSite) return null;
 
+  const d = config.designContent;
+  const sitesKicker = language === 'ar' ? (d?.sitesKickerAr || t.sitesKicker) : (d?.sitesKickerEn || t.sitesKicker);
+  const sitesTitle = language === 'ar' ? (d?.sitesTitleAr || t.sitesTitle) : (d?.sitesTitleEn || t.sitesTitle);
+  const sitesDesc = language === 'ar' ? (d?.sitesDescAr || t.sitesDesc) : (d?.sitesDescEn || t.sitesDesc);
+
   return (
     <section id="dive-sites" className="py-16 sm:py-24 bg-slate-900/40 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,13 +33,13 @@ export const DiveSitesSection: React.FC<DiveSitesSectionProps> = ({ onBookTrip }
         {/* Section Header */}
         <div className={`max-w-3xl mb-10 sm:mb-12 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
-            {t.sitesKicker}
+            {sitesKicker}
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-            {t.sitesTitle}
+            {sitesTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {t.sitesDesc}
+            {sitesDesc}
           </p>
         </div>
 

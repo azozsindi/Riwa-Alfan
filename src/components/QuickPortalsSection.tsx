@@ -1,6 +1,7 @@
 import React from 'react';
 import { Waves, HelpCircle, Calculator, ArrowLeft, ArrowRight, Compass } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useSiteConfig } from '../context/SiteConfigContext';
 
 interface QuickPortalsSectionProps {
   onOpenSites: () => void;
@@ -14,7 +15,16 @@ export const QuickPortalsSection: React.FC<QuickPortalsSectionProps> = ({
   onOpenTools,
 }) => {
   const { language, isRtl } = useLanguage();
+  const { config } = useSiteConfig();
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+
+  const d = config.designContent;
+  const portalsKicker = language === 'ar'
+    ? (d?.portalsKickerAr || 'استكشف المزيد من خدماتنا')
+    : (d?.portalsKickerEn || 'Explore More Resources');
+  const portalsTitle = language === 'ar'
+    ? (d?.portalsTitleAr || 'أدلة الأعماق، الأسئلة الشائعة، وحاسبات الغواص')
+    : (d?.portalsTitleEn || 'Dive Guides, FAQs & Diver Tools');
 
   return (
     <section className="py-12 bg-slate-950 relative border-t border-slate-900">
@@ -22,11 +32,11 @@ export const QuickPortalsSection: React.FC<QuickPortalsSectionProps> = ({
         
         {/* Subtle Section Header */}
         <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-          <span className="text-xs font-semibold text-[#C59B5F] uppercase tracking-wider">
-            {isRtl ? 'استكشف المزيد من خدماتنا' : 'Explore More Resources'}
+          <span className="text-xs font-semibold text-[#C59B5F] tracking-wider">
+            {portalsKicker}
           </span>
           <h2 className="text-xl sm:text-2xl font-black text-white font-brand-arabic">
-            {isRtl ? 'أدلة الأعماق، الأسئلة الشائعة، وحاسبات الغواص' : 'Dive Guides, FAQs & Diver Tools'}
+            {portalsTitle}
           </h2>
         </div>
 

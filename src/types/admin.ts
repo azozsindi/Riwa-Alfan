@@ -34,6 +34,12 @@ export interface HeroConfig {
   headlineHighlightEn: string;
   subheadAr: string;
   subheadEn: string;
+  locationKickerAr?: string;
+  locationKickerEn?: string;
+  ctaBookAr?: string;
+  ctaBookEn?: string;
+  ctaCoursesAr?: string;
+  ctaCoursesEn?: string;
   showStats: boolean;
   divesStat: string;
   divesLabelAr?: string;
@@ -44,6 +50,16 @@ export interface HeroConfig {
   safetyStat: string;
   safetyLabelAr?: string;
   safetyLabelEn?: string;
+  whyTitleAr?: string;
+  whyTitleEn?: string;
+  why1Ar?: string;
+  why1En?: string;
+  why2Ar?: string;
+  why2En?: string;
+  why3Ar?: string;
+  why3En?: string;
+  whatsappBtnAr?: string;
+  whatsappBtnEn?: string;
 }
 
 export interface InstructorConfig {
@@ -96,6 +112,29 @@ export interface BookingRecord {
   paymentReference?: string;
 }
 
+export interface AdminUserRecord {
+  uid: string;
+  email: string;
+  name?: string;
+  phone?: string;
+  role: 'superadmin' | 'admin' | 'instructor' | 'viewer';
+  status?: 'active' | 'suspended';
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface TraineeRecord {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  course?: string;
+  status: 'active' | 'completed' | 'pending' | 'paused';
+  padiNumber?: string;
+  notes?: string;
+  createdAt: string;
+}
+
 export interface PaymobPaymentConfig {
   enabled: boolean;
   paymentUrl: string;
@@ -118,6 +157,10 @@ export interface FemaleInstructorConfig {
   badgeEn: string;
   bioAr: string;
   bioEn: string;
+  privacyTextAr?: string;
+  privacyTextEn?: string;
+  bookingBtnAr?: string;
+  bookingBtnEn?: string;
   photoUrl?: string;
   phone?: string;
   whatsappNumber?: string;
@@ -212,6 +255,12 @@ export interface UnderConstructionConfig {
   textAr: string;
   textEn: string;
   showWhatsAppButton?: boolean;
+  badgeTextAr?: string;
+  badgeTextEn?: string;
+  messageAr?: string;
+  messageEn?: string;
+  whatsappBtnTextAr?: string;
+  whatsappBtnTextEn?: string;
 }
 
 export interface TrustBadgesConfig {
@@ -234,6 +283,14 @@ export interface TrustBadgesConfig {
 }
 
 export interface DesignContentConfig {
+  // 0. Instructor Section Header & Intro
+  instSectionKickerAr?: string;
+  instSectionKickerEn?: string;
+  instSectionTitleAr?: string;
+  instSectionTitleEn?: string;
+  instSectionDescAr?: string;
+  instSectionDescEn?: string;
+
   // 1. Quote & Philosophy
   quoteTextAr?: string;
   quoteTextEn?: string;
@@ -256,7 +313,39 @@ export interface DesignContentConfig {
   pillar3DescAr?: string;
   pillar3DescEn?: string;
 
-  // 3. Contact Section Texts
+  // 3. Courses Section Header
+  coursesKickerAr?: string;
+  coursesKickerEn?: string;
+  coursesTitleAr?: string;
+  coursesTitleEn?: string;
+  coursesDescAr?: string;
+  coursesDescEn?: string;
+
+  // 4. Sites Section Header
+  sitesKickerAr?: string;
+  sitesKickerEn?: string;
+  sitesTitleAr?: string;
+  sitesTitleEn?: string;
+  sitesDescAr?: string;
+  sitesDescEn?: string;
+
+  // 5. FAQs Section Header
+  faqKickerAr?: string;
+  faqKickerEn?: string;
+  faqTitleAr?: string;
+  faqTitleEn?: string;
+  faqDescAr?: string;
+  faqDescEn?: string;
+
+  // 6. Testimonials Section Header
+  testiKickerAr?: string;
+  testiKickerEn?: string;
+  testiTitleAr?: string;
+  testiTitleEn?: string;
+  testiDescAr?: string;
+  testiDescEn?: string;
+
+  // 7. Contact Section Texts
   contactKickerAr?: string;
   contactKickerEn?: string;
   contactTitleAr?: string;
@@ -267,6 +356,12 @@ export interface DesignContentConfig {
   regionsTextEn?: string;
   certAgencyTextAr?: string;
   certAgencyTextEn?: string;
+
+  // 8. Quick Portals Header
+  portalsKickerAr?: string;
+  portalsKickerEn?: string;
+  portalsTitleAr?: string;
+  portalsTitleEn?: string;
 
   // 4. Booking CTA Card
   contactCardTitleAr?: string;

@@ -553,33 +553,134 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 </label>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] text-slate-400 block">{isRtl ? 'عدد الغوصات:' : 'Dives Stat:'}</label>
-                  <input
-                    type="text"
-                    value={heroForm.divesStat || '1,450+'}
-                    onChange={(e) => setHeroForm({ ...heroForm, divesStat: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-mono font-bold focus:outline-none"
-                  />
+              <div className="space-y-4">
+                {/* Live Preview of the 3 Stats */}
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                  <span className="text-[10px] font-mono text-slate-400 block uppercase">
+                    {isRtl ? 'معاينة حية لإحصائيات الهيرو (كما تظهر للزوار):' : 'Hero Stats Live Preview:'}
+                  </span>
+                  <div className="grid grid-cols-3 gap-3 text-center sm:text-start">
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                      <div className="text-base sm:text-xl font-black text-white font-mono">{heroForm.divesStat || '1,450+'}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                        {isRtl ? (heroForm.divesLabelAr || 'عدد الغوصات الموثقة') : (heroForm.divesLabelEn || 'Logged Dives')}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                      <div className="text-base sm:text-xl font-black text-[#C59B5F] font-mono">{heroForm.studentsStat || '520+'}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                        {isRtl ? (heroForm.studentsLabelAr || 'عدد الغواصين الخريجين') : (heroForm.studentsLabelEn || 'Certified Students')}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                      <div className="text-base sm:text-xl font-black text-sky-400 font-mono">{heroForm.safetyStat || '100%'}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                        {isRtl ? (heroForm.safetyLabelAr || 'سجل الأمان والسلامة') : (heroForm.safetyLabelEn || 'Safety Record')}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] text-slate-400 block">{isRtl ? 'عدد الخريجين:' : 'Certified Students:'}</label>
-                  <input
-                    type="text"
-                    value={heroForm.studentsStat || '520+'}
-                    onChange={(e) => setHeroForm({ ...heroForm, studentsStat: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-emerald-300 font-mono font-bold focus:outline-none"
-                  />
+
+                {/* Stat 1: Dives */}
+                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                      <span>{isRtl ? 'الإحصائية 1: الغوصات الموثقة' : 'Stat 1: Logged Dives'}</span>
+                    </span>
+                    <span className="text-xs font-mono font-bold text-cyan-400">{heroForm.divesStat || '1,450+'}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div className="sm:col-span-4 space-y-1">
+                      <label className="text-[11px] text-slate-400 block font-medium">{isRtl ? 'الرقم / القيمة:' : 'Number Value:'}</label>
+                      <input
+                        type="text"
+                        value={heroForm.divesStat || '1,450+'}
+                        onChange={(e) => setHeroForm({ ...heroForm, divesStat: e.target.value })}
+                        placeholder="1,450+"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-mono font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="sm:col-span-8">
+                      <BilingualInput
+                        label={isRtl ? 'تسمية الإحصائية (عربي / English):' : 'Stat Label (AR & EN):'}
+                        valueAr={heroForm.divesLabelAr || 'عدد الغوصات الموثقة'}
+                        valueEn={heroForm.divesLabelEn || 'Logged Dives'}
+                        onChangeAr={(val) => setHeroForm({ ...heroForm, divesLabelAr: val })}
+                        onChangeEn={(val) => setHeroForm({ ...heroForm, divesLabelEn: val })}
+                        showAr={showAr}
+                        showEn={showEn}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] text-slate-400 block">{isRtl ? 'نسبة الأمان والسلامة:' : 'Safety Record:'}</label>
-                  <input
-                    type="text"
-                    value={heroForm.safetyStat || '100%'}
-                    onChange={(e) => setHeroForm({ ...heroForm, safetyStat: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-amber-300 font-mono font-bold focus:outline-none"
-                  />
+
+                {/* Stat 2: Students */}
+                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#E0BA84] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#C59B5F]" />
+                      <span>{isRtl ? 'الإحصائية 2: الغواصون الخريجون' : 'Stat 2: Certified Students'}</span>
+                    </span>
+                    <span className="text-xs font-mono font-bold text-[#E0BA84]">{heroForm.studentsStat || '520+'}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div className="sm:col-span-4 space-y-1">
+                      <label className="text-[11px] text-slate-400 block font-medium">{isRtl ? 'الرقم / القيمة:' : 'Number Value:'}</label>
+                      <input
+                        type="text"
+                        value={heroForm.studentsStat || '520+'}
+                        onChange={(e) => setHeroForm({ ...heroForm, studentsStat: e.target.value })}
+                        placeholder="520+"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-emerald-300 font-mono font-bold focus:border-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="sm:col-span-8">
+                      <BilingualInput
+                        label={isRtl ? 'تسمية الإحصائية (عربي / English):' : 'Stat Label (AR & EN):'}
+                        valueAr={heroForm.studentsLabelAr || 'عدد الغواصين الخريجين'}
+                        valueEn={heroForm.studentsLabelEn || 'Certified Students'}
+                        onChangeAr={(val) => setHeroForm({ ...heroForm, studentsLabelAr: val })}
+                        onChangeEn={(val) => setHeroForm({ ...heroForm, studentsLabelEn: val })}
+                        showAr={showAr}
+                        showEn={showEn}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stat 3: Safety Record */}
+                <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-sky-400" />
+                      <span>{isRtl ? 'الإحصائية 3: سجل الأمان والسلامة' : 'Stat 3: Safety Record'}</span>
+                    </span>
+                    <span className="text-xs font-mono font-bold text-sky-400">{heroForm.safetyStat || '100%'}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div className="sm:col-span-4 space-y-1">
+                      <label className="text-[11px] text-slate-400 block font-medium">{isRtl ? 'النسبة / القيمة:' : 'Percentage Value:'}</label>
+                      <input
+                        type="text"
+                        value={heroForm.safetyStat || '100%'}
+                        onChange={(e) => setHeroForm({ ...heroForm, safetyStat: e.target.value })}
+                        placeholder="100%"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-amber-300 font-mono font-bold focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="sm:col-span-8">
+                      <BilingualInput
+                        label={isRtl ? 'تسمية الإحصائية (عربي / English):' : 'Stat Label (AR & EN):'}
+                        valueAr={heroForm.safetyLabelAr || 'سجل الأمان والسلامة'}
+                        valueEn={heroForm.safetyLabelEn || 'Safety Record'}
+                        onChangeAr={(val) => setHeroForm({ ...heroForm, safetyLabelAr: val })}
+                        onChangeEn={(val) => setHeroForm({ ...heroForm, safetyLabelEn: val })}
+                        showAr={showAr}
+                        showEn={showEn}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

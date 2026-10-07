@@ -1,22 +1,36 @@
-import React, { useState } from 'react';
-import { Tag, Sparkles, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Tag, Sparkles, Save, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { AnnouncementConfig } from '../../../types/admin';
+import { AnnouncementConfig, UnderConstructionConfig } from '../../../types/admin';
+import { DEFAULT_UNDER_CONSTRUCTION } from '../../../data/defaultConfig';
 
 interface OffersTabProps {
   initialConfig: AnnouncementConfig;
+  initialUnderConstruction?: UnderConstructionConfig;
   onUpdate: (config: AnnouncementConfig) => void;
+  onUpdateUnderConstruction?: (uc: Partial<UnderConstructionConfig>) => void;
   showToast: (msg?: string) => void;
 }
 
-export const OffersTab: React.FC<OffersTabProps> = ({ initialConfig, onUpdate, showToast }) => {
+export const OffersTab: React.FC<OffersTabProps> = ({ 
+  initialConfig, 
+  initialUnderConstruction,
+  onUpdate, 
+  onUpdateUnderConstruction,
+  showToast 
+}) => {
   const { isRtl } = useLanguage();
   const [announcementForm, setAnnouncementForm] = useState<AnnouncementConfig>(initialConfig);
+  const [ucForm, setUcForm] = useState<UnderConstructionConfig>(initialUnderConstruction || DEFAULT_UNDER_CONSTRUCTION);
 
   // Sync state whenever initialConfig updates
-  React.useEffect(() => {
+  useEffect(() => {
     setAnnouncementForm(initialConfig);
   }, [initialConfig]);
+
+  useEffect(() => {
+    if (initialUnderConstruction) setUcForm(initialUnderConstruction);
+  }, [initialUnderConstruction]);
 
   const handleToggle = (enabled: boolean) => {
     const next = { ...announcementForm, enabled };
@@ -293,6 +307,154 @@ export const OffersTab: React.FC<OffersTabProps> = ({ initialConfig, onUpdate, s
           </button>
         </div>
       </form>
+
+      {/* Under Construction / Beta Launch Banner Controls */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-850">
+          <div>
+            <span className="text-xs font-bold text-white flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span>{isRtl ? 'شريط الموقع قيد التطوير / الإطلاق التجريبي (Under Construction)' : 'Under Construction / Beta Banner'}</span>
+            </span>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {isRtl 
+                ? 'شريط تنبيهي عائم يظهر في أعلى الموقع لتوضيح أن المنصة قيد التدشين والتطوير مع زر واتساب مباشر.' 
+                : 'Floating top notice banner informing visitors that the platform is in active development.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+              ucForm.enabled 
+                ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' 
+                : 'bg-slate-800 text-slate-400 border-slate-700'
+            }`}>
+              {ucForm.enabled 
+                ? (isRtl ? 'الشريط مفعّل ومعروض 🟢' : 'Banner Active 🟢') 
+                : (isRtl ? 'الشريط معطّل ومخفي ⚪' : 'Banner Inactive ⚪')}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                const nextState = !ucForm.enabled;
+                const updated = { ...ucForm, enabled: nextState };
+                setUcForm(updated);
+                onUpdateUnderConstruction?.(updated);
+                showToast(nextState 
+                  ? (isRtl ? 'تم تفعيل شريط قيد الإنشاء أعلى الموقع 🚧' : 'Under construction banner activated!') 
+                  : (isRtl ? 'تم إخفاء شريط قيد الإنشاء من الموقع' : 'Under construction banner hidden!'));
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer focus:outline-none ${
+                ucForm.enabled ? 'bg-amber-500' : 'bg-slate-800'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  ucForm.enabled ? (isRtl ? '-translate-x-6' : 'translate-x-6') : (isRtl ? '-translate-x-1' : 'translate-x-1')
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'شارة الشريط (بالعربية):' : 'Badge Text (Arabic):'}
+            </label>
+            <input 
+              type="text"
+              dir="rtl"
+              value={ucForm.badgeTextAr || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, badgeTextAr: e.target.value }))}
+              placeholder="الموقع قيد التطوير والتحديث المستمر"
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-amber-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'شارة الشريط (بالإنجليزية):' : 'Badge Text (English):'}
+            </label>
+            <input 
+              type="text"
+              dir="ltr"
+              value={ucForm.badgeTextEn || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, badgeTextEn: e.target.value }))}
+              placeholder="Under Continuous Active Development"
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-amber-500 outline-none"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'الرسالة التوضيحية (بالعربية):' : 'Notice Message (Arabic):'}
+            </label>
+            <textarea 
+              dir="rtl"
+              rows={2}
+              value={ucForm.messageAr || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, messageAr: e.target.value }))}
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-amber-500 outline-none leading-relaxed"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'الرسالة التوضيحية (بالإنجليزية):' : 'Notice Message (English):'}
+            </label>
+            <textarea 
+              dir="ltr"
+              rows={2}
+              value={ucForm.messageEn || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, messageEn: e.target.value }))}
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-amber-500 outline-none leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'نص زر الواتساب بالشريط (بالعربية):' : 'WhatsApp Button Text (Arabic):'}
+            </label>
+            <input 
+              type="text"
+              dir="rtl"
+              value={ucForm.whatsappBtnTextAr || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, whatsappBtnTextAr: e.target.value }))}
+              placeholder="تواصل مع الكابتن للطلبات والحجوزات العاجلة"
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-emerald-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              {isRtl ? 'نص زر الواتساب بالشريط (بالإنجليزية):' : 'WhatsApp Button Text (English):'}
+            </label>
+            <input 
+              type="text"
+              dir="ltr"
+              value={ucForm.whatsappBtnTextEn || ''}
+              onChange={(e) => setUcForm(prev => ({ ...prev, whatsappBtnTextEn: e.target.value }))}
+              placeholder="Contact Captain directly via WhatsApp"
+              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-emerald-500 outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="pt-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              onUpdateUnderConstruction?.(ucForm);
+              showToast(isRtl ? 'تم حفظ إعدادات شريط قيد الإنشاء بنجاح! 💾' : 'Under construction banner saved!');
+            }}
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md cursor-pointer transition-colors"
+          >
+            {isRtl ? 'حفظ إعدادات شريط قيد الإنشاء 💾' : 'Save Banner Settings 💾'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

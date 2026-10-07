@@ -24,17 +24,13 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
   showWordmark = true, 
   language 
 }) => {
+  const uid = React.useId().replace(/:/g, '');
   const isDark = theme === 'dark';
   
-  let contextLang: 'ar' | 'en' = 'ar';
-  try {
-    const langContext = useLanguage();
-    if (langContext && langContext.language) {
-      contextLang = langContext.language;
-    }
-  } catch {}
+  const langContext = useLanguage();
+  const siteConfig = useSiteConfig();
 
-  const currentLang = language || contextLang;
+  const currentLang = language || langContext?.language || 'ar';
 
   // Global automatic fallback to active site config
   let siteCustomImage: string | undefined;
@@ -42,21 +38,16 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
   let siteSubtext: string | undefined;
   let siteLogoBg: 'white' | 'dark' | 'transparent' = 'white';
 
-  try {
-    const siteConfig = useSiteConfig();
-    if (siteConfig?.config?.brand) {
-      const b = siteConfig.config.brand;
-      if (b.logoType === 'custom-image' && b.customLogoUrl) {
-        siteCustomImage = b.customLogoUrl;
-      }
-      siteTitle = b.logoText || (currentLang === 'ar' ? b.centerNameAr : b.centerNameEn);
-      siteSubtext = b.logoSubtext;
-      if (b.logoBg) {
-        siteLogoBg = b.logoBg;
-      }
+  if (siteConfig?.config?.brand) {
+    const b = siteConfig.config.brand;
+    if (b.logoType === 'custom-image' && b.customLogoUrl) {
+      siteCustomImage = b.customLogoUrl;
     }
-  } catch {
-    // If rendered outside SiteConfigProvider
+    siteTitle = b.logoText || (currentLang === 'ar' ? b.centerNameAr : b.centerNameEn);
+    siteSubtext = b.logoSubtext;
+    if (b.logoBg) {
+      siteLogoBg = b.logoBg;
+    }
   }
 
   const activeImageUrl = customImageUrl !== undefined ? customImageUrl : siteCustomImage;
@@ -94,8 +85,6 @@ export const FahadsLogo: React.FC<FahadsLogoProps> = ({
   const navyPrimary = isDark ? '#244578' : '#142749';
   const navySecondary = isDark ? '#18315B' : '#0F1E38';
   const navyStroke = isDark ? '#3D68A8' : '#1B3666';
-
-  const uid = React.useId().replace(/:/g, '');
 
   return (
     <div className={`inline-flex items-center justify-center select-none ${heightClasses[size]} ${className}`}>

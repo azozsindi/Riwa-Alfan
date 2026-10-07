@@ -9,7 +9,7 @@ service cloud.firestore {
     }
 
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() > 0 && id.size() <= 128;
     }
 
     function incoming() {
@@ -25,18 +25,17 @@ service cloud.firestore {
     }
 
     // Root Super Admin Gate:
-    // Strictly requires Google-verified email: azozsindi23@gmail.com (case-insensitive)
+    // Strictly requires email: azozsindi23@gmail.com (case-insensitive)
     function isSuperAdmin() {
       return isSignedIn() 
         && request.auth.token.email != null 
-        && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$')
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$');
     }
 
     // General Admin Gate:
     // 1. Root Super Admin (azozsindi23@gmail.com)
     // 2. Firebase Custom Claims (admin == true)
-    // 3. Explicit whitelist document in /admins/{uid} with role admin or superadmin
+    // 3. Explicit document in /admins/{uid} with role admin or superadmin
     function isAdmin() {
       return isSignedIn() && (
         isSuperAdmin() ||
@@ -62,10 +61,27 @@ service cloud.firestore {
     }
 
     function isValidAdminRecord(data) {
-      return data.keys().hasAll(['uid', 'email', 'role'])
-        && data.uid is string && data.uid.size() <= 128
+      return data.keys().hasAll(['email', 'role'])
         && data.email is string && data.email.size() <= 150
-        && data.role in ['admin', 'superadmin'];
+        && data.role in ['superadmin', 'admin', 'instructor', 'viewer']
+        && (!('name' in data) || (data.name is string && data.name.size() <= 150))
+        && (!('status' in data) || (data.status in ['active', 'suspended']))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
+        && (!('uid' in data) || (data.uid is string && data.uid.size() <= 128))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 50));
+    }
+
+    function isValidTrainee(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 150
+        && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 50
+        && (!('email' in data) || (data.email is string && data.email.size() <= 150))
+        && (!('course' in data) || (data.course is string && data.course.size() <= 200))
+        && (!('status' in data) || (data.status in ['active', 'completed', 'pending', 'paused']))
+        && (!('padiNumber' in data) || (data.padiNumber is string && data.padiNumber.size() <= 50))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && data.createdAt is string && data.createdAt.size() <= 50;
     }
 
     // 1. Bookings collection:
@@ -88,15 +104,22 @@ service cloud.firestore {
 
     // 3. Admin whitelist (/admins collection):
     // - Signed-in users can check their own admin status.
-    // - ONLY the Root Super Admin (azozsindi23@gmail.com) can add or update admin records.
+    // - Verified Admins can add or update admin and team records.
     // - Normal users or malicious actors CANNOT grant themselves or others admin rights.
     // - The root superadmin record cannot be deleted.
     match /admins/{adminId} {
       allow read: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      allow write: if isValidId(adminId) && isSuperAdmin() && isValidAdminRecord(incoming()) && incoming().uid == adminId;
-      allow delete: if isValidId(adminId) && isSuperAdmin() && (
+      allow write: if isValidId(adminId) && isAdmin() && isValidAdminRecord(incoming()) && incoming().uid == adminId;
+      allow delete: if isValidId(adminId) && isAdmin() && (
         resource.data.email == null || !resource.data.email.matches('(?i)^azozsindi23@gmail\\.com$')
       );
+    }
+
+    // 4. Trainees & Students (/trainees collection):
+    // - ONLY verified admins can manage registered trainees and students.
+    match /trainees/{traineeId} {
+      allow create, update: if isValidId(traineeId) && isAdmin() && isValidTrainee(incoming()) && incoming().id == traineeId;
+      allow read, delete: if isValidId(traineeId) && isAdmin();
     }
   }
 }

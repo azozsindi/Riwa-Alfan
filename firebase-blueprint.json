@@ -28,15 +28,35 @@
     },
     "AdminUser": {
       "title": "AdminUser",
-      "description": "Authorized administrator user profile.",
+      "description": "Authorized user or administrator profile.",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "maxLength": 128 },
         "email": { "type": "string", "maxLength": 150 },
-        "role": { "type": "string", "enum": ["admin", "superadmin"] },
+        "name": { "type": "string", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["superadmin", "admin", "instructor", "viewer"] },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "notes": { "type": "string", "maxLength": 500 },
         "createdAt": { "type": "string", "maxLength": 50 }
       },
-      "required": ["uid", "email", "role"]
+      "required": ["email", "role"]
+    },
+    "Trainee": {
+      "title": "Trainee",
+      "description": "Registered diving student or client.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 150 },
+        "course": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "enum": ["active", "completed", "pending", "paused"] },
+        "padiNumber": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "phone", "createdAt"]
     }
   },
   "firestore": {
@@ -51,6 +71,10 @@
     "/admins/{adminId}": {
       "schema": "#/entities/AdminUser",
       "description": "Collection of authorized administrators permitted to manage the site."
+    },
+    "/trainees/{traineeId}": {
+      "schema": "#/entities/Trainee",
+      "description": "Collection of registered trainees and diving students."
     }
   }
 }

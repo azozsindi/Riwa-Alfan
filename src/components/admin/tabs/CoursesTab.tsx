@@ -1,28 +1,40 @@
-import React, { useState } from 'react';
-import { Award, RotateCcw, Plus, Database, Edit3, X, Save, Trash2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Award, RotateCcw, Plus, Database, Edit3, X, Save, Trash2, AlertTriangle, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Course } from '../../../data/divingData';
+import { DesignContentConfig } from '../../../types/admin';
+import { DEFAULT_DESIGN_CONTENT } from '../../../data/defaultConfig';
 
 interface CoursesTabProps {
   courses: Course[];
+  initialDesign?: DesignContentConfig;
   onUpdateCourse: (id: string, updates: Partial<Course>) => void;
   onAddCourse: (course: Course) => void;
   onDeleteCourse: (id: string) => void;
   onRestorePrices: () => boolean;
+  onUpdateDesign?: (design: Partial<DesignContentConfig>) => void;
   showToast: (msg?: string) => void;
 }
 
 export const CoursesTab: React.FC<CoursesTabProps> = ({
   courses,
+  initialDesign = DEFAULT_DESIGN_CONTENT,
   onUpdateCourse,
   onAddCourse,
   onDeleteCourse,
   onRestorePrices,
+  onUpdateDesign,
   showToast,
 }) => {
   const { isRtl } = useLanguage();
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign);
+  const [showHeaderEditor, setShowHeaderEditor] = useState(false);
+
+  useEffect(() => {
+    if (initialDesign) setDesignForm(initialDesign);
+  }, [initialDesign]);
 
   const handleSaveCourseEdit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +42,12 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
     onUpdateCourse(editingCourse.id, editingCourse);
     setEditingCourse(null);
     showToast();
+  };
+
+  const handleSaveHeader = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdateDesign?.(designForm);
+    showToast(isRtl ? 'تم تحديث عنوان ومقدمة قسم الدورات بنجاح!' : 'Courses header updated!');
   };
 
   return (
@@ -92,8 +110,119 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
             <Plus className="w-4 h-4" />
             <span>{isRtl ? 'إضافة دورة جديدة' : 'Add New Course'}</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowHeaderEditor(!showHeaderEditor)}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+            <span>{isRtl ? 'تعديل عنوان ومقدمة القسم' : 'Edit Section Header'}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showHeaderEditor ? 'rotate-180' : ''}`} />
+          </button>
         </div>
       </div>
+
+      {/* Collapsible Section Header Editor */}
+      {showHeaderEditor && (
+        <form onSubmit={handleSaveHeader} className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-blue-500/40 space-y-4 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+              <Edit3 className="w-4 h-4" />
+              <span>{isRtl ? 'تعديل عنوان ونصوص مقدمة قسم الدورات التدريبية' : 'Courses Section Header Texts'}</span>
+            </span>
+            <button
+              type="submit"
+              className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold cursor-pointer transition-colors shadow-sm"
+            >
+              {isRtl ? 'حفظ النصوص' : 'Save Header'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'الشارة العلوية (بالعربية):' : 'Kicker (Arabic):'}
+              </label>
+              <input
+                type="text"
+                dir="rtl"
+                value={designForm.coursesKickerAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesKickerAr: e.target.value }))}
+                placeholder="دورات معتمدة دولياً · PADI"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'الشارة العلوية (بالإنجليزية):' : 'Kicker (English):'}
+              </label>
+              <input
+                type="text"
+                dir="ltr"
+                value={designForm.coursesKickerEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesKickerEn: e.target.value }))}
+                placeholder="Internationally Certified Courses · PADI"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'العنوان الرئيسي (بالعربية):' : 'Title (Arabic):'}
+              </label>
+              <input
+                type="text"
+                dir="rtl"
+                value={designForm.coursesTitleAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesTitleAr: e.target.value }))}
+                placeholder="اختر مسار تدريبك وانطلق في الأعماق"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none font-bold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'العنوان الرئيسي (بالإنجليزية):' : 'Title (English):'}
+              </label>
+              <input
+                type="text"
+                dir="ltr"
+                value={designForm.coursesTitleEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesTitleEn: e.target.value }))}
+                placeholder="Choose Your Path & Dive Deeper"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none font-bold"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'الوصف التوضيحي (بالعربية):' : 'Description (Arabic):'}
+              </label>
+              <textarea
+                dir="rtl"
+                rows={2}
+                value={designForm.coursesDescAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesDescAr: e.target.value }))}
+                placeholder="من دورات المبتدئين حتى الاحتراف والقيادة. جميع الدورات شاملة المواد والمعدات والشهادات الدولية."
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {isRtl ? 'الوصف التوضيحي (بالإنجليزية):' : 'Description (English):'}
+              </label>
+              <textarea
+                dir="ltr"
+                rows={2}
+                value={designForm.coursesDescEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, coursesDescEn: e.target.value }))}
+                placeholder="From beginner discovery to professional mastery. All courses include gear, materials, and international certification."
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+              />
+            </div>
+          </div>
+        </form>
+      )}
 
       {/* Cloud Sync & Quick Price Matrix */}
       <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">

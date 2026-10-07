@@ -41,6 +41,10 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
     : [inst.padiMemberNumber, inst.owsiNumber, inst.danNumber, inst.efrNumber].filter(Boolean);
 
   const d = config.designContent;
+  const sectionKicker = language === 'ar' ? (d?.instSectionKickerAr || t.instSectionKicker) : (d?.instSectionKickerEn || t.instSectionKicker);
+  const sectionTitle = language === 'ar' ? (d?.instSectionTitleAr || t.instSectionTitle) : (d?.instSectionTitleEn || t.instSectionTitle);
+  const sectionDesc = language === 'ar' ? (d?.instSectionDescAr || t.instSectionDesc) : (d?.instSectionDescEn || t.instSectionDesc);
+
   const activeQuote = language === 'ar' 
     ? (d?.quoteTextAr || inst.quoteAr)
     : (d?.quoteTextEn || inst.quoteEn);
@@ -64,6 +68,12 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   const femaleBio = language === 'ar' ? femaleInst.bioAr : femaleInst.bioEn;
   const femaleFeatures = language === 'ar' ? femaleInst.featuresListAr : femaleInst.featuresListEn;
   const femaleSpecialties = language === 'ar' ? femaleInst.specialtiesAr : femaleInst.specialtiesEn;
+  const femalePrivacyText = language === 'ar' 
+    ? (femaleInst.privacyTextAr || 'خصوصية تامة 100%') 
+    : (femaleInst.privacyTextEn || '100% Full Privacy');
+  const femaleBookingBtn = language === 'ar'
+    ? (femaleInst.bookingBtnAr || 'حجز تدريب نسائي خاص')
+    : (femaleInst.bookingBtnEn || 'Book Ladies Training');
   const femaleWhatsappUrl = `https://wa.me/${femaleInst.whatsappNumber || config.brand.whatsappNumber}?text=${encodeURIComponent(
     isRtl 
       ? `السلام عليكم، أود الاستفسار والتسجيل في برامج التدريب النسائي الخاص لدى رواء الفن بجدة.` 
@@ -77,13 +87,13 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
         {/* Section Header */}
         <div className={`max-w-3xl mb-10 sm:mb-16 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-[#C59B5F] tracking-wider">
-            {t.instSectionKicker}
+            {sectionKicker}
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
-            {t.instSectionTitle}
+            {sectionTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {t.instSectionDesc}
+            {sectionDesc}
           </p>
         </div>
 
@@ -188,7 +198,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     </span>
                     <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px] flex items-center gap-1">
                       <Lock className="w-3 h-3 text-emerald-400" />
-                      <span>{isRtl ? 'خصوصية تامة 100%' : '100% Full Privacy'}</span>
+                      <span>{femalePrivacyText}</span>
                     </span>
                   </div>
 
@@ -239,7 +249,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5"
                   >
                     <Sparkles className="w-4 h-4 text-slate-950 shrink-0" />
-                    <span className="truncate">{isRtl ? 'حجز تدريب نسائي خاص' : 'Book Ladies Training'}</span>
+                    <span className="truncate">{femaleBookingBtn}</span>
                   </button>
 
                   <a

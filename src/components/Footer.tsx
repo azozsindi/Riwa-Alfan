@@ -91,17 +91,18 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-black tracking-tight text-white font-brand-arabic">
-                  {language === 'ar' ? (
-                    <>
-                      <span>رواء </span>
-                      <span className="text-[#C59B5F]">الفن</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Riwa </span>
-                      <span className="text-[#C59B5F]">Alfan</span>
-                    </>
-                  )}
+                  {(() => {
+                    const words = (brandName || '').trim().split(' ');
+                    if (words.length > 1) {
+                      return (
+                        <>
+                          <span>{words[0]} </span>
+                          <span className="text-[#C59B5F]">{words.slice(1).join(' ')}</span>
+                        </>
+                      );
+                    }
+                    return <span className="text-[#C59B5F]">{brandName}</span>;
+                  })()}
                 </span>
                 <span className="text-xs text-[#C59B5F] font-semibold tracking-wider uppercase">
                   {brandSub}

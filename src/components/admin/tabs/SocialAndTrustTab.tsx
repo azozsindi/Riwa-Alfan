@@ -3,8 +3,8 @@ import {
   Share2, MapPin, ShieldCheck, Shield, Instagram, Video, ExternalLink, Save, Globe, 
   Award, Plus, Trash2, Upload, CheckCircle2, FileCheck2, Building2, Link2, Eye, EyeOff, Edit3 
 } from 'lucide-react';
-import { SocialLinksConfig, LocationConfig, TrustBadgesConfig, PadiCertificateItem, PartnerLogoItem } from '../../../types/admin';
-import { DEFAULT_SOCIAL_LINKS, DEFAULT_LOCATION_CONFIG, DEFAULT_TRUST_BADGES } from '../../../data/defaultConfig';
+import { SocialLinksConfig, LocationConfig, TrustBadgesConfig, PadiCertificateItem, PartnerLogoItem, DesignContentConfig } from '../../../types/admin';
+import { DEFAULT_SOCIAL_LINKS, DEFAULT_LOCATION_CONFIG, DEFAULT_TRUST_BADGES, DEFAULT_DESIGN_CONTENT } from '../../../data/defaultConfig';
 import { useLanguage } from '../../../context/LanguageContext';
 import { optimizeImageFile } from '../../../utils/imageUtils';
 
@@ -12,9 +12,11 @@ interface SocialAndTrustTabProps {
   initialSocial?: SocialLinksConfig;
   initialLocation?: LocationConfig;
   initialTrust?: TrustBadgesConfig;
+  initialDesign?: DesignContentConfig;
   onUpdateSocial: (partial: Partial<SocialLinksConfig>) => void;
   onUpdateLocation: (partial: Partial<LocationConfig>) => void;
   onUpdateTrust: (partial: Partial<TrustBadgesConfig>) => void;
+  onUpdateDesign?: (partial: Partial<DesignContentConfig>) => void;
   showToast: (msg?: string) => void;
 }
 
@@ -22,9 +24,11 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
   initialSocial = DEFAULT_SOCIAL_LINKS,
   initialLocation = DEFAULT_LOCATION_CONFIG,
   initialTrust = DEFAULT_TRUST_BADGES,
+  initialDesign = DEFAULT_DESIGN_CONTENT,
   onUpdateSocial,
   onUpdateLocation,
   onUpdateTrust,
+  onUpdateDesign,
   showToast
 }) => {
   const { isRtl } = useLanguage();
@@ -32,6 +36,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
   const [social, setSocial] = useState<SocialLinksConfig>(initialSocial);
   const [location, setLocation] = useState<LocationConfig>(initialLocation);
   const [trust, setTrust] = useState<TrustBadgesConfig>(initialTrust);
+  const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign);
 
   // New Certificate state
   const [newCertTitleAr, setNewCertTitleAr] = useState('');
@@ -50,6 +55,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
     onUpdateSocial(social);
     onUpdateLocation(location);
     onUpdateTrust(trust);
+    onUpdateDesign?.(designForm);
     showToast(isRtl ? 'تم حفظ وتطبيق كافة بيانات التوثيق والاعتمادات بنجاح! 🚀' : 'Social & Trust Details Saved!');
   };
 
@@ -523,7 +529,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
       <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-4">
         <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800/80 pb-3">
           <Edit3 className="w-4 h-4 text-cyan-400" />
-          <span>{isRtl ? '4. تعديل نصوص حقوق النشر وتذييل الفوتر' : '4. Footer Copyright & Country Text'}</span>
+          <span>{isRtl ? '4. نصوص حقوق النشر وتذييل الفوتر وإخلاء المسؤولية' : '4. Footer Copyright, Country & Safety Disclaimer'}</span>
         </h4>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -549,6 +555,72 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
               onChange={(e) => setTrust({ ...trust, countryTextAr: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:border-cyan-500 focus:outline-none font-bold"
             />
+          </div>
+        </div>
+
+        {/* Safety Disclaimer in Footer */}
+        <div className="pt-3 border-t border-slate-850 space-y-3">
+          <span className="text-xs font-bold text-amber-400 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-amber-400" />
+            <span>{isRtl ? 'تنبيه إخلاء المسؤولية ومعايير السلامة بالفوتر:' : 'Safety & Regulations Disclaimer in Footer:'}</span>
+          </span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                {isRtl ? 'عنوان التنبيه (بالعربية):' : 'Disclaimer Title (Arabic):'}
+              </label>
+              <input
+                type="text"
+                dir="rtl"
+                value={designForm.footerDisclaimerTitleAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, footerDisclaimerTitleAr: e.target.value }))}
+                placeholder="إخلاء مسؤولية ومعايير السلامة"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                {isRtl ? 'عنوان التنبيه (بالإنجليزية):' : 'Disclaimer Title (English):'}
+              </label>
+              <input
+                type="text"
+                dir="ltr"
+                value={designForm.footerDisclaimerTitleEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, footerDisclaimerTitleEn: e.target.value }))}
+                placeholder="Safety & Regulation Disclaimer"
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                {isRtl ? 'نص إخلاء المسؤولية (بالعربية):' : 'Disclaimer Text (Arabic):'}
+              </label>
+              <textarea
+                dir="rtl"
+                rows={2}
+                value={designForm.footerDisclaimerTextAr || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, footerDisclaimerTextAr: e.target.value }))}
+                placeholder="رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها."
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:border-amber-500 focus:outline-none leading-relaxed"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                {isRtl ? 'نص إخلاء المسؤولية (بالإنجليزية):' : 'Disclaimer Text (English):'}
+              </label>
+              <textarea
+                dir="ltr"
+                rows={2}
+                value={designForm.footerDisclaimerTextEn || ''}
+                onChange={(e) => setDesignForm(prev => ({ ...prev, footerDisclaimerTextEn: e.target.value }))}
+                placeholder="Scuba diving requires official professional training and international certification from an accredited agency."
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:border-amber-500 focus:outline-none leading-relaxed"
+              />
+            </div>
           </div>
         </div>
       </div>
