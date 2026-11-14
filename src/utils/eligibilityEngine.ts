@@ -8,6 +8,7 @@ import {
 } from '../types/admin';
 
 export type CourseKind =
+  | 'discover_scuba'
   | 'open_water'
   | 'advanced'
   | 'nitrox'
@@ -152,6 +153,9 @@ export function detectCourseKind(course: Pick<Course, 'id' | 'category' | 'title
   const id = (course.id || '').toLowerCase();
   const text = `${id} ${course.title?.en || ''} ${course.title?.ar || ''}`.toLowerCase();
 
+  if (id === 'discover-scuba' || text.includes('discover scuba') || text.includes('تجربة الغوص') || text.includes('try dive')) {
+    return 'discover_scuba';
+  }
   if (id === 'open-water' || (text.includes('open water') && !text.includes('advanced'))) {
     return 'open_water';
   }
@@ -360,8 +364,8 @@ export function evaluateCourseEligibility(
   const missingAr: string[] = [];
   const missingEn: string[] = [];
 
-  if (kind === 'open_water') {
-    // Open Water is open to anyone (even with no prior cert)
+  if (kind === 'open_water' || kind === 'discover_scuba') {
+    // Open Water and Discover Scuba are open to anyone (even with no prior cert)
   } else if (kind === 'advanced' || kind === 'nitrox') {
     if (cert === 'none') {
       missingAr.push('شهادة غواص المياه المفتوحة (Open Water Diver) أو ما يعادلها.');
@@ -472,7 +476,7 @@ export function evaluateCourseEligibility(
     priceAr: course.price.ar,
     priceEn: course.price.en,
     status: isEligible ? 'eligible' : 'missing_requirements',
-    needsEquivalency: external && kind !== 'open_water',
+    needsEquivalency: external && kind !== 'open_water' && kind !== 'discover_scuba',
     missingRequirementsAr: missingAr,
     missingRequirementsEn: missingEn,
     guidanceMessageAr,

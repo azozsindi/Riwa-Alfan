@@ -90,6 +90,65 @@ export const INSTRUCTOR_INFO = {
 
 export const COURSES_DATA: Course[] = [
   {
+    id: "discover-scuba",
+    category: "beginner",
+    certAgency: "PADI",
+    seaDives: 1,
+    poolSessions: 0,
+    title: {
+      ar: "تجربة الغوص",
+      en: "Discover Scuba Diving"
+    },
+    depth: {
+      ar: "حتى 12 متر",
+      en: "Up to 12m (40 ft)"
+    },
+    duration: {
+      ar: "نصف يوم (2 - 3 ساعات)",
+      en: "Half Day (2 - 3 hours)"
+    },
+    price: {
+      ar: "450 ر.س",
+      en: "450 SAR"
+    },
+    summary: {
+      ar: "تجربة غوص ممتعة وآمنة للمبتدئين تماماً في مياه شرم أبحر المحمية دون الحاجة لرخصة مسبقة أو إجادة السباحة.",
+      en: "A fun, safe first-time underwater experience in sheltered Sharm Obhur waters—no prior license or swimming expertise required."
+    },
+    prerequisites: {
+      ar: "عمر 10 سنوات فما فوق، صحة بدنية عامة، لا يشترط شهادة سابقة أو إجادة السباحة.",
+      en: "Age 10+, reasonable physical health, no prior certification or swimming required."
+    },
+    highlights: {
+      ar: [
+        "مرافقة فردية وشخصية مع الكابتن طوال التجربة",
+        "شاملة كامل معدات الغوص الحديثة والمعقمة",
+        "شرح مبسط للمهارات الأساسية قبل النزول للبحر",
+        "تُحتسب كخطوة تمهيدية نحو دورة المياه المفتوحة"
+      ],
+      en: [
+        "Direct 1-on-1 personal escort with the Captain",
+        "Full sanitized modern scuba gear included",
+        "Briefing and shallow-water skill introduction",
+        "Counts as your first step toward Open Water Diver"
+      ]
+    },
+    curriculum: {
+      ar: [
+        "مقدمة مبسطة عن معدات الغوص وطرق التنفس تحت الماء",
+        "التدرب على معادلة الضغط وإشارات التواصل الأساسية",
+        "مهارات تنظيف القناع واسترجاع المنظم في المياه الضحلة",
+        "جولة استكشافية ممتعة وسط الشعاب المرجانية حتى عمق 12 متر"
+      ],
+      en: [
+        "Brief introduction to scuba gear and underwater breathing",
+        "Ear equalization and essential underwater hand signals",
+        "Mask clearing and regulator recovery in shallow water",
+        "Guided coral reef exploration down to 12 meters"
+      ]
+    }
+  },
+  {
     id: "open-water",
     category: "beginner",
     certAgency: "PADI",

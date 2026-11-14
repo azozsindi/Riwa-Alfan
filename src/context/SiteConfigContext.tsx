@@ -125,6 +125,41 @@ const normalizeLocationValue = (val: string | undefined, lang: 'ar' | 'en', fall
   return val as string;
 };
 
+const isDiscoverScubaCourse = (c: Course) => {
+  const t = `${c.id} ${c.title?.ar || ''} ${c.title?.en || ''}`.toLowerCase();
+  return c.id === 'discover-scuba' || t.includes('تجربة الغوص') || t.includes('discover scuba');
+};
+
+const isOpenWaterCourse = (c: Course) => {
+  const t = `${c.id} ${c.title?.ar || ''} ${c.title?.en || ''}`.toLowerCase();
+  return (c.id === 'open-water' || t.includes('المياه المفتوحة') || t.includes('open water')) &&
+    !t.includes('متقدم') && !t.includes('advanced');
+};
+
+const isAdvancedOpenWaterCourse = (c: Course) => {
+  const t = `${c.id} ${c.title?.ar || ''} ${c.title?.en || ''}`.toLowerCase();
+  return c.id === 'advanced-open-water' || t.includes('المياه المفتوحة المتقدم') || t.includes('advanced open water');
+};
+
+const ensureOrderedCourses = (rawList: Course[] | undefined): Course[] => {
+  const list = Array.isArray(rawList) && rawList.length > 0 ? [...rawList] : [...DEFAULT_CONFIG.courses];
+  const defaultDiscover = DEFAULT_CONFIG.courses.find(isDiscoverScubaCourse);
+
+  const discover = list.find(isDiscoverScubaCourse) || defaultDiscover;
+  const openWater = list.find(isOpenWaterCourse);
+  const advanced = list.find(isAdvancedOpenWaterCourse);
+
+  const topThreeIds = new Set(
+    [discover, openWater, advanced].filter(Boolean).map((c) => (c as Course).id)
+  );
+  const rest = list.filter((c) => !topThreeIds.has(c.id));
+
+  return [
+    ...([discover, openWater, advanced].filter(Boolean) as Course[]),
+    ...rest,
+  ];
+};
+
 export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<SiteConfig>(() => {
     try {
@@ -232,7 +267,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
         captains: Array.isArray(base.captains) && base.captains.length > 0 ? base.captains : DEFAULT_CAPTAINS,
         announcement: initialAnnouncement,
-        courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
+        courses: ensureOrderedCourses(recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses)),
         diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
         faqs: Array.isArray(base.faqs) && base.faqs.length > 0 ? base.faqs : DEFAULT_CONFIG.faqs,
         testimonials: Array.isArray(base.testimonials) && base.testimonials.length > 0 ? base.testimonials : DEFAULT_CONFIG.testimonials,
@@ -371,6 +406,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return {
           ...prev,
           ...remoteData,
+          courses: ensureOrderedCourses(
+            Array.isArray(remoteData.courses) && remoteData.courses.length > 0
+              ? remoteData.courses
+              : prev.courses
+          ),
           announcement: updatedAnnouncement,
           trustBadges: {
             ...DEFAULT_TRUST_BADGES,
