@@ -1,17 +1,17 @@
 /**
  * Firestore synchronization service for Riwa Alfan.
- * Manages cloud storage of site settings, course configurations, and customer bookings.
+ * Manages cloud storage of site settings, partner media, course configurations, and customer bookings.
  */
 
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  deleteDoc, 
-  updateDoc, 
-  onSnapshot, 
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  updateDoc,
+  onSnapshot,
   getDocFromServer,
-  Unsubscribe 
+  Unsubscribe
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { SiteConfig, BookingRecord } from '../types/admin';
@@ -41,6 +41,21 @@ export interface FirestoreErrorInfo {
     }[];
   };
 }
+
+export interface PartnerMediaMap {
+  [partnerId: string]: {
+    logoUrl?: string;
+    licenseImageUrl?: string;
+    updatedAt?: string;
+  };
+}
+
+export const getPartnerMediaDocId = (partnerId: string): string => {
+  const safe = String(partnerId || 'partner')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 90);
+  return `partner_media_${safe}`;
+};
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errInfo: FirestoreErrorInfo = {
@@ -99,25 +114,77 @@ export const subscribeToBookings = (
   }
 };
 
+/**
+ * Subscribe to the entire /settings collection so both `site_config` and
+ * individual `partner_media_*` image documents stay synced without hitting the 1MB doc limit.
+ */
 export const subscribeToSiteConfig = (
-  onUpdate: (remoteData: Partial<SiteConfig>) => void
+  onUpdate: (remoteData: Partial<SiteConfig>, partnerMedia?: PartnerMediaMap) => void
 ): Unsubscribe => {
-  const path = 'settings/site_config';
+  const path = 'settings';
   try {
-    const configDocRef = doc(db, 'settings', 'site_config');
-    return onSnapshot(configDocRef, (snap) => {
-      if (snap.exists()) {
-        const remoteData = snap.data() as Partial<SiteConfig>;
-        if (remoteData && Object.keys(remoteData).length > 0) {
-          onUpdate(remoteData);
+    return onSnapshot(collection(db, path), (snapshot) => {
+      let siteConfigData: Partial<SiteConfig> | null = null;
+      const partnerMedia: PartnerMediaMap = {};
+
+      snapshot.forEach(d => {
+        if (d.id === 'site_config') {
+          const data = d.data() as Partial<SiteConfig>;
+          if (data && Object.keys(data).length > 0) {
+            siteConfigData = data;
+          }
+        } else if (d.id.startsWith('partner_media_')) {
+          const media = d.data() as {
+            partnerId?: string;
+            logoUrl?: string;
+            licenseImageUrl?: string;
+            updatedAt?: string;
+          };
+          const pid = media?.partnerId || d.id.replace(/^partner_media_/, '');
+          if (pid) {
+            partnerMedia[pid] = {
+              logoUrl: media.logoUrl ?? '',
+              licenseImageUrl: media.licenseImageUrl ?? '',
+              updatedAt: media.updatedAt
+            };
+          }
         }
+      });
+
+      if (siteConfigData || Object.keys(partnerMedia).length > 0) {
+        onUpdate(siteConfigData || {}, partnerMedia);
       }
     }, (err) => {
-      handleFirestoreError(err, OperationType.GET, path);
+      handleFirestoreError(err, OperationType.LIST, path);
     });
   } catch (e) {
-    handleFirestoreError(e, OperationType.GET, path);
+    handleFirestoreError(e, OperationType.LIST, path);
     return () => {};
+  }
+};
+
+export const savePartnerMediaToFirestore = async (
+  partnerId: string,
+  logoUrl?: string,
+  licenseImageUrl?: string
+): Promise<boolean> => {
+  const docId = getPartnerMediaDocId(partnerId);
+  const path = `settings/${docId}`;
+  try {
+    await setDoc(
+      doc(db, 'settings', docId),
+      {
+        partnerId,
+        logoUrl: logoUrl || '',
+        licenseImageUrl: licenseImageUrl || '',
+        updatedAt: new Date().toISOString()
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    handleFirestoreError(err, OperationType.WRITE, path);
+    return false;
   }
 };
 
@@ -125,8 +192,29 @@ export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<voi
   const path = 'settings/site_config';
   try {
     const configDocRef = doc(db, 'settings', 'site_config');
-    // Sanitize object to strip undefined values that cause Firestore setDoc to fail
-    const cleanConfig = JSON.parse(JSON.stringify(config));
+    const cleanConfig = JSON.parse(JSON.stringify(config)) as SiteConfig;
+
+    // Offload partner images into dedicated partner_media_* docs so site_config never hits the 1MB Firestore limit
+    const partners = cleanConfig.trustBadges?.partnerLogos;
+    if (Array.isArray(partners) && partners.length > 0) {
+      await Promise.all(
+        partners.map((p) => {
+          if (!p?.id) return Promise.resolve(true);
+          if (p.logoUrl || p.licenseImageUrl) {
+            return savePartnerMediaToFirestore(p.id, p.logoUrl, p.licenseImageUrl);
+          }
+          return Promise.resolve(true);
+        })
+      );
+
+      // Strip large inline data:image payloads from site_config copy (stored safely in partner_media_*)
+      cleanConfig.trustBadges!.partnerLogos = partners.map((p) => ({
+        ...p,
+        logoUrl: p.logoUrl && p.logoUrl.startsWith('data:image/') && p.logoUrl.length > 20_000 ? '' : p.logoUrl,
+        licenseImageUrl: p.licenseImageUrl && p.licenseImageUrl.startsWith('data:image/') && p.licenseImageUrl.length > 20_000 ? '' : p.licenseImageUrl,
+      }));
+    }
+
     await setDoc(configDocRef, cleanConfig, { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, path);
@@ -136,7 +224,6 @@ export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<voi
 export const saveBookingToFirestore = async (booking: BookingRecord): Promise<void> => {
   const path = `bookings/${booking.id}`;
   try {
-    // Sanitize string lengths and types according to security blueprint
     const sanitizedBooking: BookingRecord = {
       id: String(booking.id || '').slice(0, 128),
       name: String(booking.name || '').slice(0, 120),
@@ -151,7 +238,6 @@ export const saveBookingToFirestore = async (booking: BookingRecord): Promise<vo
       createdAt: booking.createdAt || new Date().toISOString()
     };
 
-    // Filter out any undefined keys
     const cleanPayload = Object.fromEntries(
       Object.entries(sanitizedBooking).filter(([_, v]) => v !== undefined)
     );
@@ -163,7 +249,7 @@ export const saveBookingToFirestore = async (booking: BookingRecord): Promise<vo
 };
 
 export const updateBookingStatusInFirestore = async (
-  id: string, 
+  id: string,
   status: BookingRecord['status']
 ): Promise<void> => {
   const path = `bookings/${id}`;

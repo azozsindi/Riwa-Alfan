@@ -3,7 +3,7 @@ import {
   Palette, Quote, Shield, HeartHandshake, Sparkles, MessageSquare, PhoneCall, 
   Mail, MapPin, ShieldCheck, Calendar, FileText, Check, Save, RefreshCw,
   Building2, Award, FileCheck2, Eye, EyeOff, Globe, Tag,
-  BarChart2, Percent, AlertTriangle, Type, Layers, Languages
+  BarChart2, Percent, AlertTriangle, Type, Layers, Languages, Upload, Trash2
 } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { 
@@ -25,6 +25,8 @@ import {
   DEFAULT_SOCIAL_LINKS
 } from '../../../data/defaultConfig';
 import { FahadsLogo } from '../../FahadsLogo';
+import { optimizeImageFile } from '../../../utils/imageUtils';
+import { savePartnerMediaToFirestore } from '../../../services/firestoreSync';
 
 interface DesignTabProps {
   initialDesign?: DesignContentConfig;
@@ -231,8 +233,42 @@ export const DesignTab: React.FC<DesignTabProps> = ({
     hasEfrPartner || !defaultEfrPartner ? cleanedPartners : [...cleanedPartners, defaultEfrPartner];
 
   const handleUpdatePartner = (id: string, updates: Partial<PartnerLogoItem>) => {
-    const updated = partnerLogos.map(item => item.id === id ? { ...item, ...updates } : item);
-    setTrustForm(prev => ({ ...prev, partnerLogos: updated }));
+    setTrustForm(prev => {
+      const updated = partnerLogos.map(item => item.id === id ? { ...item, ...updates } : item);
+      return { ...prev, partnerLogos: updated };
+    });
+  };
+
+  const handleDesignPartnerImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    partner: PartnerLogoItem,
+    field: 'logoUrl' | 'licenseImageUrl'
+  ) => {
+    const input = e.target;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const base64 = await optimizeImageFile(
+        file,
+        field === 'logoUrl' ? 400 : 850,
+        field === 'logoUrl' ? 400 : 850,
+        0.84
+      );
+      handleUpdatePartner(partner.id, { [field]: base64 });
+      const nextLogo = field === 'logoUrl' ? base64 : partner.logoUrl;
+      const nextLicense = field === 'licenseImageUrl' ? base64 : partner.licenseImageUrl;
+      await savePartnerMediaToFirestore(partner.id, nextLogo, nextLicense);
+      onUpdateTrust({
+        ...trustForm,
+        partnerLogos: partnerLogos.map(p => p.id === partner.id ? { ...p, [field]: base64 } : p)
+      });
+      showToast(isRtl ? 'تم رفع الصورة وحفظها بنجاح!' : 'Image uploaded and saved!');
+    } catch (err) {
+      console.error('Partner image upload error:', err);
+      showToast(isRtl ? 'تعذر معالجة الصورة، جرب صورة PNG أو JPG.' : 'Could not process image.');
+    } finally {
+      input.value = '';
+    }
   };
 
   const handleSave = (e?: React.FormEvent) => {
@@ -1419,6 +1455,54 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                         showAr={showAr}
                         showEn={showEn}
                       />
+
+                      {/* Partner Logo & License Image Upload */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+                        <div className="flex items-center gap-2">
+                          <label className="flex-1 px-2.5 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors">
+                            <Upload className="w-3 h-3" />
+                            <span>{partner.logoUrl ? (isRtl ? 'تغيير الشعار' : 'Change Logo') : (isRtl ? 'رفع الشعار' : 'Upload Logo')}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleDesignPartnerImageUpload(e, partner, 'logoUrl')}
+                              className="hidden"
+                            />
+                          </label>
+                          {partner.logoUrl && (
+                            <img src={partner.logoUrl} alt={partner.nameAr} className="w-8 h-8 object-contain rounded bg-white p-0.5 border border-slate-600 shrink-0" />
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <label className="flex-1 px-2.5 py-1.5 rounded-lg bg-[#C59B5F]/15 hover:bg-[#C59B5F]/25 border border-[#C59B5F]/40 text-[#E0BA84] text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors">
+                            <Upload className="w-3 h-3" />
+                            <span>{partner.licenseImageUrl ? (isRtl ? 'تغيير صورة الرخصة' : 'Change License') : (isRtl ? 'رفع صورة الرخصة' : 'Upload License')}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleDesignPartnerImageUpload(e, partner, 'licenseImageUrl')}
+                              className="hidden"
+                            />
+                          </label>
+                          {partner.licenseImageUrl && (
+                            <>
+                              <img src={partner.licenseImageUrl} alt="License" className="w-8 h-8 object-contain rounded bg-white p-0.5 border border-slate-600 shrink-0" />
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  handleUpdatePartner(partner.id, { licenseImageUrl: '' });
+                                  await savePartnerMediaToFirestore(partner.id, partner.logoUrl, '');
+                                }}
+                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-500/30 cursor-pointer shrink-0"
+                                title={isRtl ? 'حذف صورة الرخصة' : 'Remove image'}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

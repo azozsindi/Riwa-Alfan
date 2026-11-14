@@ -322,10 +322,10 @@ export const Footer: React.FC<FooterProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    {partner.logoUrl ? (
+                    {(partner.logoUrl || partner.licenseImageUrl) ? (
                       <div className="w-9 h-9 rounded-lg bg-white p-1 border border-slate-700/60 flex items-center justify-center shrink-0">
                         <img 
-                          src={partner.logoUrl} 
+                          src={partner.logoUrl || partner.licenseImageUrl} 
                           alt={partnerName} 
                           className="w-full h-full object-contain" 
                         />
@@ -423,10 +423,10 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
 
             {/* License Image Only */}
-            {activePartner.licenseImageUrl ? (
+            {(activePartner.licenseImageUrl || activePartner.logoUrl) ? (
               <div className="rounded-2xl overflow-hidden border border-slate-700 bg-white/95 p-2">
                 <img
-                  src={activePartner.licenseImageUrl}
+                  src={activePartner.licenseImageUrl || activePartner.logoUrl}
                   alt={isRtl ? 'صورة الرخصة' : 'License Certificate'}
                   className="w-full max-h-[420px] object-contain rounded-xl mx-auto"
                 />

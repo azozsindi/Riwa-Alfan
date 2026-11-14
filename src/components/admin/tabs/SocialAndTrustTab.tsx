@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Share2, MapPin, ShieldCheck, Shield, Instagram, Video, ExternalLink, Save, Globe, 
   Award, Plus, Trash2, Upload, CheckCircle2, FileCheck2, Building2, Link2, Eye, EyeOff, Edit3 
@@ -7,6 +7,7 @@ import { SocialLinksConfig, LocationConfig, TrustBadgesConfig, PadiCertificateIt
 import { DEFAULT_SOCIAL_LINKS, DEFAULT_LOCATION_CONFIG, DEFAULT_TRUST_BADGES, DEFAULT_DESIGN_CONTENT } from '../../../data/defaultConfig';
 import { useLanguage } from '../../../context/LanguageContext';
 import { optimizeImageFile } from '../../../utils/imageUtils';
+import { savePartnerMediaToFirestore } from '../../../services/firestoreSync';
 
 interface SocialAndTrustTabProps {
   initialSocial?: SocialLinksConfig;
@@ -22,12 +23,17 @@ interface SocialAndTrustTabProps {
 
 const normalizePartners = (partners?: PartnerLogoItem[]): PartnerLogoItem[] => {
   const source = partners && partners.length > 0 ? partners : (DEFAULT_TRUST_BADGES.partnerLogos || []);
-  const cleaned = source.filter(
-    (p) =>
-      p.id !== 'partner-saudi-business' &&
-      p.id !== 'partner-freelance' &&
-      !/منصة الأعمال|منصة العمل الحر|FL-2918401/i.test(`${p.nameAr} ${p.nameEn}`)
-  );
+  const cleaned = source
+    .filter(
+      (p) =>
+        p.id !== 'partner-saudi-business' &&
+        p.id !== 'partner-freelance' &&
+        !/منصة الأعمال|منصة العمل الحر|FL-2918401/i.test(`${p.nameAr} ${p.nameEn}`)
+    )
+    .map((p, idx) => ({
+      ...p,
+      id: p.id || `partner-${idx}`
+    }));
   const hasEfr = cleaned.some(
     (p) => p.id === 'partner-efr' || /\befr\b/i.test(`${p.nameAr} ${p.nameEn}`)
   );
@@ -65,6 +71,22 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
     )
   }));
   const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign);
+
+  useEffect(() => {
+    if (!initialTrust?.partnerLogos || initialTrust.partnerLogos.length === 0) return;
+    setTrust(prev => {
+      const incoming = normalizePartners(initialTrust.partnerLogos);
+      const merged = incoming.map(p => {
+        const localMatch = (prev.partnerLogos || []).find(lp => lp.id === p.id);
+        return {
+          ...p,
+          logoUrl: p.logoUrl || localMatch?.logoUrl || '',
+          licenseImageUrl: p.licenseImageUrl || localMatch?.licenseImageUrl || ''
+        };
+      });
+      return { ...prev, partnerLogos: merged };
+    });
+  }, [initialTrust]);
 
   // New Certificate state
   const [newCertTitleAr, setNewCertTitleAr] = useState('');
@@ -141,19 +163,23 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
   };
 
   const handleUpdatePartnerItem = (id: string, updates: Partial<PartnerLogoItem>) => {
-    const updatedPartners = (trust.partnerLogos || []).map(p => 
-      p.id === id ? { ...p, ...updates } : p
-    );
-    const updatedTrust = { ...trust, partnerLogos: updatedPartners };
-    setTrust(updatedTrust);
-    onUpdateTrust(updatedTrust);
+    setTrust(prev => {
+      const updatedPartners = (prev.partnerLogos || []).map(p =>
+        p.id === id ? { ...p, ...updates } : p
+      );
+      const updatedTrust = { ...prev, partnerLogos: updatedPartners };
+      onUpdateTrust(updatedTrust);
+      return updatedTrust;
+    });
   };
 
   const handleDeletePartnerLogo = (id: string) => {
-    const updatedPartners = (trust.partnerLogos || []).filter(p => p.id !== id);
-    const updatedTrust = { ...trust, partnerLogos: updatedPartners };
-    setTrust(updatedTrust);
-    onUpdateTrust(updatedTrust);
+    setTrust(prev => {
+      const updatedPartners = (prev.partnerLogos || []).filter(p => p.id !== id);
+      const updatedTrust = { ...prev, partnerLogos: updatedPartners };
+      onUpdateTrust(updatedTrust);
+      return updatedTrust;
+    });
     showToast(isRtl ? 'تم حذف بطاقة الاعتماد.' : 'Partner logo removed.');
   };
 
@@ -164,14 +190,17 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
       try {
         const base64 = await optimizeImageFile(file, 400, 400, 0.85);
         if (partnerId) {
+          const target = (trust.partnerLogos || []).find(p => p.id === partnerId);
           handleUpdatePartnerItem(partnerId, { logoUrl: base64 });
-          showToast(isRtl ? 'تم تحديث لوجو الجهة بنجاح!' : 'Partner logo updated!');
+          await savePartnerMediaToFirestore(partnerId, base64, target?.licenseImageUrl);
+          showToast(isRtl ? 'تم تحديث لوجو الجهة وحفظه بنجاح!' : 'Partner logo saved!');
         } else {
           setNewPartnerLogoUrl(base64);
           showToast(isRtl ? 'تم تحميل لوجو الجهة الجديدة!' : 'Logo image loaded!');
         }
       } catch (err) {
         console.error('Error optimizing image:', err);
+        showToast(isRtl ? 'تعذر معالجة الصورة، جرب صورة بصيغة PNG أو JPG.' : 'Could not process image. Try PNG or JPG.');
       } finally {
         input.value = '';
       }
@@ -183,11 +212,14 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
     const file = input.files?.[0];
     if (file) {
       try {
-        const base64 = await optimizeImageFile(file, 900, 900, 0.82);
+        const base64 = await optimizeImageFile(file, 850, 850, 0.82);
+        const target = (trust.partnerLogos || []).find(p => p.id === partnerId);
         handleUpdatePartnerItem(partnerId, { licenseImageUrl: base64 });
-        showToast(isRtl ? 'تم رفع صورة الرخصة بنجاح!' : 'License image uploaded!');
+        await savePartnerMediaToFirestore(partnerId, target?.logoUrl, base64);
+        showToast(isRtl ? 'تم رفع وحفظ صورة الرخصة بنجاح!' : 'License image uploaded and saved!');
       } catch (err) {
         console.error('Error optimizing license image:', err);
+        showToast(isRtl ? 'تعذر معالجة صورة الرخصة، جرب صورة بصيغة PNG أو JPG.' : 'Could not process license image.');
       } finally {
         input.value = '';
       }
@@ -501,11 +533,14 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
                           <img
                             src={partner.licenseImageUrl}
                             alt="License"
-                            className="w-7 h-7 object-cover rounded border border-slate-700 shrink-0"
+                            className="w-8 h-8 object-contain rounded bg-white p-0.5 border border-slate-600 shrink-0"
                           />
                           <button
                             type="button"
-                            onClick={() => handleUpdatePartnerItem(partner.id, { licenseImageUrl: '' })}
+                            onClick={async () => {
+                              handleUpdatePartnerItem(partner.id, { licenseImageUrl: '' });
+                              await savePartnerMediaToFirestore(partner.id, partner.logoUrl, '');
+                            }}
                             className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-500/30 cursor-pointer shrink-0"
                             title={isRtl ? 'حذف صورة الرخصة' : 'Remove image'}
                           >

@@ -38,7 +38,8 @@ import {
   saveSiteConfigToFirestore,
   saveBookingToFirestore,
   updateBookingStatusInFirestore,
-  deleteBookingFromFirestore
+  deleteBookingFromFirestore,
+  PartnerMediaMap
 } from '../services/firestoreSync';
 
 interface SiteConfigContextType {
@@ -206,6 +207,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const { isAdminUser } = useAuth();
+  const skipNextFirestoreSaveRef = React.useRef(false);
 
   // Validate Connection to Firestore on boot
   useEffect(() => {
@@ -247,9 +249,10 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [config.brand.logoType, config.brand.customLogoUrl]);
 
-  // Real-time Firestore sync for Site Config
+  // Real-time Firestore sync for Site Config & Partner Media
   useEffect(() => {
-    const unsub = subscribeToSiteConfig((remoteData) => {
+    const unsub = subscribeToSiteConfig((remoteData, partnerMedia?: PartnerMediaMap) => {
+      skipNextFirestoreSaveRef.current = true;
       setConfig(prev => {
         const isExplicitlyDisabled = localStorage.getItem('riwa_offers_explicitly_disabled') === 'true';
         let updatedAnnouncement = prev.announcement;
@@ -266,6 +269,24 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           updatedAnnouncement = { ...prev.announcement, enabled: false };
         }
 
+        const basePartners = (remoteData.trustBadges?.partnerLogos && remoteData.trustBadges.partnerLogos.length > 0)
+          ? remoteData.trustBadges.partnerLogos
+          : (prev.trustBadges?.partnerLogos && prev.trustBadges.partnerLogos.length > 0)
+            ? prev.trustBadges.partnerLogos
+            : (DEFAULT_TRUST_BADGES.partnerLogos || []);
+
+        const mergedPartners = basePartners.map((p, idx) => {
+          const pid = p.id || `partner-${idx}`;
+          const media = partnerMedia?.[pid];
+          const prevMatch = prev.trustBadges?.partnerLogos?.find(x => x.id === pid);
+          return {
+            ...p,
+            id: pid,
+            logoUrl: media ? (media.logoUrl || '') : (p.logoUrl || prevMatch?.logoUrl || ''),
+            licenseImageUrl: media ? (media.licenseImageUrl || '') : (p.licenseImageUrl || prevMatch?.licenseImageUrl || ''),
+          };
+        });
+
         return {
           ...prev,
           ...remoteData,
@@ -274,11 +295,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             ...DEFAULT_TRUST_BADGES,
             ...(prev.trustBadges || {}),
             ...(remoteData.trustBadges || {}),
-            partnerLogos: (remoteData.trustBadges?.partnerLogos && remoteData.trustBadges.partnerLogos.length > 0)
-              ? remoteData.trustBadges.partnerLogos
-              : (prev.trustBadges?.partnerLogos && prev.trustBadges.partnerLogos.length > 0)
-                ? prev.trustBadges.partnerLogos
-                : DEFAULT_TRUST_BADGES.partnerLogos,
+            partnerLogos: mergedPartners,
             certificates: (remoteData.trustBadges?.certificates && remoteData.trustBadges.certificates.length > 0)
               ? remoteData.trustBadges.certificates
               : (prev.trustBadges?.certificates && prev.trustBadges.certificates.length > 0)
@@ -301,15 +318,29 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return () => unsub();
   }, []);
 
-  // Sync config to localStorage and Firestore
+  // Sync config to localStorage and (for verified admins) Firestore
   useEffect(() => {
     try {
+      // Clear legacy config keys to keep localStorage quota free for active config
+      try {
+        ['riwa_alfan_site_config_v11', 'riwa_alfan_site_config_v10', 'riwa_alfan_site_config_v9'].forEach(k => {
+          if (localStorage.getItem(k)) localStorage.removeItem(k);
+        });
+      } catch {}
       localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
-      saveSiteConfigToFirestore(config);
     } catch (e) {
-      console.error('Failed to save site config:', e);
+      console.error('Failed to save site config to localStorage:', e);
     }
-  }, [config]);
+
+    if (skipNextFirestoreSaveRef.current) {
+      skipNextFirestoreSaveRef.current = false;
+      return;
+    }
+
+    if (isAdminUser) {
+      saveSiteConfigToFirestore(config);
+    }
+  }, [config, isAdminUser]);
 
   // Sync bookings to localStorage
   useEffect(() => {
