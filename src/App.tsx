@@ -23,6 +23,7 @@ import { PoliciesModal } from './components/PoliciesModal';
 import { DiverToolsModal } from './components/DiverToolsModal';
 import { DiveSitesModal } from './components/DiveSitesModal';
 import { FaqModal } from './components/FaqModal';
+import { BookingStatusModal } from './components/BookingStatusModal';
 import { AdminPage } from './pages/AdminPage';
 import { DEFAULT_VISIBLE_SECTIONS } from './data/defaultConfig';
 import { CartProvider } from './context/CartContext';
@@ -36,6 +37,8 @@ function AppContent() {
   const sections = config.visibleSections || DEFAULT_VISIBLE_SECTIONS;
   
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isStatusTrackerOpen, setIsStatusTrackerOpen] = useState(false);
+  const [statusTrackerRef, setStatusTrackerRef] = useState<string | undefined>(undefined);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isSitesOpen, setIsSitesOpen] = useState(false);
@@ -76,6 +79,11 @@ function AppContent() {
     setIsBookingOpen(false);
     setSelectedCourseId(undefined);
     setSelectedTripSite(undefined);
+  };
+
+  const handleOpenStatusTracker = (bookingRef?: string) => {
+    setStatusTrackerRef(bookingRef);
+    setIsStatusTrackerOpen(true);
   };
 
   const handleExploreCourses = () => {
@@ -146,7 +154,10 @@ function AppContent() {
 
         {/* Contact & Consultation */}
         {sections.contact && (
-          <ContactSection onOpenBooking={() => handleOpenBooking()} />
+          <ContactSection
+            onOpenBooking={() => handleOpenBooking()}
+            onOpenStatusTracker={() => handleOpenStatusTracker()}
+          />
         )}
       </main>
 
@@ -157,6 +168,7 @@ function AppContent() {
           onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
           onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
           onOpenFaq={sections.faqModal ? () => setIsFaqOpen(true) : undefined}
+          onOpenStatusTracker={() => handleOpenStatusTracker()}
         />
       )}
 
@@ -179,12 +191,20 @@ function AppContent() {
         onClose={() => setIsFaqOpen(false)}
       />
 
-      {/* Booking and Consultation Modal */}
+      {/* Booking and Q&A Eligibility Modal */}
       <BookingModal
         isOpen={isBookingOpen}
         onClose={handleCloseBooking}
         preSelectedCourseId={selectedCourseId}
         preSelectedTripSite={selectedTripSite}
+        onOpenStatusTracker={handleOpenStatusTracker}
+      />
+
+      {/* Customer Status Tracker & Post-Approval Payment Gate Modal */}
+      <BookingStatusModal
+        isOpen={isStatusTrackerOpen}
+        onClose={() => setIsStatusTrackerOpen(false)}
+        initialBookingId={statusTrackerRef}
       />
 
       {/* Official Policies, Refund & Safety Modal */}
@@ -192,6 +212,10 @@ function AppContent() {
         isOpen={isPoliciesOpen}
         onClose={() => setIsPoliciesOpen(false)}
       />
+
+      {/* Shopping Cart Drawer & Floating Button */}
+      <CartDrawer onOpenStatusTracker={handleOpenStatusTracker} />
+      <FloatingCartButton />
     </div>
   );
 }
@@ -204,8 +228,6 @@ export default function App() {
           <SiteConfigProvider>
             <CartProvider>
               <AppContent />
-              <CartDrawer />
-              <FloatingCartButton />
             </CartProvider>
           </SiteConfigProvider>
         </LanguageProvider>

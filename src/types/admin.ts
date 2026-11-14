@@ -97,6 +97,77 @@ export interface AnnouncementConfig {
   highlightCourseId?: string;
 }
 
+export type EligibilityStatus =
+  | 'eligible'
+  | 'missing_requirements'
+  | 'pending_instructor_review'
+  | 'approved'
+  | 'rejected';
+
+export type HighestCertification =
+  | 'none'
+  | 'open_water'
+  | 'advanced_open_water'
+  | 'rescue_diver'
+  | 'divemaster'
+  | 'other';
+
+export type IssuingAgency =
+  | 'PADI'
+  | 'SSI'
+  | 'NAUI'
+  | 'SDI'
+  | 'RAID'
+  | 'CMAS'
+  | 'other'
+  | 'none';
+
+export type InstructorActionType =
+  | 'approved'
+  | 'request_info'
+  | 'request_requirement'
+  | 'rejected';
+
+export interface CourseEligibilityEvaluation {
+  courseId: string;
+  titleAr: string;
+  titleEn: string;
+  priceAr: string;
+  priceEn: string;
+  status: 'eligible' | 'missing_requirements';
+  needsEquivalency: boolean;
+  missingRequirementsAr: string[];
+  missingRequirementsEn: string[];
+  guidanceMessageAr: string;
+  guidanceMessageEn: string;
+}
+
+export interface BookingQAAnswers {
+  highestCert: HighestCertification;
+  otherCertName?: string;
+  issuingAgency: IssuingAgency;
+  otherAgencyName?: string;
+  hasAdventureAndNav?: 'yes' | 'no' | 'unsure';
+  hasValidEfrCpr?: 'yes' | 'no' | 'unsure';
+  loggedDivesRange?: '0-19' | '20-39' | '40+';
+  lastDiveRecency?: 'within_6m' | '6m_to_1y' | 'over_1y';
+  medicalClearanceReady?: 'yes' | 'no' | 'unsure';
+}
+
+export interface BookingStatusPublic {
+  id: string;
+  phoneSuffix: string;
+  interest: string;
+  eligibilityStatus: EligibilityStatus;
+  preliminaryEligibility?: 'eligible' | 'missing_requirements';
+  paymentAllowed: boolean;
+  instructorActionType?: InstructorActionType;
+  instructorReviewNote?: string;
+  paymentAmount?: string;
+  status: BookingRecord['status'];
+  updatedAt: string;
+}
+
 export interface BookingRecord {
   id: string;
   createdAt: string;
@@ -110,6 +181,20 @@ export interface BookingRecord {
   paymentMethod?: 'cash' | 'transfer' | 'whatsapp';
   paymentAmount?: string;
   paymentReference?: string;
+  // Smart Q&A Eligibility & Captain Review fields (optional for backwards compatibility)
+  bookingType?: 'courses' | 'expedition' | 'mixed';
+  selectedCourses?: CourseEligibilityEvaluation[];
+  highestCert?: HighestCertification;
+  issuingAgency?: IssuingAgency;
+  qaAnswers?: BookingQAAnswers;
+  preliminaryEligibility?: 'eligible' | 'missing_requirements';
+  eligibilityStatus?: EligibilityStatus;
+  equivalencyRequired?: boolean;
+  instructorActionType?: InstructorActionType;
+  instructorReviewNote?: string;
+  paymentAllowed?: boolean;
+  reviewedAt?: string;
+  phoneSuffix?: string;
 }
 
 export interface AdminUserRecord {

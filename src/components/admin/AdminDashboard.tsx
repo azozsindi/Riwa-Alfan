@@ -77,6 +77,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateFaqs,
     updateTestimonials,
     updateBookingStatus,
+    updateBookingReview,
     deleteBooking,
     resetToDefaults,
     exportBackupJson,
@@ -110,7 +111,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }, 2500);
   };
 
-  const newBookingsCount = bookings.filter(b => b.status === 'new').length;
+  const newBookingsCount = bookings.filter(
+    b => b.status === 'new' || b.eligibilityStatus === 'pending_instructor_review'
+  ).length;
 
   const adminTabsList: {
     id: AdminTab;
@@ -803,6 +806,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <BookingsTab 
               bookings={bookings}
               onUpdateStatus={updateBookingStatus}
+              onUpdateReview={updateBookingReview}
               onDeleteBooking={deleteBooking}
               showToast={showToast}
             />

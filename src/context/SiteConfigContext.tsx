@@ -13,7 +13,9 @@ import {
   LocationConfig,
   TrustBadgesConfig,
   UnderConstructionConfig,
-  DesignContentConfig
+  DesignContentConfig,
+  EligibilityStatus,
+  InstructorActionType
 } from '../types/admin';
 import { Course, DiveSite, FAQItem, Testimonial } from '../data/divingData';
 import { 
@@ -38,6 +40,7 @@ import {
   saveSiteConfigToFirestore,
   saveBookingToFirestore,
   updateBookingStatusInFirestore,
+  updateBookingReviewInFirestore,
   deleteBookingFromFirestore,
   PartnerMediaMap
 } from '../services/firestoreSync';
@@ -68,6 +71,16 @@ interface SiteConfigContextType {
   updateTestimonials: (testimonials: Testimonial[]) => void;
   addBooking: (booking: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => string;
   updateBookingStatus: (id: string, status: BookingRecord['status']) => void;
+  updateBookingReview: (
+    id: string,
+    review: {
+      eligibilityStatus: EligibilityStatus;
+      instructorActionType: InstructorActionType;
+      instructorReviewNote?: string;
+      paymentAllowed: boolean;
+      status?: BookingRecord['status'];
+    }
+  ) => void;
   deleteBooking: (id: string) => void;
   clearAllBookings: () => void;
   resetToDefaults: () => void;
@@ -564,17 +577,30 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
+    const cleanDigits = String(bookingData.phone || '').replace(/\D/g, '');
     const newRecord: BookingRecord = {
       id,
       name: sanitizeText(bookingData.name, 120),
       phone: sanitizeText(bookingData.phone, 30),
-      interest: sanitizeText(bookingData.interest, 250),
-      experience: sanitizeText(bookingData.experience, 100) || '',
+      phoneSuffix: cleanDigits.slice(-4),
+      interest: sanitizeText(bookingData.interest, 500),
+      experience: sanitizeText(bookingData.experience, 150) || '',
       timing: sanitizeText(bookingData.timing, 100) || '',
       notes: bookingData.notes ? sanitizeText(bookingData.notes, 2000) : undefined,
       paymentMethod: bookingData.paymentMethod,
-      paymentAmount: bookingData.paymentAmount ? sanitizeText(bookingData.paymentAmount, 50) : undefined,
-      status: 'new', // Enforce 'new' on submission
+      paymentAmount: bookingData.paymentAmount ? sanitizeText(bookingData.paymentAmount, 100) : undefined,
+      status: 'new', // Enforce 'new' on submission — payment stays locked until Captain approval
+      bookingType: bookingData.bookingType,
+      selectedCourses: bookingData.selectedCourses,
+      highestCert: bookingData.highestCert,
+      issuingAgency: bookingData.issuingAgency,
+      qaAnswers: bookingData.qaAnswers,
+      preliminaryEligibility: bookingData.preliminaryEligibility,
+      eligibilityStatus: 'pending_instructor_review',
+      equivalencyRequired: bookingData.equivalencyRequired,
+      instructorActionType: undefined,
+      instructorReviewNote: undefined,
+      paymentAllowed: false,
       createdAt: new Date().toISOString()
     };
     setBookings(prev => [newRecord, ...prev]);
@@ -585,6 +611,34 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const updateBookingStatus = (id: string, status: BookingRecord['status']) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
     updateBookingStatusInFirestore(id, status);
+  };
+
+  const updateBookingReview = (
+    id: string,
+    review: {
+      eligibilityStatus: EligibilityStatus;
+      instructorActionType: InstructorActionType;
+      instructorReviewNote?: string;
+      paymentAllowed: boolean;
+      status?: BookingRecord['status'];
+    }
+  ) => {
+    const reviewedAt = new Date().toISOString();
+    const safePaymentAllowed = review.eligibilityStatus === 'approved' && review.paymentAllowed;
+    const cleanNote = review.instructorReviewNote ? sanitizeText(review.instructorReviewNote, 1000) : '';
+    const existingTarget = bookings.find(b => b.id === id);
+
+    const nextPatch: Partial<BookingRecord> = {
+      eligibilityStatus: review.eligibilityStatus,
+      instructorActionType: review.instructorActionType,
+      instructorReviewNote: cleanNote || undefined,
+      paymentAllowed: safePaymentAllowed,
+      reviewedAt,
+      ...(review.status ? { status: review.status } : {})
+    };
+
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, ...nextPatch } : b));
+    updateBookingReviewInFirestore(id, nextPatch, existingTarget);
   };
 
   const deleteBooking = (id: string) => {
@@ -683,6 +737,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       updateTestimonials,
       addBooking,
       updateBookingStatus,
+      updateBookingReview,
       deleteBooking,
       clearAllBookings,
       resetToDefaults,

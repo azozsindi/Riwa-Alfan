@@ -1,14 +1,15 @@
 import React from 'react';
-import { Mail, MapPin, MessageSquare, Calendar, ShieldCheck, PhoneCall } from 'lucide-react';
+import { Mail, MapPin, MessageSquare, Calendar, ShieldCheck, PhoneCall, Search } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface ContactSectionProps {
   onOpenBooking: () => void;
+  onOpenStatusTracker?: () => void;
 }
 
-export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking }) => {
+export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, onOpenStatusTracker }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
@@ -150,6 +151,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                 <Calendar className="w-4 h-4 text-slate-950 shrink-0" />
                 <span>{contactCardBtn}</span>
               </button>
+
+              {onOpenStatusTracker && (
+                <button
+                  type="button"
+                  onClick={onOpenStatusTracker}
+                  className="w-full py-3 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-[#C59B5F]/50 text-slate-200 font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  <Search className="w-4 h-4 text-[#C59B5F] shrink-0" />
+                  <span>{isRtl ? 'متابعة حالة الطلب والدفع' : 'Track Booking Status & Payment'}</span>
+                </button>
+              )}
 
               <div className="text-[11px] text-slate-500">
                 {availableDaily}

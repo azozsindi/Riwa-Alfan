@@ -2,22 +2,55 @@
   "entities": {
     "Booking": {
       "title": "Booking",
-      "description": "A booking or consultation request submitted by a visitor or student.",
+      "description": "A booking or consultation request submitted by a visitor or student with Q&A eligibility and Captain review metadata.",
       "type": "object",
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
-        "name": { "type": "string", "maxLength": 150 },
-        "phone": { "type": "string", "maxLength": 50 },
-        "interest": { "type": "string", "maxLength": 200 },
-        "experience": { "type": "string", "maxLength": 100 },
+        "name": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "phoneSuffix": { "type": "string", "maxLength": 10 },
+        "interest": { "type": "string", "maxLength": 500 },
+        "experience": { "type": "string", "maxLength": 150 },
         "timing": { "type": "string", "maxLength": 100 },
-        "notes": { "type": "string", "maxLength": 1000 },
+        "notes": { "type": "string", "maxLength": 2000 },
         "paymentMethod": { "type": "string", "maxLength": 50 },
-        "paymentAmount": { "type": "string", "maxLength": 50 },
+        "paymentAmount": { "type": "string", "maxLength": 100 },
+        "paymentReference": { "type": "string", "maxLength": 120 },
         "status": { "type": "string", "enum": ["new", "contacted", "confirmed", "completed", "cancelled", "paid", "pending_payment"] },
+        "bookingType": { "type": "string", "enum": ["courses", "expedition", "mixed"] },
+        "selectedCourses": { "type": "array", "description": "Independent per-course eligibility evaluations (max 15)." },
+        "highestCert": { "type": "string", "enum": ["none", "open_water", "advanced_open_water", "rescue_diver", "divemaster", "other"] },
+        "issuingAgency": { "type": "string", "enum": ["PADI", "SSI", "NAUI", "SDI", "RAID", "CMAS", "other", "none"] },
+        "qaAnswers": { "type": "object", "description": "Structured Q&A answers." },
+        "preliminaryEligibility": { "type": "string", "enum": ["eligible", "missing_requirements"] },
+        "eligibilityStatus": { "type": "string", "enum": ["eligible", "missing_requirements", "pending_instructor_review", "approved", "rejected"] },
+        "equivalencyRequired": { "type": "boolean" },
+        "instructorActionType": { "type": "string", "enum": ["approved", "request_info", "request_requirement", "rejected"] },
+        "instructorReviewNote": { "type": "string", "maxLength": 1000 },
+        "paymentAllowed": { "type": "boolean" },
+        "reviewedAt": { "type": "string", "maxLength": 50 },
         "createdAt": { "type": "string", "maxLength": 50 }
       },
       "required": ["id", "name", "phone", "interest", "status", "createdAt"]
+    },
+    "BookingStatusPublic": {
+      "title": "BookingStatusPublic",
+      "description": "Non-PII booking status projection for customer status lookup and post-approval payment unlock.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "phoneSuffix": { "type": "string", "maxLength": 10 },
+        "interest": { "type": "string", "maxLength": 500 },
+        "eligibilityStatus": { "type": "string", "enum": ["eligible", "missing_requirements", "pending_instructor_review", "approved", "rejected"] },
+        "preliminaryEligibility": { "type": "string", "enum": ["eligible", "missing_requirements"] },
+        "paymentAllowed": { "type": "boolean" },
+        "instructorActionType": { "type": "string", "enum": ["approved", "request_info", "request_requirement", "rejected"] },
+        "instructorReviewNote": { "type": "string", "maxLength": 1000 },
+        "paymentAmount": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["new", "contacted", "confirmed", "completed", "cancelled", "paid", "pending_payment"] },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "phoneSuffix", "interest", "eligibilityStatus", "paymentAllowed", "status", "updatedAt"]
     },
     "SiteConfigDoc": {
       "title": "SiteConfigDoc",
@@ -66,7 +99,11 @@
   "firestore": {
     "/bookings/{bookingId}": {
       "schema": "#/entities/Booking",
-      "description": "Collection of student bookings and consultation requests."
+      "description": "Collection of student bookings and Q&A eligibility review requests."
+    },
+    "/booking_status/{bookingId}": {
+      "schema": "#/entities/BookingStatusPublic",
+      "description": "Public non-PII status mirror for tracking Captain approval and payment unlock."
     },
     "/settings/{settingId}": {
       "schema": "#/entities/SiteConfigDoc",

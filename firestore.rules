@@ -37,6 +37,7 @@ service cloud.firestore {
     // Matches azozsindi23@gmail.com (case-insensitive)
     function isSuperAdmin() {
       return isSignedIn() 
+        && isVerifiedUser()
         && request.auth.token.email != null 
         && (
           request.auth.token.email == 'azozsindi23@gmail.com' ||
@@ -46,9 +47,6 @@ service cloud.firestore {
     }
 
     // General Admin Gate:
-    // 1. Root Super Admin (azozsindi23@gmail.com)
-    // 2. Verified Custom Token Claims (admin == true)
-    // 3. Verified Firestore /admins/{uid} whitelist record with role admin/superadmin
     function isAdmin() {
       return isSignedIn() && (
         isSuperAdmin() ||
@@ -60,21 +58,62 @@ service cloud.firestore {
       );
     }
 
-    // Booking Schema Validator with Strict Allowed Keys
+    // Booking Schema Validator with Strict Allowed Keys (Supports Legacy + Q&A Eligibility Fields)
     function isValidBooking(data) {
       return data.keys().hasAll(['id', 'name', 'phone', 'interest', 'status', 'createdAt'])
-        && data.keys().hasOnly(['id', 'name', 'phone', 'interest', 'experience', 'timing', 'notes', 'paymentMethod', 'paymentAmount', 'status', 'createdAt'])
+        && data.keys().hasOnly([
+          'id', 'name', 'phone', 'phoneSuffix', 'interest', 'experience', 'timing', 'notes',
+          'paymentMethod', 'paymentAmount', 'paymentReference', 'status', 'createdAt',
+          'bookingType', 'selectedCourses', 'highestCert', 'issuingAgency', 'qaAnswers',
+          'preliminaryEligibility', 'eligibilityStatus', 'equivalencyRequired',
+          'instructorActionType', 'instructorReviewNote', 'paymentAllowed', 'reviewedAt'
+        ])
         && data.id is string && data.id.size() > 0 && data.id.size() <= 128
         && data.name is string && data.name.size() > 0 && data.name.size() <= 120
         && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 30
-        && data.interest is string && data.interest.size() <= 250
-        && (!('experience' in data) || (data.experience is string && data.experience.size() <= 100))
+        && (!('phoneSuffix' in data) || (data.phoneSuffix is string && data.phoneSuffix.size() <= 10))
+        && data.interest is string && data.interest.size() <= 500
+        && (!('experience' in data) || (data.experience is string && data.experience.size() <= 150))
         && (!('timing' in data) || (data.timing is string && data.timing.size() <= 100))
         && (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000))
         && (!('paymentMethod' in data) || (data.paymentMethod is string && data.paymentMethod.size() <= 50))
-        && (!('paymentAmount' in data) || (data.paymentAmount is string && data.paymentAmount.size() <= 50))
+        && (!('paymentAmount' in data) || (data.paymentAmount is string && data.paymentAmount.size() <= 100))
+        && (!('paymentReference' in data) || (data.paymentReference is string && data.paymentReference.size() <= 120))
         && data.status in ['new', 'contacted', 'confirmed', 'completed', 'cancelled', 'paid', 'pending_payment']
+        && (!('bookingType' in data) || (data.bookingType in ['courses', 'expedition', 'mixed']))
+        && (!('selectedCourses' in data) || (data.selectedCourses is list && data.selectedCourses.size() <= 15 && (data.selectedCourses.size() == 0 || data.selectedCourses[0] is map)))
+        && (!('highestCert' in data) || (data.highestCert in ['none', 'open_water', 'advanced_open_water', 'rescue_diver', 'divemaster', 'other']))
+        && (!('issuingAgency' in data) || (data.issuingAgency in ['PADI', 'SSI', 'NAUI', 'SDI', 'RAID', 'CMAS', 'other', 'none']))
+        && (!('qaAnswers' in data) || (data.qaAnswers is map && data.qaAnswers.keys().size() <= 15))
+        && (!('preliminaryEligibility' in data) || (data.preliminaryEligibility in ['eligible', 'missing_requirements']))
+        && (!('eligibilityStatus' in data) || (data.eligibilityStatus in ['eligible', 'missing_requirements', 'pending_instructor_review', 'approved', 'rejected']))
+        && (!('equivalencyRequired' in data) || (data.equivalencyRequired is bool))
+        && (!('instructorActionType' in data) || (data.instructorActionType in ['approved', 'request_info', 'request_requirement', 'rejected']))
+        && (!('instructorReviewNote' in data) || (data.instructorReviewNote is string && data.instructorReviewNote.size() <= 1000))
+        && (!('paymentAllowed' in data) || (data.paymentAllowed is bool))
+        && (!('reviewedAt' in data) || (data.reviewedAt is string && data.reviewedAt.size() <= 50))
         && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Non-PII Public Status Projection Validator
+    function isValidBookingStatus(data) {
+      return data.keys().hasAll(['id', 'phoneSuffix', 'interest', 'eligibilityStatus', 'paymentAllowed', 'status', 'updatedAt'])
+        && data.keys().hasOnly([
+          'id', 'phoneSuffix', 'interest', 'eligibilityStatus', 'preliminaryEligibility',
+          'paymentAllowed', 'instructorActionType', 'instructorReviewNote', 'paymentAmount',
+          'status', 'updatedAt'
+        ])
+        && data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.phoneSuffix is string && data.phoneSuffix.size() <= 10
+        && data.interest is string && data.interest.size() <= 500
+        && data.eligibilityStatus in ['eligible', 'missing_requirements', 'pending_instructor_review', 'approved', 'rejected']
+        && (!('preliminaryEligibility' in data) || (data.preliminaryEligibility in ['eligible', 'missing_requirements']))
+        && data.paymentAllowed is bool
+        && (!('instructorActionType' in data) || (data.instructorActionType in ['approved', 'request_info', 'request_requirement', 'rejected']))
+        && (!('instructorReviewNote' in data) || (data.instructorReviewNote is string && data.instructorReviewNote.size() <= 1000))
+        && (!('paymentAmount' in data) || (data.paymentAmount is string && data.paymentAmount.size() <= 100))
+        && data.status in ['new', 'contacted', 'confirmed', 'completed', 'cancelled', 'paid', 'pending_payment']
+        && data.updatedAt is string && data.updatedAt.size() <= 50;
     }
 
     // Admin Record Validator with Strict Allowed Keys
@@ -108,22 +147,46 @@ service cloud.firestore {
     }
 
     // 1. Bookings Collection:
-    // - Public site visitors can ONLY create their own consultation or course booking with status 'new'.
-    // - Public visitors CANNOT mark bookings as 'paid' or 'confirmed'.
-    // - Customer PII (name, phone, notes) is strictly protected: ONLY verified admins can read, update, or delete!
-    // - Note: allow list is decoupled from isValidId(bookingId) so collection queries by admins succeed.
+    // - Public visitors can ONLY submit new bookings with paymentAllowed == false and status == 'new'.
+    // - Public visitors CANNOT approve requests or set paymentAllowed == true or status == 'paid'.
+    // - Customer PII is strictly restricted to admins.
     match /bookings/{bookingId} {
       allow create: if isValidId(bookingId) 
         && isValidBooking(incoming()) 
         && incoming().id == bookingId
-        && (incoming().status in ['new', 'pending_payment'] || isAdmin());
-      allow get, update, delete: if isValidId(bookingId) && isAdmin();
+        && (
+          isAdmin() ||
+          (
+            incoming().status == 'new'
+            && (!('paymentAllowed' in incoming()) || incoming().paymentAllowed == false)
+            && (!('eligibilityStatus' in incoming()) || incoming().eligibilityStatus == 'pending_instructor_review')
+          )
+        );
+      allow update: if isValidId(bookingId) && isAdmin() && isValidBooking(incoming()) && incoming().id == existing().id;
+      allow get, delete: if isValidId(bookingId) && isAdmin();
+      allow list: if isAdmin();
+    }
+
+    // 1b. Non-PII Booking Status Projection (customer lookup by exact Booking ID only, no listing):
+    match /booking_status/{bookingId} {
+      allow create: if isValidId(bookingId)
+        && isValidBookingStatus(incoming())
+        && incoming().id == bookingId
+        && (
+          isAdmin() ||
+          (
+            incoming().status == 'new'
+            && incoming().paymentAllowed == false
+            && incoming().eligibilityStatus == 'pending_instructor_review'
+          )
+        );
+      allow get: if isValidId(bookingId);
+      allow update: if isValidId(bookingId) && isAdmin() && isValidBookingStatus(incoming());
+      allow delete: if isValidId(bookingId) && isAdmin();
       allow list: if isAdmin();
     }
 
     // 2. Settings Collection:
-    // - Public site visitors can read website settings (courses, prices, contact info).
-    // - ONLY verified admins can modify or write settings!
     match /settings/{settingId} {
       allow get: if isValidId(settingId);
       allow list: if true;
@@ -131,9 +194,6 @@ service cloud.firestore {
     }
 
     // 3. Admin Whitelist (/admins collection):
-    // - Signed-in users can only read their own admin status record.
-    // - Verified Admins can list and manage team members.
-    // - The root superadmin record cannot be deleted or revoked by other admins.
     match /admins/{adminId} {
       allow get: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow list: if isAdmin();
@@ -158,7 +218,6 @@ service cloud.firestore {
     }
 
     // 4. Trainees & Students (/trainees collection):
-    // - Contains confidential student PII: ONLY verified admins can view or manage!
     match /trainees/{traineeId} {
       allow create, update: if isValidId(traineeId) && isAdmin() && isValidTrainee(incoming()) && incoming().id == traineeId;
       allow get, delete: if isValidId(traineeId) && isAdmin();

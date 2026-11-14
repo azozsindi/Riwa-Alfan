@@ -10,11 +10,12 @@ import {
   deleteDoc,
   updateDoc,
   onSnapshot,
+  getDoc,
   getDocFromServer,
   Unsubscribe
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { SiteConfig, BookingRecord } from '../types/admin';
+import { SiteConfig, BookingRecord, BookingStatusPublic } from '../types/admin';
 
 export enum OperationType {
   CREATE = 'create',
@@ -210,12 +211,14 @@ export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<voi
       // Strip large inline data:image payloads from site_config copy (stored safely in partner_media_*)
       cleanConfig.trustBadges!.partnerLogos = partners.map((p) => ({
         ...p,
-        logoUrl: p.logoUrl && p.logoUrl.startsWith('data:image/') && p.logoUrl.length > 20_000 ? '' : p.logoUrl,
-        licenseImageUrl: p.licenseImageUrl && p.licenseImageUrl.startsWith('data:image/') && p.licenseImageUrl.length > 20_000 ? '' : p.licenseImageUrl,
+        logoUrl: p.logoUrl && p.logoUrl.startsWith('data:image/') && p.logoUrl.length > 20_000 ? '' : (p.logoUrl || ''),
+        licenseImageUrl: p.licenseImageUrl && p.licenseImageUrl.startsWith('data:image/') && p.licenseImageUrl.length > 20_000 ? '' : (p.licenseImageUrl || ''),
       }));
     }
 
-    await setDoc(configDocRef, cleanConfig, { merge: true });
+    // Re-serialize right before setDoc so zero undefined values ever reach Firestore
+    const sanitizedPayload = JSON.parse(JSON.stringify(cleanConfig));
+    await setDoc(configDocRef, sanitizedPayload, { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, path);
   }
@@ -224,25 +227,56 @@ export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<voi
 export const saveBookingToFirestore = async (booking: BookingRecord): Promise<void> => {
   const path = `bookings/${booking.id}`;
   try {
-    const sanitizedBooking: BookingRecord = {
+    const cleanPhoneDigits = String(booking.phone || '').replace(/\D/g, '');
+    const phoneSuffix = booking.phoneSuffix || cleanPhoneDigits.slice(-4) || '';
+
+    const rawBooking: BookingRecord = {
       id: String(booking.id || '').slice(0, 128),
       name: String(booking.name || '').slice(0, 120),
       phone: String(booking.phone || '').slice(0, 30),
-      interest: String(booking.interest || '').slice(0, 250),
-      experience: String(booking.experience || '').slice(0, 100),
+      phoneSuffix: phoneSuffix.slice(0, 10),
+      interest: String(booking.interest || '').slice(0, 500),
+      experience: String(booking.experience || '').slice(0, 150),
       timing: String(booking.timing || '').slice(0, 100),
       notes: booking.notes ? String(booking.notes).slice(0, 2000) : undefined,
       paymentMethod: booking.paymentMethod,
-      paymentAmount: booking.paymentAmount ? String(booking.paymentAmount).slice(0, 50) : undefined,
+      paymentAmount: booking.paymentAmount ? String(booking.paymentAmount).slice(0, 100) : undefined,
+      paymentReference: booking.paymentReference ? String(booking.paymentReference).slice(0, 120) : undefined,
       status: (booking.status || 'new') as BookingRecord['status'],
+      bookingType: booking.bookingType,
+      selectedCourses: Array.isArray(booking.selectedCourses) ? booking.selectedCourses.slice(0, 15) : undefined,
+      highestCert: booking.highestCert,
+      issuingAgency: booking.issuingAgency,
+      qaAnswers: booking.qaAnswers,
+      preliminaryEligibility: booking.preliminaryEligibility,
+      eligibilityStatus: booking.eligibilityStatus || 'pending_instructor_review',
+      equivalencyRequired: booking.equivalencyRequired,
+      instructorActionType: booking.instructorActionType,
+      instructorReviewNote: booking.instructorReviewNote ? String(booking.instructorReviewNote).slice(0, 1000) : undefined,
+      paymentAllowed: booking.paymentAllowed === true && booking.eligibilityStatus === 'approved',
+      reviewedAt: booking.reviewedAt ? String(booking.reviewedAt).slice(0, 50) : undefined,
       createdAt: booking.createdAt || new Date().toISOString()
     };
 
-    const cleanPayload = Object.fromEntries(
-      Object.entries(sanitizedBooking).filter(([_, v]) => v !== undefined)
-    );
+    const sanitizedPayload = JSON.parse(JSON.stringify(rawBooking));
+    await setDoc(doc(db, 'bookings', rawBooking.id), sanitizedPayload);
 
-    await setDoc(doc(db, 'bookings', sanitizedBooking.id), cleanPayload);
+    // Sync non-PII status mirror for customer status tracking & payment gate
+    const statusDoc: BookingStatusPublic = {
+      id: rawBooking.id,
+      phoneSuffix: phoneSuffix.slice(0, 10),
+      interest: rawBooking.interest,
+      eligibilityStatus: rawBooking.eligibilityStatus || 'pending_instructor_review',
+      preliminaryEligibility: rawBooking.preliminaryEligibility,
+      paymentAllowed: Boolean(rawBooking.paymentAllowed),
+      instructorActionType: rawBooking.instructorActionType,
+      instructorReviewNote: rawBooking.instructorReviewNote,
+      paymentAmount: rawBooking.paymentAmount,
+      status: rawBooking.status,
+      updatedAt: new Date().toISOString(),
+    };
+    const sanitizedStatusDoc = JSON.parse(JSON.stringify(statusDoc));
+    await setDoc(doc(db, 'booking_status', rawBooking.id), sanitizedStatusDoc);
   } catch (err) {
     handleFirestoreError(err, OperationType.CREATE, path);
   }
@@ -255,8 +289,77 @@ export const updateBookingStatusInFirestore = async (
   const path = `bookings/${id}`;
   try {
     await updateDoc(doc(db, 'bookings', id), { status });
+    try {
+      await updateDoc(doc(db, 'booking_status', id), {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch {
+      // Legacy bookings created prior to booking_status mirror may not have a status doc yet
+    }
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, path);
+  }
+};
+
+export const updateBookingReviewInFirestore = async (
+  id: string,
+  reviewUpdate: Partial<
+    Pick<
+      BookingRecord,
+      'eligibilityStatus' | 'instructorActionType' | 'instructorReviewNote' | 'paymentAllowed' | 'reviewedAt' | 'status'
+    >
+  >,
+  fallbackBooking?: BookingRecord
+): Promise<void> => {
+  const path = `bookings/${id}`;
+  try {
+    const cleanPatch = JSON.parse(JSON.stringify(reviewUpdate));
+    await updateDoc(doc(db, 'bookings', id), cleanPatch);
+
+    const statusPatch: Record<string, unknown> = {
+      ...cleanPatch,
+      updatedAt: new Date().toISOString(),
+    };
+    try {
+      await updateDoc(doc(db, 'booking_status', id), statusPatch);
+    } catch {
+      if (fallbackBooking) {
+        const cleanPhoneDigits = String(fallbackBooking.phone || '').replace(/\D/g, '');
+        const fullStatusDoc: BookingStatusPublic = {
+          id,
+          phoneSuffix: fallbackBooking.phoneSuffix || cleanPhoneDigits.slice(-4) || '',
+          interest: String(fallbackBooking.interest || '').slice(0, 500),
+          eligibilityStatus: (reviewUpdate.eligibilityStatus || fallbackBooking.eligibilityStatus || 'pending_instructor_review'),
+          preliminaryEligibility: fallbackBooking.preliminaryEligibility,
+          paymentAllowed: Boolean(reviewUpdate.paymentAllowed ?? fallbackBooking.paymentAllowed),
+          instructorActionType: reviewUpdate.instructorActionType ?? fallbackBooking.instructorActionType,
+          instructorReviewNote: reviewUpdate.instructorReviewNote ?? fallbackBooking.instructorReviewNote,
+          paymentAmount: fallbackBooking.paymentAmount,
+          status: (reviewUpdate.status || fallbackBooking.status || 'new'),
+          updatedAt: new Date().toISOString(),
+        };
+        await setDoc(doc(db, 'booking_status', id), JSON.parse(JSON.stringify(fullStatusDoc)));
+      }
+    }
+  } catch (err) {
+    handleFirestoreError(err, OperationType.UPDATE, path);
+  }
+};
+
+export const fetchBookingStatusFromFirestore = async (
+  bookingId: string
+): Promise<BookingStatusPublic | null> => {
+  const normalizedId = String(bookingId || '').trim().toUpperCase();
+  if (!normalizedId) return null;
+  const path = `booking_status/${normalizedId}`;
+  try {
+    const snap = await getDoc(doc(db, 'booking_status', normalizedId));
+    if (!snap.exists()) return null;
+    return snap.data() as BookingStatusPublic;
+  } catch (err) {
+    handleFirestoreError(err, OperationType.GET, path);
+    return null;
   }
 };
 
@@ -264,6 +367,9 @@ export const deleteBookingFromFirestore = async (id: string): Promise<void> => {
   const path = `bookings/${id}`;
   try {
     await deleteDoc(doc(db, 'bookings', id));
+    try {
+      await deleteDoc(doc(db, 'booking_status', id));
+    } catch {}
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, path);
   }
