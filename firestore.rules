@@ -34,15 +34,14 @@ service cloud.firestore {
     }
 
     // Root Super Admin Gate:
-    // Matches azozsindi23@gmail.com (case-insensitive)
+    // Matches azozsindi23@gmail.com and riwaalfan@gmail.com (case-insensitive)
     function isSuperAdmin() {
       return isSignedIn() 
         && isVerifiedUser()
         && request.auth.token.email != null 
         && (
-          request.auth.token.email == 'azozsindi23@gmail.com' ||
-          request.auth.token.email == 'AzozSindi23@gmail.com' ||
-          request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$')
+          request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$') ||
+          request.auth.token.email.matches('(?i)^riwaalfan@gmail\\.com$')
         );
     }
 
@@ -211,8 +210,9 @@ service cloud.firestore {
       );
       allow delete: if isValidId(adminId) && isAdmin() && (
         resource.data.email == null || (
-          resource.data.email != 'azozsindi23@gmail.com' &&
-          resource.data.email != 'AzozSindi23@gmail.com'
+          resource.data.email is string &&
+          !resource.data.email.matches('(?i)^azozsindi23@gmail\\.com$') &&
+          !resource.data.email.matches('(?i)^riwaalfan@gmail\\.com$')
         )
       );
     }

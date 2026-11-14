@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, Download, RotateCcw, AlertTriangle, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { useAuth, BOOTSTRAPPED_ADMIN_EMAIL } from '../../../context/AuthContext';
+import { useAuth, BOOTSTRAPPED_ADMIN_EMAILS } from '../../../context/AuthContext';
 
 interface SettingsTabProps {
   onExportBackupJson: () => string;
@@ -54,10 +54,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
 
         <div className="pt-3 border-t border-slate-800/80 text-xs text-slate-300 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400">{isRtl ? 'المدير الرئيسي المصرح له:' : 'Root Super Admin:'}</span>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-slate-400">{isRtl ? 'المدراء الرئيسيون المصرح لهم:' : 'Root Super Admins:'}</span>
             <span className="font-mono font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
-              {BOOTSTRAPPED_ADMIN_EMAIL}
+              {BOOTSTRAPPED_ADMIN_EMAILS.join(' · ')}
             </span>
           </div>
           {user && (

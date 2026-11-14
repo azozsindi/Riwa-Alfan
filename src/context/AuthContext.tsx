@@ -11,8 +11,18 @@ import {
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
-// Primary superadmin email (bootstrapped, case-insensitive)
+// Primary superadmin emails (bootstrapped, case-insensitive)
 export const BOOTSTRAPPED_ADMIN_EMAIL = 'azozsindi23@gmail.com';
+export const BOOTSTRAPPED_ADMIN_EMAILS = [
+  'azozsindi23@gmail.com',
+  'riwaalfan@gmail.com',
+] as const;
+
+export const isBootstrappedAdminEmail = (email?: string | null): boolean => {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return BOOTSTRAPPED_ADMIN_EMAILS.includes(normalized as (typeof BOOTSTRAPPED_ADMIN_EMAILS)[number]);
+};
 
 interface AuthContextType {
   user: User | null;
@@ -46,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const isGoogleProvider = currentUser.providerData?.some(p => p.providerId === 'google.com');
       const isVerified = currentUser.emailVerified || isGoogleProvider;
 
-      if (email === BOOTSTRAPPED_ADMIN_EMAIL && isVerified) {
+      if (isBootstrappedAdminEmail(email) && isVerified) {
         setUserRole('superadmin');
         // Seed /admins/{uid} ONLY if not created yet (avoid writing on every page reload)
         try {
@@ -228,7 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (loginErr: any) {
         // If the user is the primary superadmin and attempting first-time password setup
         if (
-          cleanEmail === BOOTSTRAPPED_ADMIN_EMAIL && 
+          isBootstrappedAdminEmail(cleanEmail) && 
           (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential')
         ) {
           try {

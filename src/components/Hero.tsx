@@ -27,10 +27,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
     }
   };
 
-  const whatsAppText = isRtl
-    ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل دورات الغوص والرحلات القادمة بجدة`
-    : `Hello Captain Fahad, I would like to inquire about certified scuba courses and upcoming boat expeditions in Jeddah.`;
-
   const heroHeadline = language === 'ar' ? config.hero.headlineAr : config.hero.headlineEn;
   const heroHighlight = language === 'ar' ? config.hero.headlineHighlightAr : config.hero.headlineHighlightEn;
   const heroSubhead = language === 'ar' ? config.hero.subheadAr : config.hero.subheadEn;
@@ -52,9 +48,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
   const heroWhy3 = language === 'ar'
     ? (config.hero.why3Ar || t.heroWhy3)
     : (config.hero.why3En || t.heroWhy3);
-  const heroChatWhatsApp = language === 'ar'
-    ? (config.hero.whatsappBtnAr || t.heroChatWhatsApp)
-    : (config.hero.whatsappBtnEn || t.heroChatWhatsApp);
 
 
   return (
@@ -199,20 +192,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                     </div>
                   </div>
                 </div>
-
-                {/* Instant WhatsApp Quick Link */}
-                <a
-                  href={`https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-xs sm:text-sm transition-colors cursor-pointer group min-h-[44px]"
-                >
-                  <svg className="w-4 h-4 fill-current group-hover:scale-110 transition-transform shrink-0" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
-                  </svg>
-                  <span>{heroChatWhatsApp}</span>
-                </a>
-
               </div>
             </div>
           </div>

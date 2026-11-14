@@ -31,7 +31,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut as secondarySignOut } from 'firebase/auth';
 import { db } from '../../../firebase';
 import firebaseConfig from '../../../../firebase-applet-config.json';
-import { useAuth, BOOTSTRAPPED_ADMIN_EMAIL } from '../../../context/AuthContext';
+import { useAuth, BOOTSTRAPPED_ADMIN_EMAILS, isBootstrappedAdminEmail } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Course } from '../../../data/divingData';
 import { BookingRecord, AdminUserRecord, TraineeRecord } from '../../../types/admin';
@@ -47,7 +47,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   const { user, userRole } = useAuth();
 
   const isCurrentUserSuperAdmin = 
-    (user?.email || '').toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase() || 
+    isBootstrappedAdminEmail(user?.email) || 
     userRole === 'superadmin';
   const canCurrentUserManageUsers = isCurrentUserSuperAdmin || userRole === 'admin';
   
@@ -146,17 +146,20 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
         }
       });
 
-      // Ensure root superadmin is always listed
-      if (!list.some(a => a.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase())) {
-        list.unshift({
-          uid: user?.uid || 'superadmin_root',
-          email: BOOTSTRAPPED_ADMIN_EMAIL,
-          name: 'المدير العام والمالك (Super Admin)',
-          role: 'superadmin',
-          status: 'active',
-          createdAt: new Date().toISOString()
-        });
-      }
+      // Ensure root superadmins are always listed
+      [...BOOTSTRAPPED_ADMIN_EMAILS].reverse().forEach((rootEmail) => {
+        if (!list.some(a => a.email.toLowerCase() === rootEmail.toLowerCase())) {
+          const isSignedInAsThis = (user?.email || '').toLowerCase() === rootEmail.toLowerCase();
+          list.unshift({
+            uid: isSignedInAsThis && user?.uid ? user.uid : `superadmin_${rootEmail.split('@')[0]}`,
+            email: rootEmail,
+            name: 'المدير العام والمالك (Super Admin)',
+            role: 'superadmin',
+            status: 'active',
+            createdAt: new Date().toISOString()
+          });
+        }
+      });
 
       // Merge with locally cached admins so created users never disappear
       try {
@@ -412,7 +415,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       const updatedPhone = editPhone.trim();
       const updatedNotes = editNotes.trim();
 
-      const isTargetRoot = editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase();
+      const isTargetRoot = isBootstrappedAdminEmail(editingAdmin.email);
       const finalRole = isTargetRoot ? 'superadmin' : editRole;
       const finalStatus = isTargetRoot ? 'active' : editStatus;
 
@@ -448,7 +451,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
 
   // --- Toggle User Status (Active / Suspended) ---
   const handleToggleAdminStatus = async (adm: AdminUserRecord) => {
-    if (adm.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
+    if (isBootstrappedAdminEmail(adm.email)) {
       alert(isRtl ? 'لا يمكن تعليق حساب المدير الرئيسي.' : 'Cannot suspend Root Super Admin.');
       return;
     }
@@ -496,7 +499,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     const emailToDelete = userToDelete.email.toLowerCase().trim();
     const uidToDelete = userToDelete.uid;
 
-    if (emailToDelete === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
+    if (isBootstrappedAdminEmail(emailToDelete)) {
       showToast(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي المعتمد.' : 'Cannot delete Root Super Admin.');
       setUserToDelete(null);
       return;
@@ -849,9 +852,11 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs sm:text-base font-bold text-white font-mono break-all">{BOOTSTRAPPED_ADMIN_EMAIL}</span>
+                    <span className="text-xs sm:text-base font-bold text-white font-mono break-all">
+                      {BOOTSTRAPPED_ADMIN_EMAILS.join(' · ')}
+                    </span>
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30">
-                      {isRtl ? 'المدير الرئيسي' : 'Root Super Admin'}
+                      {isRtl ? 'المدراء الرئيسيون' : 'Root Super Admins'}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
@@ -1030,7 +1035,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
                 {filteredAdmins.map((adm) => {
                   const isSuspended = adm.status === 'suspended';
-                  const isRoot = adm.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase();
+                  const isRoot = isBootstrappedAdminEmail(adm.email);
 
                   return (
                     <div 
@@ -1701,11 +1706,11 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                  disabled={isBootstrappedAdminEmail(editingAdmin.email)}
                   required
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono focus:border-cyan-500 focus:outline-none disabled:opacity-60"
                 />
-                {editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase() && (
+                {isBootstrappedAdminEmail(editingAdmin.email) && (
                   <span className="text-[10px] text-amber-400 block">
                     {isRtl ? 'حساب المدير العام المعتمد لا يمكن تعديل بريده.' : 'Root super admin email is locked.'}
                   </span>
@@ -1720,7 +1725,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   </label>
                   <select
                     value={editRole}
-                    disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                    disabled={isBootstrappedAdminEmail(editingAdmin.email)}
                     onChange={(e) => setEditRole(e.target.value as any)}
                     className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:opacity-60"
                   >
@@ -1736,7 +1741,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   </label>
                   <select
                     value={editStatus}
-                    disabled={editingAdmin.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()}
+                    disabled={isBootstrappedAdminEmail(editingAdmin.email)}
                     onChange={(e) => setEditStatus(e.target.value as any)}
                     className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:opacity-60"
                   >
