@@ -26,7 +26,7 @@ export const TestimonialsSection: React.FC = () => {
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
             {testiKicker}
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-normal leading-snug font-brand-arabic">
             {testiTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">

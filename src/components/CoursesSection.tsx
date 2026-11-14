@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Course } from '../data/divingData';
-import { ArrowLeft, ArrowRight, Clock, Check, X, ShieldAlert, BookOpen, Tag } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Check, X, ShieldAlert, BookOpen, Tag, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
+import { useCart } from '../context/CartContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface CoursesSectionProps {
@@ -15,6 +16,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
   const [selectedCourseDetail, setSelectedCourseDetail] = useState<Course | null>(null);
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
+  const { addToCart, openCart, lastAddedId } = useCart();
   const t = UI_TRANSLATIONS[language];
 
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
@@ -42,7 +44,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           <div className="text-xs font-semibold text-blue-400 tracking-wider">
             {coursesKicker}
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-normal leading-snug font-brand-arabic">
             {coursesTitle}
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
@@ -51,10 +53,10 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
         </div>
 
         {/* Filter Tabs / Segmented Controls with Brand Gold Active State */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-950/80 border border-slate-800 rounded-2xl w-fit mb-10 overflow-x-auto max-w-full">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-950/80 border border-slate-800 rounded-2xl w-fit mb-8 sm:mb-10 overflow-x-auto max-w-full no-scrollbar">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer min-h-[40px] flex items-center justify-center ${
               activeCategory === 'all'
                 ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
@@ -64,7 +66,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('beginner')}
-            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer min-h-[40px] flex items-center justify-center ${
               activeCategory === 'beginner'
                 ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
@@ -74,7 +76,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('advanced')}
-            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer min-h-[40px] flex items-center justify-center ${
               activeCategory === 'advanced'
                 ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
@@ -84,7 +86,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('specialty')}
-            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer min-h-[40px] flex items-center justify-center ${
               activeCategory === 'specialty'
                 ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
@@ -94,7 +96,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
           </button>
           <button
             onClick={() => setActiveCategory('professional')}
-            className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer min-h-[40px] flex items-center justify-center ${
               activeCategory === 'professional'
                 ? 'gold-gradient-btn'
                 : 'text-slate-400 hover:text-white'
@@ -105,16 +107,16 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
         </div>
 
         {/* Courses Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {displayedCourses.map((course) => (
             <div
               key={course.id}
-              className={`rounded-3xl bg-slate-950/90 border border-slate-800 hover:border-[#C59B5F]/50 transition-all flex flex-col justify-between overflow-hidden group shadow-lg shadow-black/20 ${
+              className={`rounded-2xl sm:rounded-3xl bg-slate-950/90 border border-slate-800 hover:border-[#C59B5F]/50 transition-all flex flex-col justify-between overflow-hidden group shadow-lg shadow-black/20 ${
                 isRtl ? 'text-right' : 'text-left'
               }`}
             >
               {/* Card Header & Details */}
-              <div className="p-6 sm:p-7 space-y-5">
+              <div className="p-5 sm:p-7 space-y-4 sm:space-y-5">
                 
                 {/* Meta header without pills */}
                 <div className="flex items-center justify-between text-xs text-slate-400">
@@ -127,40 +129,40 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
 
                 {/* Title */}
                 <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-[#DDB67E] transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-[#DDB67E] transition-colors">
                     {course.title[language]}
                   </h3>
                 </div>
 
                 {/* Summary */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed min-h-[42px]">
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed min-h-[38px]">
                   {course.summary[language]}
                 </p>
 
                 {/* Specs metadata */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                  <div>
-                    <span className="text-slate-500 block">{t.maxDepthLabel}</span>
-                    <span className="font-semibold text-white font-mono">{course.depth[language]}</span>
+                <div className="pt-3 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center text-xs text-slate-400">
+                  <div className="p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                    <span className="text-slate-500 text-[10px] sm:text-xs block mb-0.5">{t.maxDepthLabel}</span>
+                    <span className="font-semibold text-white font-mono text-xs">{course.depth[language]}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">{t.seaDivesLabel}</span>
-                    <span className="font-semibold text-white font-mono">{course.seaDives}</span>
+                  <div className="p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                    <span className="text-slate-500 text-[10px] sm:text-xs block mb-0.5">{t.seaDivesLabel}</span>
+                    <span className="font-semibold text-white font-mono text-xs">{course.seaDives}</span>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">{t.poolSessionsLabel}</span>
-                    <span className="font-semibold text-white font-mono">
+                  <div className="p-1.5 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                    <span className="text-slate-500 text-[10px] sm:text-xs block mb-0.5">{t.poolSessionsLabel}</span>
+                    <span className="font-semibold text-white font-mono text-xs">
                       {course.poolSessions > 0 ? course.poolSessions : t.poolNotRequired}
                     </span>
                   </div>
                 </div>
 
                 {/* Highlights List */}
-                <div className="space-y-2 pt-2">
+                <div className="space-y-1.5 pt-1">
                   {course.highlights[language].slice(0, 3).map((h, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
                       <Check className="w-3.5 h-3.5 text-[#C59B5F] shrink-0 mt-0.5" />
-                      <span>{h}</span>
+                      <span className="leading-snug">{h}</span>
                     </div>
                   ))}
                 </div>
@@ -168,18 +170,18 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
               </div>
 
               {/* Card Footer: Price & Actions */}
-              <div className="p-6 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between gap-4">
+              <div className="p-4 sm:p-6 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between gap-3">
                 <div>
-                  <span className="text-[11px] text-slate-400 block">{t.priceLabel}</span>
-                  <span className="text-lg font-extrabold text-[#E0BA84] font-mono">
+                  <span className="text-[10px] sm:text-[11px] text-slate-400 block">{t.priceLabel}</span>
+                  <span className="text-base sm:text-lg font-extrabold text-[#E0BA84] font-mono">
                     {course.price[language]}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     onClick={() => setSelectedCourseDetail(course)}
-                    className="p-2.5 rounded-xl border border-slate-700/80 hover:border-[#C59B5F]/50 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                    className="p-2 sm:p-2.5 rounded-xl border border-slate-700/80 hover:border-[#C59B5F]/50 text-slate-300 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
                     title={t.viewDetails}
                     aria-label={t.viewDetails}
                   >
@@ -187,11 +189,35 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                   </button>
 
                   <button
-                    onClick={() => onSelectCourseForBooking(course.id)}
-                    className="gold-gradient-btn inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap cursor-pointer active:scale-95"
+                    type="button"
+                    onClick={() => {
+                      addToCart({
+                        id: course.id,
+                        title: course.title,
+                        subtitle: course.depth,
+                        price: course.price[language],
+                        priceFormatted: course.price,
+                        type: 'course',
+                        category: course.certAgency,
+                      });
+                    }}
+                    className={`inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap cursor-pointer active:scale-95 min-h-[40px] ${
+                      lastAddedId === course.id
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400'
+                        : 'gold-gradient-btn text-slate-950'
+                    }`}
                   >
-                    <span>{t.bookCourse}</span>
-                    <ArrowIcon className="w-3.5 h-3.5 text-slate-950" />
+                    {lastAddedId === course.id ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                        <span>{isRtl ? 'تمت الإضافة ✓' : 'Added ✓'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-3.5 h-3.5 text-slate-950" />
+                        <span>{isRtl ? 'أضف للسلة' : 'Add to Cart'}</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -305,21 +331,45 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-4">
+            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <span className="text-xs text-slate-400 block">{t.priceLabel}</span>
                 <span className="text-xl font-bold text-[#E0BA84] font-mono">{selectedCourseDetail.price[language]}</span>
               </div>
-              <button
-                onClick={() => {
-                  const id = selectedCourseDetail.id;
-                  setSelectedCourseDetail(null);
-                  onSelectCourseForBooking(id);
-                }}
-                className="gold-gradient-btn px-6 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer active:scale-95"
-              >
-                {t.confirmBookingCourse}
-              </button>
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addToCart({
+                      id: selectedCourseDetail.id,
+                      title: selectedCourseDetail.title,
+                      subtitle: selectedCourseDetail.depth,
+                      price: selectedCourseDetail.price[language],
+                      priceFormatted: selectedCourseDetail.price,
+                      type: 'course',
+                      category: selectedCourseDetail.certAgency,
+                    });
+                    openCart();
+                    setSelectedCourseDetail(null);
+                  }}
+                  className="flex-1 sm:flex-none gold-gradient-btn px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-950 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <ShoppingBag className="w-4 h-4 text-slate-950" />
+                  <span>{isRtl ? 'أضف للسلة والطلب عبر واتساب' : 'Add to Cart & Checkout'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const id = selectedCourseDetail.id;
+                    setSelectedCourseDetail(null);
+                    onSelectCourseForBooking(id);
+                  }}
+                  className="px-4 py-2.5 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm transition-all cursor-pointer"
+                >
+                  {t.confirmBookingCourse}
+                </button>
+              </div>
             </div>
 
           </div>

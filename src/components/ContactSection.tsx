@@ -34,10 +34,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
     : `Hello Captain Fahad, I would like to inquire about certified scuba training in Jeddah.`;
 
   return (
-    <section id="contact" className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
+    <section id="contact" className="py-14 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className={`rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-6 sm:p-12 relative overflow-hidden ${
+        <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-5 sm:p-8 lg:p-12 relative overflow-hidden ${
           isRtl ? 'text-right' : 'text-left'
         }`}>
           
@@ -52,28 +52,28 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
                 {contactKicker}
               </div>
 
-              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
+              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-normal leading-snug font-brand-arabic">
                 {contactTitle}
               </h2>
 
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-xl">
                 {contactDesc}
               </p>
 
               {/* Direct Contact Links */}
-              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-300">
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm text-slate-300">
                 <a
                   href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-colors group"
+                  className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-colors group min-h-[48px]"
                 >
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                     <MessageSquare className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-slate-400 block">{t.directWhatsApp}</span>
-                    <span className="font-semibold text-white group-hover:text-emerald-300 font-mono">
+                    <span className="text-[11px] sm:text-xs text-slate-400 block">{t.directWhatsApp}</span>
+                    <span className="font-semibold text-white group-hover:text-emerald-300 font-mono text-xs sm:text-sm">
                       {phone}
                     </span>
                   </div>
@@ -81,14 +81,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
 
                 <a
                   href={`tel:${phone}`}
-                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group"
+                  className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group min-h-[48px]"
                 >
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
                     <PhoneCall className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-slate-400 block">{isRtl ? 'اتصال مباشر:' : 'Direct Call:'}</span>
-                    <span className="font-semibold text-white group-hover:text-blue-300 font-mono">
+                    <span className="text-[11px] sm:text-xs text-slate-400 block">{isRtl ? 'اتصال مباشر:' : 'Direct Call:'}</span>
+                    <span className="font-semibold text-white group-hover:text-blue-300 font-mono text-xs sm:text-sm">
                       {phone}
                     </span>
                   </div>
@@ -96,37 +96,37 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
 
                 <a
                   href={`mailto:${email}`}
-                  className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group"
+                  className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group min-h-[48px]"
                 >
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
-                  <div>
-                    <span className="text-xs text-slate-400 block">{t.emailLabel}</span>
-                    <span className="font-semibold text-white group-hover:text-blue-300 font-mono text-xs">
+                  <div className="min-w-0">
+                    <span className="text-[11px] sm:text-xs text-slate-400 block">{t.emailLabel}</span>
+                    <span className="font-semibold text-white group-hover:text-blue-300 font-mono text-xs truncate block">
                       {email}
                     </span>
                   </div>
                 </a>
 
-                <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
+                <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 min-h-[48px]">
                   <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-slate-400 block">{t.regionsLabel}</span>
+                    <span className="text-[11px] sm:text-xs text-slate-400 block">{t.regionsLabel}</span>
                     <span className="font-semibold text-white text-xs">
                       {regionsText}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
+                <div className="sm:col-span-2 flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 min-h-[48px]">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-slate-400 block">{t.certAgencyLabel}</span>
+                    <span className="text-[11px] sm:text-xs text-slate-400 block">{t.certAgencyLabel}</span>
                     <span className="font-semibold text-white text-xs">
                       {certAgencyText}
                     </span>
@@ -137,17 +137,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking })
             </div>
 
             {/* Action Card */}
-            <div className="lg:col-span-5 text-center p-6 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-4">
-              <h3 className="text-xl font-bold text-white">{contactCardTitle}</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+            <div className="lg:col-span-5 text-center p-5 sm:p-8 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white font-brand-arabic">{contactCardTitle}</h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {contactCardDesc}
               </p>
 
               <button
                 onClick={onOpenBooking}
-                className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-xl shadow-blue-600/30 cursor-pointer flex items-center justify-center gap-2"
+                className="gold-gradient-btn w-full py-3.5 px-6 rounded-xl text-slate-950 font-bold text-sm transition-all shadow-xl shadow-[#C59B5F]/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
               >
-                <Calendar className="w-5 h-5" />
+                <Calendar className="w-4 h-4 text-slate-950 shrink-0" />
                 <span>{contactCardBtn}</span>
               </button>
 

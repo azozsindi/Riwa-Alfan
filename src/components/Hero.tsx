@@ -62,7 +62,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
 
 
   return (
-    <section id="home" className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden ocean-gradient-hero caustics-pattern pt-8 sm:pt-12 pb-14 sm:pb-20">
+    <section id="home" className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden ocean-gradient-hero caustics-pattern pt-8 sm:pt-14 pb-12 sm:pb-20">
       {/* Background ambient deep sea light beams themed with logo blue */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-blue-600/20 blur-[130px] rounded-full" />
@@ -83,10 +83,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           
           {/* Main Content Column */}
-          <div className={`lg:col-span-7 space-y-5 sm:space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+          <div className={`lg:col-span-7 space-y-4 sm:space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
             
             {/* Clean unboxed editorial metadata kicker */}
             <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-[#C59B5F] tracking-wide">
@@ -96,32 +96,36 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
               <span className="text-slate-400">{heroLocationKicker}</span>
             </div>
 
-            {/* High-impact headline in brand gold & white */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.25] text-balance font-brand-arabic">
-              {heroHeadline}{' '}
-              <span className="bg-gradient-to-r from-[#E0BA84] via-[#C59B5F] to-[#A4783B] bg-clip-text text-transparent">
+            {/* High-impact headline in brand gold & white with generous Arabic line-height */}
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-normal leading-[1.35] sm:leading-[1.4] lg:leading-[1.42] font-brand-arabic">
+              <span className="block mb-2 sm:mb-3">
+                {heroHeadline}
+              </span>
+              <span className="inline-block bg-gradient-to-r from-[#E0BA84] via-[#C59B5F] to-[#A4783B] bg-clip-text text-transparent pb-1">
                 {heroHighlight}
               </span>
             </h1>
 
             {/* Concrete value proposition */}
-            <p className="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-2xl">
               {heroSubhead}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-1 sm:pt-2">
               <button
+                type="button"
                 onClick={() => onOpenBooking()}
-                className="gold-gradient-btn inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
+                className="gold-gradient-btn inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 text-xs sm:text-sm md:text-base font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] min-h-[44px]"
               >
-                <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
+                <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 shrink-0" />
                 <span>{heroCtaBook}</span>
               </button>
 
               <button
+                type="button"
                 onClick={onExploreCourses}
-                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-[#C59B5F]/30 hover:border-[#C59B5F] rounded-xl transition-all whitespace-nowrap cursor-pointer group"
+                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 text-xs sm:text-sm md:text-base font-medium text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-[#C59B5F]/30 hover:border-[#C59B5F] rounded-xl transition-all whitespace-nowrap cursor-pointer group min-h-[44px]"
               >
                 <span>{heroCtaCourses}</span>
                 <ArrowIcon className={`w-4 h-4 text-[#C59B5F] transition-transform ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
@@ -130,30 +134,30 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
 
             {/* Quantitative Proof adjacent to claims */}
             {config.hero.showStats !== false && (
-              <div className={`pt-6 sm:pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-2.5 sm:gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
-                <div>
-                  <div className="text-xl sm:text-3xl font-black text-white font-mono tabular-nums">
+              <div className={`pt-5 sm:pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-2 sm:gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+                <div className="p-2 sm:p-0 rounded-xl bg-slate-950/40 sm:bg-transparent border border-slate-800/50 sm:border-0 text-center sm:text-start">
+                  <div className="text-lg xs:text-xl sm:text-3xl font-black text-white font-mono tabular-nums">
                     {config.hero.divesStat || '1,450+'}
                   </div>
-                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
+                  <div className="text-[10px] sm:text-xs lg:text-sm text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {language === 'ar' ? (config.hero.divesLabelAr || 'عدد الغوصات الموثقة') : (config.hero.divesLabelEn || 'Logged Dives')}
                   </div>
                 </div>
 
-                <div>
-                  <div className="text-xl sm:text-3xl font-black text-[#C59B5F] font-mono tabular-nums">
+                <div className="p-2 sm:p-0 rounded-xl bg-slate-950/40 sm:bg-transparent border border-slate-800/50 sm:border-0 text-center sm:text-start">
+                  <div className="text-lg xs:text-xl sm:text-3xl font-black text-[#C59B5F] font-mono tabular-nums">
                     {config.hero.studentsStat || '520+'}
                   </div>
-                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
+                  <div className="text-[10px] sm:text-xs lg:text-sm text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {language === 'ar' ? (config.hero.studentsLabelAr || 'عدد الغواصين الخريجين') : (config.hero.studentsLabelEn || 'Certified Students')}
                   </div>
                 </div>
 
-                <div>
-                  <div className="text-xl sm:text-3xl font-black text-sky-400 font-mono tabular-nums">
+                <div className="p-2 sm:p-0 rounded-xl bg-slate-950/40 sm:bg-transparent border border-slate-800/50 sm:border-0 text-center sm:text-start">
+                  <div className="text-lg xs:text-xl sm:text-3xl font-black text-sky-400 font-mono tabular-nums">
                     {config.hero.safetyStat || '100%'}
                   </div>
-                  <div className="text-[11px] sm:text-sm text-slate-400 mt-0.5 line-clamp-2">
+                  <div className="text-[10px] sm:text-xs lg:text-sm text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {language === 'ar' ? (config.hero.safetyLabelAr || 'سجل الأمان والسلامة') : (config.hero.safetyLabelEn || 'Safety Record')}
                   </div>
                 </div>
@@ -164,20 +168,20 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
 
           {/* Visual Showcase Column (Accreditation & Highlights) */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-3xl p-1 bg-gradient-to-b from-[#C59B5F]/40 via-slate-800/40 to-slate-900/60 shadow-2xl shadow-blue-950/50">
+            <div className="relative rounded-2xl sm:rounded-3xl p-1 bg-gradient-to-b from-[#C59B5F]/40 via-slate-800/40 to-slate-900/60 shadow-2xl shadow-blue-950/50">
               
-              <div className="relative rounded-[22px] overflow-hidden bg-slate-900/95 border border-slate-800 p-6 sm:p-8 space-y-6">
+              <div className="relative rounded-[18px] sm:rounded-[22px] overflow-hidden bg-slate-900/95 border border-slate-800 p-5 sm:p-7 space-y-5 sm:space-y-6">
                 
                 {/* Official Accreditation Header */}
-                <div className={`flex items-center gap-3.5 pb-5 border-b border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  <div className="w-12 h-12 rounded-2xl bg-[#C59B5F]/15 border border-[#C59B5F]/30 text-[#C59B5F] flex items-center justify-center shrink-0 shadow-inner">
-                    <Award className="w-6 h-6" />
+                <div className={`flex items-center gap-3.5 pb-4 sm:pb-5 border-b border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#C59B5F]/15 border border-[#C59B5F]/30 text-[#C59B5F] flex items-center justify-center shrink-0 shadow-inner">
+                    <Award className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-[#C59B5F] uppercase tracking-wider block">
+                    <span className="text-[11px] sm:text-xs font-bold text-[#C59B5F] uppercase tracking-wider block">
                       {isRtl ? 'اعتمادات PADI الدولية المعتمدة' : 'Official PADI Accreditations'}
                     </span>
-                    <h3 className="text-base font-extrabold text-white">
+                    <h3 className="text-sm sm:text-base font-extrabold text-white">
                       {language === 'ar' 
                         ? (config.instructor.titleAr || 'PADI Open Water Scuba Instructor (OWSI)') 
                         : (config.instructor.titleEn || 'PADI Open Water Scuba Instructor (OWSI)')}
@@ -186,22 +190,22 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                 </div>
 
                 {/* Instructor Highlights list */}
-                <div className={`space-y-3.5 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <div className={`space-y-3 sm:space-y-3.5 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     {heroWhyTitle}
                   </div>
 
-                  <div className="space-y-3 text-sm text-slate-300">
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm text-slate-300">
+                    <div className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0 mt-0.5" />
                       <span className="leading-snug">{heroWhy1}</span>
                     </div>
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <Award className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 shrink-0 mt-0.5" />
                       <span className="leading-snug">{heroWhy2}</span>
                     </div>
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                      <Users className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                      <Users className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400 shrink-0 mt-0.5" />
                       <span className="leading-snug">{heroWhy3}</span>
                     </div>
                   </div>
@@ -212,9 +216,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                   href={`https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-sm transition-colors cursor-pointer group"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-medium text-xs sm:text-sm transition-colors cursor-pointer group min-h-[44px]"
                 >
-                  <svg className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 fill-current group-hover:scale-110 transition-transform shrink-0" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
                   </svg>
                   <span>{heroChatWhatsApp}</span>

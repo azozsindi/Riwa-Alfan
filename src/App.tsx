@@ -25,6 +25,9 @@ import { DiveSitesModal } from './components/DiveSitesModal';
 import { FaqModal } from './components/FaqModal';
 import { AdminPage } from './pages/AdminPage';
 import { DEFAULT_VISIBLE_SECTIONS } from './data/defaultConfig';
+import { CartProvider } from './context/CartContext';
+import { CartDrawer } from './components/CartDrawer';
+import { FloatingCartButton } from './components/FloatingCartButton';
 
 function AppContent() {
   const { isRtl } = useLanguage();
@@ -97,6 +100,7 @@ function AppContent() {
       {/* Top Header */}
       <Header 
         onOpenBooking={() => handleOpenBooking()} 
+        onOpenAdmin={() => navigate('/admin')}
         onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
         onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
         onOpenFaq={sections.faqModal ? () => setIsFaqOpen(true) : undefined}
@@ -149,6 +153,7 @@ function AppContent() {
       {/* Footer with Modals Triggers */}
       {sections.footer && (
         <Footer 
+          onOpenAdmin={() => navigate('/admin')}
           onOpenPolicies={() => setIsPoliciesOpen(true)} 
           onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
           onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
@@ -198,7 +203,11 @@ export default function App() {
       <RouterProvider>
         <LanguageProvider>
           <SiteConfigProvider>
-            <AppContent />
+            <CartProvider>
+              <AppContent />
+              <CartDrawer />
+              <FloatingCartButton />
+            </CartProvider>
           </SiteConfigProvider>
         </LanguageProvider>
       </RouterProvider>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, MapPin, Compass, Anchor, Fish, Ship, Waves } from 'lucide-react';
+import { X, MapPin, Compass, Anchor, Fish, Ship, Waves, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
+import { useCart } from '../context/CartContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface DiveSitesModalProps {
@@ -13,6 +14,7 @@ interface DiveSitesModalProps {
 export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose, onBookTrip }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
+  const { addToCart, openCart, lastAddedId } = useCart();
   const t = UI_TRANSLATIONS[language];
 
   const sites = config.diveSites || [];
@@ -28,32 +30,32 @@ export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
       <div 
-        className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6 my-6 max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl space-y-5 sm:space-y-6 my-auto max-h-[92vh] overflow-y-auto"
         dir={isRtl ? 'rtl' : 'ltr'}
       >
         {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-800 pb-3.5 sm:pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider">
               <Waves className="w-4 h-4 text-cyan-400" />
               <span>{isRtl ? 'رحلات وأعماق البحر الأحمر' : 'Red Sea Dive Safaris'}</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white font-brand-arabic">
+            <h2 className="text-lg sm:text-2xl font-black text-white font-brand-arabic">
               {t.sitesTitle}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] sm:text-xs text-slate-400">
               {t.sitesDesc}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer shrink-0"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
             aria-label="إغلاق / Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -158,15 +160,46 @@ export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose,
                 </div>
               </div>
 
-              {/* CTA Book Trip */}
-              <div className="pt-2">
+              {/* CTA Book Trip & Add to Cart */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const tripId = `trip-${activeSite.id}`;
+                    addToCart({
+                      id: tripId,
+                      title: {
+                        ar: `رحلة بحرية إلى موقع ${activeSite.name.ar}`,
+                        en: `Boat Safari to ${activeSite.name.en}`,
+                      },
+                      subtitle: {
+                        ar: `عمق: ${activeSite.depth.ar} | رؤية: ${activeSite.visibility.ar}`,
+                        en: `Depth: ${activeSite.depth.en} | Vis: ${activeSite.visibility.en}`,
+                      },
+                      price: 450,
+                      priceFormatted: {
+                        ar: '450 ر.س',
+                        en: '450 SAR',
+                      },
+                      type: 'trip',
+                      category: activeSite.location.ar,
+                    });
+                    openCart();
+                    onClose();
+                  }}
+                  className="flex-1 gold-gradient-btn py-3 px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag className="w-4 h-4 text-slate-950" />
+                  <span>{isRtl ? 'أضف الرحلة للسلة 🛒' : 'Add Safari to Cart 🛒'}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => handleBook(activeSite.name[language])}
-                  className="gold-gradient-btn w-full py-3 px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-2"
+                  className="px-4 py-3 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Ship className="w-4 h-4 text-slate-950" />
-                  <span>{isRtl ? `احجز رحلة بحرية إلى (${activeSite.name[language]})` : `Book Safari to ${activeSite.name[language]}`}</span>
+                  <Ship className="w-4 h-4 text-cyan-400" />
+                  <span>{isRtl ? 'استفسار مباشر' : 'Direct Inquiry'}</span>
                 </button>
               </div>
             </div>

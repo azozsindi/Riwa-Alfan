@@ -42,8 +42,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const email = (currentUser.email || '').toLowerCase().trim();
 
-      // 1. Check Bootstrapped Superadmin Email
-      if (email === BOOTSTRAPPED_ADMIN_EMAIL) {
+      // 1. Check Bootstrapped Superadmin Email (requires verified email to prevent spoofing)
+      const isGoogleProvider = currentUser.providerData?.some(p => p.providerId === 'google.com');
+      const isVerified = currentUser.emailVerified || isGoogleProvider;
+
+      if (email === BOOTSTRAPPED_ADMIN_EMAIL && isVerified) {
         setUserRole('superadmin');
         // Auto-seed admin document in Firestore /admins/{uid} so UID-based rules also pass
         try {

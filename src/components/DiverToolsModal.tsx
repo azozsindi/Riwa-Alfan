@@ -21,32 +21,32 @@ export const DiverToolsModal: React.FC<DiverToolsModalProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
       <div 
-        className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6 my-6 max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-2xl space-y-4 sm:space-y-6 my-auto max-h-[92vh] overflow-y-auto"
         dir={isRtl ? 'rtl' : 'ltr'}
       >
         {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-800 pb-3.5 sm:pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[#E0BA84] text-xs font-bold uppercase tracking-wider">
               <Calculator className="w-4 h-4 text-[#C59B5F]" />
               <span>{isRtl ? 'أدوات وحاسبات الغوص التفاعلية' : 'Interactive Diver Calculators'}</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white font-brand-arabic">
+            <h2 className="text-lg sm:text-2xl font-black text-white font-brand-arabic">
               {t.toolsTitle}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] sm:text-xs text-slate-400">
               {t.toolsDesc}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer shrink-0"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
             aria-label="إغلاق / Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 

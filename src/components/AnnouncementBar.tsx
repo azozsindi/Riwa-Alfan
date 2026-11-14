@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Sparkles, ArrowLeft, ArrowRight, X, Tag } from 'lucide-react';
+import React from 'react';
+import { Sparkles, ArrowLeft, ArrowRight, Tag } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 
@@ -10,17 +10,10 @@ interface AnnouncementBarProps {
 export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
-  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('riwa_announcement_dismissed') === 'true';
-    } catch {
-      return false;
-    }
-  });
 
   const { announcement } = config;
 
-  if (!announcement.enabled || isDismissed) {
+  if (!announcement.enabled) {
     return null;
   }
 
@@ -31,9 +24,9 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }
   return (
     <aside 
       aria-label={badgeText}
-      className="bg-gradient-to-r from-[#0C172B] via-[#162E52] to-[#0C172B] text-white text-xs py-2 px-3 sm:px-4 relative z-50 shadow-md border-b border-[#C59B5F]/35"
+      className="bg-gradient-to-r from-[#0C172B] via-[#162E52] to-[#0C172B] text-white text-xs py-2 sm:py-2.5 px-3 sm:px-4 relative z-50 shadow-md border-b border-[#C59B5F]/35"
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2.5 sm:gap-3">
         {/* Left / Center content */}
         <div className="flex-1 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-start">
           {/* Badge */}
@@ -48,14 +41,14 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }
           </span>
 
           {/* Text */}
-          <span className="font-medium text-slate-200 tracking-wide">
+          <span className="font-medium text-slate-200 tracking-wide text-xs sm:text-[13px] leading-snug">
             {mainText}
           </span>
 
           {/* Action button */}
           <button
             onClick={() => onClaimOffer(announcement.highlightCourseId)}
-            className="inline-flex items-center gap-1 font-bold text-[#E0BA84] hover:text-white underline decoration-[#C59B5F] underline-offset-4 hover:decoration-white transition-all cursor-pointer text-xs"
+            className="inline-flex items-center gap-1 font-bold text-[#E0BA84] hover:text-white underline decoration-[#C59B5F] underline-offset-4 hover:decoration-white transition-all cursor-pointer text-xs min-h-[30px]"
           >
             <span>{ctaText}</span>
             {isRtl ? (
@@ -65,20 +58,6 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onClaimOffer }
             )}
           </button>
         </div>
-
-        {/* Dismiss button */}
-        <button
-          onClick={() => {
-            setIsDismissed(true);
-            try {
-              localStorage.setItem('riwa_announcement_dismissed', 'true');
-            } catch {}
-          }}
-          className="p-1 rounded-md text-blue-200 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
-          title={isRtl ? 'إغلاق الإعلان' : 'Dismiss'}
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
       </div>
     </aside>
   );

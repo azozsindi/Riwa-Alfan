@@ -124,36 +124,36 @@ ${paymentChoice === 'paymob' ? 'Payment Method: Paymob Online Payment\n' : ''}${
   const whatsAppUrl = `https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppMessage)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className={`bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto p-4 sm:p-7 space-y-5 sm:space-y-6 ${
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className={`bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto p-4 sm:p-7 space-y-4 sm:space-y-6 ${
         isRtl ? 'text-right' : 'text-left'
       }`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3.5 sm:pb-4">
           {isRtl ? (
             <>
               <button
                 onClick={onClose}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="إغلاق"
               >
                 <X className="w-5 h-5" />
               </button>
               <div>
-                <div className="text-xs font-semibold text-[#C59B5F]">{t.modalKicker}</div>
-                <h3 className="text-lg sm:text-xl font-black text-white font-brand-arabic">{t.modalTitle}</h3>
+                <div className="text-[11px] sm:text-xs font-semibold text-[#C59B5F]">{t.modalKicker}</div>
+                <h3 className="text-base sm:text-xl font-black text-white font-brand-arabic">{t.modalTitle}</h3>
               </div>
             </>
           ) : (
             <>
               <div>
-                <div className="text-xs font-semibold text-[#C59B5F]">{t.modalKicker}</div>
-                <h3 className="text-lg sm:text-xl font-black text-white font-brand-arabic">{t.modalTitle}</h3>
+                <div className="text-[11px] sm:text-xs font-semibold text-[#C59B5F]">{t.modalKicker}</div>
+                <h3 className="text-base sm:text-xl font-black text-white font-brand-arabic">{t.modalTitle}</h3>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />

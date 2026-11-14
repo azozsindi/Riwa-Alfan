@@ -14,6 +14,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ 
+  onOpenAdmin,
   onOpenPolicies, 
   onOpenTools, 
   onOpenSites, 
@@ -68,10 +69,10 @@ export const Footer: React.FC<FooterProps> = ({
   ];
 
   return (
-    <footer className={`bg-slate-950 border-t border-slate-900 text-slate-400 py-16 ${
+    <footer className={`bg-slate-950 border-t border-slate-900 text-slate-400 py-12 sm:py-16 ${
       isRtl ? 'text-right' : 'text-left'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           
@@ -90,7 +91,7 @@ export const Footer: React.FC<FooterProps> = ({
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-white font-brand-arabic">
+                <span className="text-lg sm:text-xl font-black tracking-tight text-white font-brand-arabic">
                   {(() => {
                     const words = (brandName || '').trim().split(' ');
                     if (words.length > 1) {
@@ -104,7 +105,7 @@ export const Footer: React.FC<FooterProps> = ({
                     return <span className="text-[#C59B5F]">{brandName}</span>;
                   })()}
                 </span>
-                <span className="text-xs text-[#C59B5F] font-semibold tracking-wider uppercase">
+                <span className="text-[10px] sm:text-xs text-[#C59B5F] font-semibold tracking-wider uppercase">
                   {brandSub}
                 </span>
               </div>
@@ -248,8 +249,8 @@ export const Footer: React.FC<FooterProps> = ({
                   </a>
                 )}
               </li>
-              <li>
-                {onOpenFaq ? (
+              {onOpenFaq ? (
+                <li>
                   <button
                     type="button"
                     onClick={onOpenFaq}
@@ -258,13 +259,27 @@ export const Footer: React.FC<FooterProps> = ({
                     <span>❓</span>
                     <span>{t.navFaq}</span>
                   </button>
-                ) : (
+                </li>
+              ) : (
+                <li>
                   <a href="#faq" className="hover:text-blue-400 transition-colors flex items-center gap-1.5">
                     <span>❓</span>
                     <span>{t.navFaq}</span>
                   </a>
-                )}
-              </li>
+                </li>
+              )}
+              {onOpenAdmin && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={onOpenAdmin}
+                    className="hover:text-[#E0BA84] text-slate-500 hover:text-slate-300 transition-colors cursor-pointer flex items-center gap-1.5 pt-0.5"
+                  >
+                    <span>🔐</span>
+                    <span>{isRtl ? 'بوابة إدارة الموقع' : 'Admin Portal'}</span>
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   type="button"
@@ -327,7 +342,7 @@ export const Footer: React.FC<FooterProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
             {partnerLogos.filter(p => p.active !== false).map((partner) => {
               const partnerName = isRtl ? partner.nameAr : partner.nameEn;
               const badgeLabel = isRtl 
@@ -411,6 +426,17 @@ export const Footer: React.FC<FooterProps> = ({
             <span className="px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-500/30 text-blue-400 text-[10px] font-bold">
               PADI Certified
             </span>
+            {onOpenAdmin && (
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="px-2 py-0.5 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-[#C59B5F]/40 text-slate-400 hover:text-[#E0BA84] text-[10px] font-sans flex items-center gap-1 transition-colors cursor-pointer"
+                title={isRtl ? 'لوحة تحكم وإدارة الموقع' : 'Admin Portal'}
+              >
+                <span>🔐</span>
+                <span>{isRtl ? 'لوحة الإدارة' : 'Admin'}</span>
+              </button>
+            )}
           </div>
         </div>
 

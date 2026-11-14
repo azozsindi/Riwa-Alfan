@@ -81,18 +81,18 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   )}`;
 
   return (
-    <section id="instructor" className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
+    <section id="instructor" className="py-14 sm:py-24 bg-slate-950 relative border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className={`max-w-3xl mb-10 sm:mb-16 space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+        <div className={`max-w-3xl mb-8 sm:mb-14 space-y-2.5 sm:space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="text-xs font-semibold text-[#C59B5F] tracking-wider">
             {sectionKicker}
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight font-brand-arabic">
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-normal leading-snug font-brand-arabic">
             {sectionTitle}
           </h2>
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-base text-slate-300 leading-relaxed">
             {sectionDesc}
           </p>
         </div>
@@ -101,18 +101,18 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
         {(showCaptainFahad || showFemaleTraining) && (
           <div className={
             showCaptainFahad && showFemaleTraining
-              ? "grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch mb-12"
-              : "max-w-2xl mx-auto mb-12"
+              ? "grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch mb-10 sm:mb-14"
+              : "max-w-2xl mx-auto mb-10 sm:mb-14"
           }>
             
             {/* Card 1: Captain Fahad Al-Huwaimli */}
             {showCaptainFahad && (
-              <div className={`rounded-3xl bg-slate-900 border border-[#C59B5F]/35 p-6 sm:p-8 space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
-                <div className="space-y-6">
+              <div className={`rounded-2xl sm:rounded-3xl bg-slate-900 border border-[#C59B5F]/35 p-5 sm:p-7 space-y-5 sm:space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
+                <div className="space-y-5 sm:space-y-6">
                   
                   {/* Profile Header without image box */}
                   <div className="space-y-2 border-b border-slate-800/80 pb-4">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#DDB67E]/20 via-[#C59B5F]/25 to-[#A4783B]/20 text-[#E0BA84] border border-[#C59B5F]/40 font-bold text-xs flex items-center gap-1.5 shadow-sm">
                         <span>👑</span>
                         <span>{isRtl ? 'كبير المدربين ومؤسس رواء الفن' : 'Lead Instructor & Founder'}</span>
@@ -121,13 +121,13 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                         PADI OWSI
                       </span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-black text-white font-brand-arabic pt-1">{name}</h3>
+                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-1">{name}</h3>
                     <p className="text-xs text-[#C59B5F] font-semibold">{title}</p>
                     <p className="text-xs text-slate-400 font-medium">{accreditation}</p>
                   </div>
 
                   {/* Bio text */}
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     {bio}
                   </p>
 
@@ -142,7 +142,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                   </div>
 
                   {/* Specialties preview */}
-                  <div className="space-y-2 pt-2">
+                  <div className="space-y-2 pt-1">
                     <div className="text-xs font-semibold text-slate-400">
                       {t.instSpecialtiesHeading}:
                     </div>
@@ -160,7 +160,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                 <div className="pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 sm:gap-3 items-stretch">
                   <button
                     onClick={onOpenBooking}
-                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5"
+                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5 min-h-[44px]"
                   >
                     <Award className="w-4 h-4 text-slate-950 shrink-0" />
                     <span className="truncate">{isRtl ? 'احجز تدريبك' : 'Book Training'}</span>
@@ -174,7 +174,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-[#C59B5F]/40 text-[#E0BA84] hover:text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-[#C59B5F]/40 text-[#E0BA84] hover:text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center min-h-[44px]"
                   >
                     <PhoneCall className="w-4 h-4 shrink-0 text-[#C59B5F]" />
                     <span className="truncate">{isRtl ? 'واتساب مباشر' : 'WhatsApp'}</span>
@@ -185,13 +185,13 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
 
             {/* Card 2: Female Training Division */}
             {showFemaleTraining && (
-              <div className={`rounded-3xl bg-gradient-to-b from-slate-900 via-[#16253D]/40 to-slate-900 border border-[#C59B5F]/45 p-6 sm:p-8 space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ring-1 ring-[#C59B5F]/25 ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b from-slate-900 via-[#16253D]/40 to-slate-900 border border-[#C59B5F]/45 p-5 sm:p-7 space-y-5 sm:space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ring-1 ring-[#C59B5F]/25 ${isRtl ? 'text-right' : 'text-left'}`}>
                 
                 {/* Top decorative banner */}
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   
                   {/* Header Badge */}
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#DDB67E]/20 via-[#C59B5F]/25 to-[#A4783B]/20 text-[#E0BA84] border border-[#C59B5F]/40 font-bold text-xs flex items-center gap-1.5 shadow-sm">
                       <span>🧕</span>
                       <span>{femaleBadge}</span>
@@ -204,7 +204,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
 
                   {/* Profile Header without image box */}
                   <div className="space-y-2 border-b border-slate-800/80 pb-4">
-                    <h3 className="text-xl sm:text-2xl font-black text-white font-brand-arabic pt-1">{femaleName}</h3>
+                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-1">{femaleName}</h3>
                     <p className="text-xs text-[#C59B5F] font-semibold">{femaleTitle}</p>
                     <p className="text-xs text-slate-400 font-medium font-sans">
                       {femaleInst.padiNumber || 'PADI Certified Instructor'} · {femaleInst.experienceYears || '6+ سنوات خبرة'}
@@ -212,7 +212,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                   </div>
 
                   {/* Bio text */}
-                  <p className="text-sm text-slate-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     {femaleBio}
                   </p>
 
@@ -242,11 +242,11 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
 
                 </div>
 
-                {/* Action buttons: Dual 50% buttons side-by-side (مربعين جمب بعض مو تحت بعض وماخذه نص الشاشة) */}
+                {/* Action buttons: Dual 50% buttons side-by-side */}
                 <div className="pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 sm:gap-3 items-stretch">
                   <button
                     onClick={onOpenBooking}
-                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5"
+                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5 min-h-[44px]"
                   >
                     <Sparkles className="w-4 h-4 text-slate-950 shrink-0" />
                     <span className="truncate">{femaleBookingBtn}</span>
@@ -256,7 +256,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     href={femaleWhatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 text-emerald-400 hover:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 text-emerald-400 hover:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center min-h-[44px]"
                   >
                     <PhoneCall className="w-4 h-4 shrink-0 text-emerald-400" />
                     <span className="truncate">{isRtl ? 'واتساب مباشر' : 'WhatsApp'}</span>
@@ -271,9 +271,9 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
 
         {/* Sleek Unified Philosophy & Trust Banner (Combines Quote & 3 Pillars compactly) */}
         {showQuote && (
-          <div className={`p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#162E52]/40 via-slate-900 to-[#0C172B] border border-[#C59B5F]/35 space-y-5 shadow-xl ${isRtl ? 'text-right' : 'text-left'}`}>
+          <div className={`p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#162E52]/40 via-slate-900 to-[#0C172B] border border-[#C59B5F]/35 space-y-5 shadow-xl ${isRtl ? 'text-right' : 'text-left'}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
-            <p className="text-sm sm:text-base text-slate-200 italic leading-relaxed">
+            <p className="text-xs sm:text-base text-slate-200 italic leading-relaxed">
               &ldquo;{activeQuote}&rdquo;
             </p>
             <span className="text-xs font-bold text-[#E0BA84] shrink-0 font-brand-arabic">
@@ -282,7 +282,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           </div>
 
           {/* 3 Core Trust Badges in a single sleek row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
               <Shield className="w-4 h-4 text-[#C59B5F] shrink-0" />
               <div>

@@ -12,7 +12,9 @@
         "experience": { "type": "string", "maxLength": 100 },
         "timing": { "type": "string", "maxLength": 100 },
         "notes": { "type": "string", "maxLength": 1000 },
-        "status": { "type": "string", "enum": ["new", "contacted", "confirmed", "completed", "cancelled"] },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "paymentAmount": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["new", "contacted", "confirmed", "completed", "cancelled", "paid", "pending_payment"] },
         "createdAt": { "type": "string", "maxLength": 50 }
       },
       "required": ["id", "name", "phone", "interest", "status", "createdAt"]

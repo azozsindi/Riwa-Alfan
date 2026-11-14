@@ -727,33 +727,33 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           </div>
 
           {/* Sub-tabs switcher */}
-          <div className="flex items-center gap-1.5 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl shrink-0 self-start sm:self-auto">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl w-full sm:w-auto shrink-0">
             <button
               onClick={() => setSubTab('admins')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 subTab === 'admins'
                   ? 'gold-gradient-btn text-slate-950 shadow-md font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-3.5 h-3.5" />
               <span>{isRtl ? 'فريق العمل والمدراء' : 'Staff & Admins'}</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-950/30 text-[10px]">
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-950/40 text-[10px]">
                 {adminsList.length}
               </span>
             </button>
 
             <button
               onClick={() => setSubTab('trainees')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 subTab === 'trainees'
                   ? 'gold-gradient-btn text-slate-950 shadow-md font-black'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <GraduationCap className="w-4 h-4" />
-              <span>{isRtl ? 'سجل المتدربين والطلاب' : 'Trainees Directory'}</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-950/30 text-[10px]">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>{isRtl ? 'سجل المتدربين' : 'Trainees'}</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-950/40 text-[10px]">
                 {traineesList.length}
               </span>
             </button>
@@ -841,26 +841,26 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
         <div className="space-y-6">
           
           {/* Bootstrapped Superadmin Card */}
-          <div className="p-6 rounded-3xl bg-slate-950 border border-amber-500/30 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xl shrink-0">
+          <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-950 border border-amber-500/30 space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-base sm:text-lg shrink-0">
                   👑
                 </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm sm:text-base font-bold text-white font-mono">{BOOTSTRAPPED_ADMIN_EMAIL}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30">
-                      {isRtl ? 'المدير الرئيسي (Super Admin)' : 'Root Super Admin'}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs sm:text-base font-bold text-white font-mono break-all">{BOOTSTRAPPED_ADMIN_EMAIL}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30">
+                      {isRtl ? 'المدير الرئيسي' : 'Root Super Admin'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
                     {isRtl ? 'الحساب المالك للمشروع والمحمي في قواعد الأمان السحابية Firestore (مفعّل دائماً).' : 'Root account specified in Firestore Security Rules (Always Active).'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center self-start sm:self-auto shrink-0">
                 <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{isRtl ? 'نشط دائماً' : 'Always Active'}</span>
@@ -870,10 +870,10 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           </div>
 
           {/* Permissions Guide Banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-amber-950/20 border border-blue-500/30 space-y-2">
-            <div className="flex items-center justify-between">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-amber-950/20 border border-blue-500/30 space-y-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2 text-white font-bold text-xs">
-                <Shield className="w-4 h-4 text-amber-400" />
+                <Shield className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{isRtl ? 'دليل الصلاحيات والتحكم بالمستخدمين:' : 'Permissions & Roles Guide:'}</span>
               </div>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
@@ -892,77 +892,85 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           </div>
 
           {/* Quick Inline User Add Box */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#C59B5F]" />
                 <span>{isRtl ? 'إضافة مستخدم سريع (بالبريد الإلكتروني):' : 'Quick Add User (By Email):'}</span>
               </span>
-              <span className="text-[11px] text-slate-400">
-                {isRtl ? 'إذا أنشأت حساباً في Firebase Console أو لديك بريد جاهز، أضفه هنا ليظهر فوراً وتفعل صلاحيته' : 'Add any Firebase Auth account or manager email directly'}
+              <span className="text-[10px] sm:text-[11px] text-slate-400">
+                {isRtl ? 'أدخل البريد والصلاحية لإضافته وتفعيله فوراً' : 'Add account directly'}
               </span>
             </div>
 
-            <form onSubmit={handleQuickAddAdmin} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-              <input
-                type="email"
-                value={quickEmail}
-                onChange={(e) => setQuickEmail(e.target.value)}
-                placeholder="email@example.com"
-                required
-                className="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:border-cyan-500 focus:outline-none"
-              />
+            <form onSubmit={handleQuickAddAdmin} className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <div className="sm:col-span-5">
+                <input
+                  type="email"
+                  value={quickEmail}
+                  onChange={(e) => setQuickEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
 
-              <input
-                type="text"
-                value={quickName}
-                onChange={(e) => setQuickName(e.target.value)}
-                placeholder={isRtl ? 'الاسم الكامل (اختياري)' : 'Full Name (optional)'}
-                className="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
+              <div className="sm:col-span-3">
+                <input
+                  type="text"
+                  value={quickName}
+                  onChange={(e) => setQuickName(e.target.value)}
+                  placeholder={isRtl ? 'الاسم الكامل' : 'Full Name'}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
 
-              <select
-                value={quickRole}
-                onChange={(e) => setQuickRole(e.target.value as any)}
-                className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
-              >
-                <option value="admin">{isRtl ? 'مدير نظام (Admin)' : 'Admin'}</option>
-                <option value="instructor">{isRtl ? 'كابتن ومدرب (Instructor)' : 'Instructor'}</option>
-                <option value="viewer">{isRtl ? 'مشرف ومساعد (Viewer)' : 'Viewer'}</option>
-              </select>
+              <div className="sm:col-span-2">
+                <select
+                  value={quickRole}
+                  onChange={(e) => setQuickRole(e.target.value as any)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
+                >
+                  <option value="admin">{isRtl ? 'مدير نظام' : 'Admin'}</option>
+                  <option value="instructor">{isRtl ? 'مدرب غوص' : 'Instructor'}</option>
+                  <option value="viewer">{isRtl ? 'مشرف' : 'Viewer'}</option>
+                </select>
+              </div>
 
-              <button
-                type="submit"
-                disabled={isSubmittingQuick}
-                className="gold-gradient-btn px-4 py-2 rounded-xl text-slate-950 font-bold text-xs shadow-md shadow-[#C59B5F]/20 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 transition-transform disabled:opacity-50"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{isSubmittingQuick ? (isRtl ? 'جارِ الإضافة...' : 'Adding...') : (isRtl ? 'إضافة فورية ➕' : 'Add User ➕')}</span>
-              </button>
+              <div className="sm:col-span-2">
+                <button
+                  type="submit"
+                  disabled={isSubmittingQuick}
+                  className="w-full gold-gradient-btn px-4 py-2.5 rounded-xl text-slate-950 font-bold text-xs shadow-md shadow-[#C59B5F]/20 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 transition-transform disabled:opacity-50"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{isSubmittingQuick ? (isRtl ? 'جارِ الإضافة...' : 'Adding...') : (isRtl ? 'إضافة فورية ➕' : 'Add ➕')}</span>
+                </button>
+              </div>
             </form>
           </div>
 
           {/* Action Bar: Search, Filters, Add Button */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-1 items-center gap-2">
-              <div className="relative flex-1 max-w-sm">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+            <div className="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2">
+              <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={adminSearch}
                   onChange={(e) => setAdminSearch(e.target.value)}
                   placeholder={isRtl ? 'بحث بالاسم أو البريد...' : 'Search by name or email...'}
-                  className="w-full ps-9 pe-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  className="w-full ps-9 pe-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
               {/* Role filter pills */}
-              <div className="flex items-center gap-1 overflow-x-auto text-xs">
+              <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
                 {(['all', 'admin', 'instructor', 'viewer'] as const).map(role => (
                   <button
                     key={role}
                     onClick={() => setAdminRoleFilter(role)}
-                    className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
+                    className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors whitespace-nowrap ${
                       adminRoleFilter === role
                         ? 'bg-blue-600 text-white'
                         : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
@@ -980,7 +988,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchAdmins}
-                className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors cursor-pointer"
+                className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors cursor-pointer shrink-0"
                 title={isRtl ? 'تحديث القائمة' : 'Refresh'}
               >
                 <RefreshCw className={`w-4 h-4 ${loadingAdmins ? 'animate-spin' : ''}`} />
@@ -991,7 +999,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   setShowAddUserModal(true);
                   setFormError(null);
                 }}
-                className="gold-gradient-btn px-4 py-2.5 rounded-xl text-slate-950 font-bold text-xs shadow-md shadow-[#C59B5F]/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
+                className="flex-1 sm:flex-initial gold-gradient-btn px-4 py-2.5 rounded-xl text-slate-950 font-bold text-xs shadow-md shadow-[#C59B5F]/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform whitespace-nowrap"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>{isRtl ? 'إضافة مستخدم جديد ➕' : 'Add New User ➕'}</span>
@@ -1019,7 +1027,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
                 {filteredAdmins.map((adm) => {
                   const isSuspended = adm.status === 'suspended';
                   const isRoot = adm.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase();
@@ -1027,113 +1035,129 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                   return (
                     <div 
                       key={adm.uid} 
-                      className={`p-5 rounded-2xl bg-slate-950 border transition-all space-y-4 ${
+                      className={`p-4 sm:p-5 rounded-2xl bg-slate-950 border transition-all space-y-3 sm:space-y-3.5 ${
                         isSuspended 
-                          ? 'border-red-900/40 bg-red-950/10 opacity-75' 
+                          ? 'border-red-900/40 bg-red-950/10 opacity-80' 
                           : 'border-slate-800 hover:border-slate-700'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border ${
-                            adm.role === 'admin' || adm.role === 'superadmin'
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                              : adm.role === 'instructor'
-                              ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                              : 'bg-slate-800 text-slate-300 border-slate-700'
-                          }`}>
-                            {adm.name ? adm.name.slice(0, 2).toUpperCase() : '👤'}
-                          </div>
-                          
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h5 className="text-sm font-bold text-white truncate">
-                                {adm.name || (isRtl ? 'مستخدم بدون اسم' : 'Unnamed User')}
-                              </h5>
-                              {isSuspended && (
-                                <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 text-[9px] font-bold border border-red-500/30">
-                                  {isRtl ? 'معلّق' : 'Suspended'}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-slate-400 font-mono truncate">{adm.email}</p>
-                          </div>
+                      {/* Top User Info: Avatar + Name + Email + Role Badge */}
+                      <div className="flex items-center gap-3">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border ${
+                          adm.role === 'admin' || adm.role === 'superadmin'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : adm.role === 'instructor'
+                            ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                            : 'bg-slate-800 text-slate-300 border-slate-700'
+                        }`}>
+                          {adm.name ? adm.name.slice(0, 2).toUpperCase() : '👤'}
                         </div>
-
-                        {/* User Actions: Edit, Suspend, Delete */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {/* Edit User Button (Available for all users) */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingAdmin(adm);
-                              setEditName(adm.name || '');
-                              setEditEmail(adm.email || '');
-                              setEditPhone(adm.phone || '');
-                              setEditRole((adm.role as any) || 'admin');
-                              setEditStatus(adm.status || 'active');
-                              setEditNotes(adm.notes || '');
-                              setEditError(null);
-                              setShowEditUserModal(true);
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 hover:text-white border border-blue-500/30 transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold"
-                            title={isRtl ? 'تعديل بيانات وصلاحيات الحساب' : 'Edit user details & permissions'}
-                          >
-                            <Edit3 className="w-3.5 h-3.5 text-blue-400" />
-                            <span>{isRtl ? 'تعديل' : 'Edit'}</span>
-                          </button>
-
-                          {!isRoot && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => handleToggleAdminStatus(adm)}
-                                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                                  isSuspended
-                                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60'
-                                    : 'bg-amber-950/40 text-amber-300 border-amber-500/30 hover:bg-amber-900/60'
-                                }`}
-                                title={isSuspended ? (isRtl ? 'إلغاء التعليق' : 'Unsuspend') : (isRtl ? 'تعليق الحساب' : 'Suspend')}
-                              >
-                                {isSuspended ? (isRtl ? 'تنشيط' : 'Activate') : (isRtl ? 'تعليق' : 'Suspend')}
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setDeleteUserError(null);
-                                  setUserToDelete(adm);
-                                }}
-                                className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/70 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer"
-                                title={isRtl ? 'حذف الحساب نهائياً' : 'Delete user'}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </>
-                          )}
+                        
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h5 className="text-sm font-bold text-white truncate">
+                              {adm.name || (isRtl ? 'مستخدم بدون اسم' : 'Unnamed User')}
+                            </h5>
+                            {isRoot ? (
+                              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30">
+                                {isRtl ? 'المدير الرئيسي 👑' : 'Super Admin 👑'}
+                              </span>
+                            ) : (
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                                adm.role === 'admin'
+                                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                                  : adm.role === 'instructor'
+                                  ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                  : 'bg-slate-800 text-slate-300 border-slate-700'
+                              }`}>
+                                {adm.role === 'admin' && (isRtl ? 'مدير نظام' : 'Admin')}
+                                {adm.role === 'instructor' && (isRtl ? 'مدرب غوص' : 'Instructor')}
+                                {adm.role === 'viewer' && (isRtl ? 'مشرف ومساعد' : 'Viewer')}
+                              </span>
+                            )}
+                            {isSuspended && (
+                              <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 text-[9px] font-bold border border-red-500/30">
+                                {isRtl ? 'معلّق ⏸️' : 'Suspended'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-400 font-mono break-all mt-0.5">{adm.email}</p>
                         </div>
                       </div>
 
-                      {/* Role selection & details */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-900 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-slate-500">{isRtl ? 'الصلاحية:' : 'Role:'}</span>
+                      {/* Action Toolbar: Dedicated row (Neat & Clean on all screens) */}
+                      <div className="flex items-center gap-2 pt-1 border-t border-slate-900/80">
+                        {/* Edit Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingAdmin(adm);
+                            setEditName(adm.name || '');
+                            setEditEmail(adm.email || '');
+                            setEditPhone(adm.phone || '');
+                            setEditRole((adm.role as any) || 'admin');
+                            setEditStatus(adm.status || 'active');
+                            setEditNotes(adm.notes || '');
+                            setEditError(null);
+                            setShowEditUserModal(true);
+                          }}
+                          className="flex-1 py-2 px-3 rounded-xl bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 hover:text-white border border-blue-500/30 transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold active:scale-95"
+                          title={isRtl ? 'تعديل بيانات وصلاحيات الحساب' : 'Edit account'}
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+                          <span>{isRtl ? 'تعديل الحساب' : 'Edit Info'}</span>
+                        </button>
+
+                        {!isRoot && (
+                          <>
+                            {/* Suspend / Activate Toggle */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleAdminStatus(adm)}
+                              className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer flex items-center justify-center gap-1 active:scale-95 shrink-0 ${
+                                isSuspended
+                                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60'
+                                  : 'bg-amber-950/40 text-amber-300 border-amber-500/30 hover:bg-amber-900/60'
+                              }`}
+                              title={isSuspended ? (isRtl ? 'إلغاء التعليق' : 'Unsuspend') : (isRtl ? 'تعليق الحساب' : 'Suspend')}
+                            >
+                              <span>{isSuspended ? (isRtl ? 'تنشيط ✅' : 'Activate') : (isRtl ? 'تعليق ⏸️' : 'Suspend')}</span>
+                            </button>
+
+                            {/* Delete Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeleteUserError(null);
+                                setUserToDelete(adm);
+                              }}
+                              className="p-2 sm:p-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/70 text-red-400 hover:text-red-200 border border-red-500/30 transition-colors cursor-pointer shrink-0 active:scale-95"
+                              title={isRtl ? 'حذف الحساب نهائياً' : 'Delete user'}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Quick Role & Contact Bar */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1.5 border-t border-slate-900 text-xs">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          <span className="text-[11px] text-slate-500 shrink-0">{isRtl ? 'الصلاحية:' : 'Role:'}</span>
                           {isRoot ? (
-                            <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20">
-                              {isRtl ? 'مدير رئيسي (Super Admin)' : 'Super Admin'}
+                            <span className="text-xs font-bold text-amber-400 truncate">
+                              {isRtl ? 'مدير عام المركز (Super Admin)' : 'Root Super Admin'}
                             </span>
                           ) : (
-                            <div className="flex items-center gap-1.5">
-                              <select
-                                value={adm.role}
-                                onChange={(e) => handleUpdateAdminRole(adm.uid, e.target.value as any)}
-                                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
-                              >
-                                <option value="admin">{isRtl ? 'مدير نظام كامل (Admin)' : 'Admin'}</option>
-                                <option value="instructor">{isRtl ? 'كابتن ومدرب (Instructor)' : 'Instructor'}</option>
-                                <option value="viewer">{isRtl ? 'مشرف ومساعد (Viewer)' : 'Viewer'}</option>
-                              </select>
-                            </div>
+                            <select
+                              value={adm.role}
+                              onChange={(e) => handleUpdateAdminRole(adm.uid, e.target.value as any)}
+                              className="w-full sm:w-auto px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-bold focus:outline-none cursor-pointer"
+                            >
+                              <option value="admin">{isRtl ? '👑 مدير نظام (Admin)' : 'Admin'}</option>
+                              <option value="instructor">{isRtl ? '🤿 كابتن ومدرب (Instructor)' : 'Instructor'}</option>
+                              <option value="viewer">{isRtl ? '👁️ مشرف ومساعد (Viewer)' : 'Viewer'}</option>
+                            </select>
                           )}
                         </div>
 
@@ -1142,21 +1166,21 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
                             href={`https://wa.me/${adm.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-bold text-xs"
+                            className="flex items-center justify-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-bold text-xs bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-500/20 transition-colors shrink-0"
                           >
-                            <Phone className="w-3 h-3" />
+                            <Phone className="w-3.5 h-3.5" />
                             <span>{adm.phone}</span>
                           </a>
                         )}
                       </div>
 
                       {adm.notes && (
-                        <p className="text-[11px] text-slate-400 bg-slate-900/60 p-2 rounded-lg border border-slate-800/80">
+                        <p className="text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">
                           💬 {adm.notes}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1">
                         <span>UID: {adm.uid.slice(0, 10)}...</span>
                         {adm.createdAt && (
                           <span>{new Date(adm.createdAt).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US')}</span>
@@ -1416,8 +1440,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       {/* MODAL 1: ADD NEW USER / ADMIN (INSTANT OR UID LINK) */}
       {/* ============================================================== */}
       {showAddUserModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[92dvh] overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-white">
                 <UserPlus className="w-5 h-5 text-cyan-400" />
@@ -1631,8 +1655,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       {/* MODAL 1.5: EDIT USER & PERMISSIONS */}
       {/* ============================================================== */}
       {showEditUserModal && editingAdmin && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[92dvh] overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-white">
                 <Edit3 className="w-5 h-5 text-cyan-400" />
@@ -1788,8 +1812,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       {/* MODAL 2: ADD / EDIT TRAINEE */}
       {/* ============================================================== */}
       {showAddTraineeModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-lg w-full max-h-[92dvh] overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-white">
                 <GraduationCap className="w-5 h-5 text-cyan-400" />
@@ -2006,8 +2030,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       {/* MODAL 4: IN-APP CONFIRM DELETE ADMIN / USER */}
       {/* ============================================================== */}
       {userToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
                 <Trash2 className="w-5 h-5 text-red-400" />
@@ -2068,8 +2092,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       {/* MODAL 5: IN-APP CONFIRM DELETE TRAINEE */}
       {/* ============================================================== */}
       {traineeToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-slate-950 border border-red-500/40 rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 shadow-2xl shadow-red-950/40">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
                 <Trash2 className="w-5 h-5 text-red-400" />

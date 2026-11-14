@@ -31,6 +31,7 @@ import {
   BOOKINGS_STORAGE_KEY 
 } from '../data/defaultConfig';
 import { applySiteFont } from '../utils/fontManager';
+import { useAuth } from './AuthContext';
 import {
   validateFirestoreConnection,
   subscribeToBookings,
@@ -207,19 +208,21 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const { isAdminUser } = useAuth();
 
   // Validate Connection to Firestore on boot
   useEffect(() => {
     validateFirestoreConnection();
   }, []);
 
-  // Real-time Firestore sync for Bookings
+  // Real-time Firestore sync for Bookings (strictly restricted to verified administrators)
   useEffect(() => {
+    if (!isAdminUser) return;
     const unsub = subscribeToBookings((remoteBookings) => {
       setBookings(remoteBookings);
     });
     return () => unsub();
-  }, []);
+  }, [isAdminUser]);
 
   // Apply typography to document body dynamically
   useEffect(() => {
@@ -530,12 +533,28 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   };
 
+  const sanitizeText = (str: string | undefined, maxLen: number): string => {
+    if (!str) return '';
+    return str
+      .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+      .replace(/[<>]/g, '')       // Strip stray angle brackets
+      .trim()
+      .slice(0, maxLen);
+  };
+
   const addBooking = (bookingData: Omit<BookingRecord, 'id' | 'createdAt'> & { status?: BookingRecord['status'] }) => {
     const id = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     const newRecord: BookingRecord = {
-      ...bookingData,
-      status: bookingData.status || 'new',
       id,
+      name: sanitizeText(bookingData.name, 120),
+      phone: sanitizeText(bookingData.phone, 30),
+      interest: sanitizeText(bookingData.interest, 250),
+      experience: sanitizeText(bookingData.experience, 100) || '',
+      timing: sanitizeText(bookingData.timing, 100) || '',
+      notes: bookingData.notes ? sanitizeText(bookingData.notes, 2000) : undefined,
+      paymentMethod: bookingData.paymentMethod,
+      paymentAmount: bookingData.paymentAmount ? sanitizeText(bookingData.paymentAmount, 50) : undefined,
+      status: 'new', // Enforce 'new' on submission
       createdAt: new Date().toISOString()
     };
     setBookings(prev => [newRecord, ...prev]);

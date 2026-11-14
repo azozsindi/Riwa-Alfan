@@ -44,10 +44,10 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
         </div>
 
         {/* Filter tabs */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar max-w-full shrink-0">
           <button
             onClick={() => setBookingFilter('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
               bookingFilter === 'all' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -55,7 +55,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
           </button>
           <button
             onClick={() => setBookingFilter('new')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
               bookingFilter === 'new' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -63,7 +63,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
           </button>
           <button
             onClick={() => setBookingFilter('paid')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 ${
               bookingFilter === 'paid' ? 'gold-gradient-btn text-slate-950 font-bold' : 'text-[#E0BA84] hover:text-white'
             }`}
           >
@@ -71,7 +71,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
           </button>
           <button
             onClick={() => setBookingFilter('contacted')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
               bookingFilter === 'contacted' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
