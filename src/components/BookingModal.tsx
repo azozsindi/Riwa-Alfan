@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   Edit3,
   Award,
-  Search,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
@@ -42,7 +41,6 @@ interface BookingModalProps {
   onClose: () => void;
   preSelectedCourseId?: string;
   preSelectedTripSite?: string;
-  onOpenStatusTracker?: (bookingRef?: string) => void;
 }
 
 type WizardPhase = 'select_courses' | 'qa' | 'summary_contact' | 'submitted';
@@ -52,7 +50,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   onClose,
   preSelectedCourseId,
   preSelectedTripSite,
-  onOpenStatusTracker,
 }) => {
   const { language, isRtl } = useLanguage();
   const { config, addBooking } = useSiteConfig();
@@ -1200,8 +1197,8 @@ ${coursesLines}
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {isRtl
-                    ? 'تم حفظ إجاباتك ونتائج التقييم المبدئي وإرسالها للكابتن فهد. بعد مراجعة الطلب والموافقة النهائية من الكابتن، سيُفتح لك الدفع لتأكيد الحجز.'
-                    : 'Your Q&A answers and per-course evaluation have been sent to Captain Fahad. Once approved, payment will unlock for booking confirmation.'}
+                    ? 'تم حفظ إجاباتك ونتائج التقييم المبدئي وإرسالها للكابتن فهد. سيتواصل معك الكابتن مباشرة عبر الجوال أو الواتساب لمراجعة الطلب وتأكيد المواعيد وإجراءات الدفع.'
+                    : 'Your Q&A answers and per-course evaluation have been sent to Captain Fahad. The Captain will contact you directly to review, confirm schedule, and arrange payment.'}
                 </p>
               </div>
 
@@ -1215,21 +1212,6 @@ ${coursesLines}
                   <PhoneCall className="w-4 h-4" />
                   <span>{t.modalWhatsAppBtn}</span>
                 </a>
-
-                {onOpenStatusTracker && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const ref = bookingRef;
-                      onClose();
-                      onOpenStatusTracker(ref);
-                    }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 font-bold text-xs sm:text-sm transition-colors cursor-pointer min-h-[44px]"
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>{isRtl ? 'متابعة حالة الطلب والدفع' : 'Track Status & Payment'}</span>
-                  </button>
-                )}
 
                 <button
                   type="button"

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { DiveSite } from '../data/divingData';
-import { MapPin, Compass, Anchor, Fish } from 'lucide-react';
+import { MapPin, Compass, Fish } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface DiveSitesSectionProps {
-  onBookTrip: (siteName: string) => void;
+  onBookTrip?: (siteName: string) => void;
 }
 
-export const DiveSitesSection: React.FC<DiveSitesSectionProps> = ({ onBookTrip }) => {
+export const DiveSitesSection: React.FC<DiveSitesSectionProps> = () => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
@@ -144,19 +144,11 @@ export const DiveSitesSection: React.FC<DiveSitesSectionProps> = ({ onBookTrip }
                 </div>
               </div>
 
-              {/* Action to book trip to this site */}
-              <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              {/* Weekly trips note */}
+              <div className="pt-4 border-t border-slate-800">
                 <span className="text-xs text-slate-400">
                   {t.weeklyTripsNote}
                 </span>
-
-                <button
-                  onClick={() => onBookTrip(activeSite.name[language])}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-colors shadow-lg shadow-blue-600/30 cursor-pointer shrink-0"
-                >
-                  <Anchor className="w-4 h-4" />
-                  <span>{t.bookSeat}</span>
-                </button>
               </div>
 
             </div>

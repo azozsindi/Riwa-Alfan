@@ -8,8 +8,8 @@ export const DEFAULT_CONTACT = {
   phoneDisplay: '053 054 9675',
   whatsappNumber: '966530549675',
   email: 'fahad@riwaalfan.com',
-  locationAr: 'جدة، المملكة العربية السعودية - أبحر الشمالية',
-  locationEn: 'Jeddah, Saudi Arabia - North Obhur',
+  locationAr: 'أبحر الشمالية - جدة',
+  locationEn: 'North Obhur - Jeddah',
   padiMemberNumber: '499845',
 } as const;
 

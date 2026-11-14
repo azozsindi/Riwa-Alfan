@@ -42,6 +42,7 @@ import {
   updateBookingStatusInFirestore,
   updateBookingReviewInFirestore,
   deleteBookingFromFirestore,
+  subscribeToQuotaStatus,
   PartnerMediaMap
 } from '../services/firestoreSync';
 
@@ -94,9 +95,35 @@ interface SiteConfigContextType {
   updateUnderConstruction: (partial: Partial<UnderConstructionConfig>) => void;
   toggleUnderConstruction: () => void;
   updateDesignContent: (partial: Partial<DesignContentConfig>) => void;
+  firestoreQuotaExceeded: boolean;
 }
 
 const SiteConfigContext = createContext<SiteConfigContextType | undefined>(undefined);
+
+const LEGACY_LOCATION_AR = new Set([
+  'جدة فقط (شرم أبحر وشواطئ جدة البحرية)',
+  'مرسى أبحر الشمالية - جدة',
+  'جدة - أبحر الشمالية، ساحل البحر الأحمر',
+  'جدة - ساحل البحر الأحمر، المملكة العربية السعودية',
+  'جدة، المملكة العربية السعودية - أبحر الشمالية',
+]);
+
+const LEGACY_LOCATION_EN = new Set([
+  'Jeddah only (Sharm Obhur & Marine Coastal Sites)',
+  'Jeddah Exclusively (Sharm Obhur & Red Sea Coast)',
+  'North Obhur Marina - Jeddah',
+  'Jeddah - North Obhur, Red Sea Coast',
+  'Jeddah - Red Sea Coast, Saudi Arabia',
+  'Jeddah, Saudi Arabia - North Obhur',
+]);
+
+const normalizeLocationValue = (val: string | undefined, lang: 'ar' | 'en', fallback: string): string => {
+  const trimmed = (val || '').trim();
+  if (!trimmed) return fallback;
+  if (lang === 'ar' && LEGACY_LOCATION_AR.has(trimmed)) return 'أبحر الشمالية - جدة';
+  if (lang === 'en' && LEGACY_LOCATION_EN.has(trimmed)) return 'North Obhur - Jeddah';
+  return val as string;
+};
 
 export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<SiteConfig>(() => {
@@ -171,10 +198,25 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           : (base.announcement?.enabled !== undefined ? base.announcement.enabled : false)
       };
 
+      const rawBrand = { ...DEFAULT_CONFIG.brand, ...(base.brand || recoveredBrand || {}), email: 'Riwaalfan@gmail.com' };
+      const rawDesign = { ...DEFAULT_DESIGN_CONTENT, ...(base.designContent || {}) };
+      const rawLocation = { ...DEFAULT_LOCATION_CONFIG, ...(base.locationConfig || {}) };
+
       return {
         ...DEFAULT_CONFIG,
         ...base,
-        brand: { ...DEFAULT_CONFIG.brand, ...(base.brand || recoveredBrand || {}), email: 'Riwaalfan@gmail.com' },
+        brand: {
+          ...rawBrand,
+          locationAr: normalizeLocationValue(rawBrand.locationAr, 'ar', 'أبحر الشمالية - جدة'),
+          locationEn: normalizeLocationValue(rawBrand.locationEn, 'en', 'North Obhur - Jeddah'),
+        },
+        locationConfig: {
+          ...rawLocation,
+          marinaNameAr: normalizeLocationValue(rawLocation.marinaNameAr, 'ar', 'أبحر الشمالية - جدة'),
+          marinaNameEn: normalizeLocationValue(rawLocation.marinaNameEn, 'en', 'North Obhur - Jeddah'),
+          addressAr: normalizeLocationValue(rawLocation.addressAr, 'ar', 'أبحر الشمالية - جدة'),
+          addressEn: normalizeLocationValue(rawLocation.addressEn, 'en', 'North Obhur - Jeddah'),
+        },
         trustBadges: {
           ...DEFAULT_TRUST_BADGES,
           ...(base.trustBadges || {}),
@@ -195,8 +237,9 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         faqs: Array.isArray(base.faqs) && base.faqs.length > 0 ? base.faqs : DEFAULT_CONFIG.faqs,
         testimonials: Array.isArray(base.testimonials) && base.testimonials.length > 0 ? base.testimonials : DEFAULT_CONFIG.testimonials,
         designContent: {
-          ...DEFAULT_DESIGN_CONTENT,
-          ...(base.designContent || {})
+          ...rawDesign,
+          regionsTextAr: normalizeLocationValue(rawDesign.regionsTextAr, 'ar', 'أبحر الشمالية - جدة'),
+          regionsTextEn: normalizeLocationValue(rawDesign.regionsTextEn, 'en', 'North Obhur - Jeddah'),
         }
       };
     } catch (e) {
@@ -219,8 +262,17 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [firestoreQuotaExceeded, setFirestoreQuotaExceeded] = useState(false);
   const { isAdminUser } = useAuth();
-  const skipNextFirestoreSaveRef = React.useRef(false);
+  const hasLocalConfigEditRef = React.useRef(false);
+  const saveConfigTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Subscribe to Firestore quota circuit breaker
+  useEffect(() => {
+    return subscribeToQuotaStatus((exhausted) => {
+      setFirestoreQuotaExceeded(exhausted);
+    });
+  }, []);
 
   // Validate Connection to Firestore on boot
   useEffect(() => {
@@ -265,7 +317,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Real-time Firestore sync for Site Config & Partner Media
   useEffect(() => {
     const unsub = subscribeToSiteConfig((remoteData, partnerMedia?: PartnerMediaMap) => {
-      skipNextFirestoreSaveRef.current = true;
+      // Remote hydration must NEVER mark local config as dirty for re-upload
       setConfig(prev => {
         const isExplicitlyDisabled = localStorage.getItem('riwa_offers_explicitly_disabled') === 'true';
         let updatedAnnouncement = prev.announcement;
@@ -300,6 +352,22 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           };
         });
 
+        const mergedBrand = {
+          ...prev.brand,
+          ...(remoteData.brand || {}),
+          email: 'Riwaalfan@gmail.com'
+        };
+        const mergedLocation = {
+          ...DEFAULT_LOCATION_CONFIG,
+          ...(prev.locationConfig || {}),
+          ...(remoteData.locationConfig || {})
+        };
+        const mergedDesign = {
+          ...DEFAULT_DESIGN_CONTENT,
+          ...(prev.designContent || {}),
+          ...(remoteData.designContent || {})
+        };
+
         return {
           ...prev,
           ...remoteData,
@@ -316,14 +384,21 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 : DEFAULT_TRUST_BADGES.certificates
           },
           brand: {
-            ...prev.brand,
-            ...(remoteData.brand || {}),
-            email: 'Riwaalfan@gmail.com'
+            ...mergedBrand,
+            locationAr: normalizeLocationValue(mergedBrand.locationAr, 'ar', 'أبحر الشمالية - جدة'),
+            locationEn: normalizeLocationValue(mergedBrand.locationEn, 'en', 'North Obhur - Jeddah'),
+          },
+          locationConfig: {
+            ...mergedLocation,
+            marinaNameAr: normalizeLocationValue(mergedLocation.marinaNameAr, 'ar', 'أبحر الشمالية - جدة'),
+            marinaNameEn: normalizeLocationValue(mergedLocation.marinaNameEn, 'en', 'North Obhur - Jeddah'),
+            addressAr: normalizeLocationValue(mergedLocation.addressAr, 'ar', 'أبحر الشمالية - جدة'),
+            addressEn: normalizeLocationValue(mergedLocation.addressEn, 'en', 'North Obhur - Jeddah'),
           },
           designContent: {
-            ...DEFAULT_DESIGN_CONTENT,
-            ...(prev.designContent || {}),
-            ...(remoteData.designContent || {})
+            ...mergedDesign,
+            regionsTextAr: normalizeLocationValue(mergedDesign.regionsTextAr, 'ar', 'أبحر الشمالية - جدة'),
+            regionsTextEn: normalizeLocationValue(mergedDesign.regionsTextEn, 'en', 'North Obhur - Jeddah'),
           }
         };
       });
@@ -331,10 +406,15 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return () => unsub();
   }, []);
 
-  // Sync config to localStorage and (for verified admins) Firestore
+  // Helper to commit a user-initiated config update (writes to localStorage & marks dirty for debounced Firestore save)
+  const applyConfigEdit = (updater: (prev: SiteConfig) => SiteConfig) => {
+    hasLocalConfigEditRef.current = true;
+    setConfig(updater);
+  };
+
+  // Sync config to localStorage and (ONLY on user edits by verified admins, debounced) to Firestore
   useEffect(() => {
     try {
-      // Clear legacy config keys to keep localStorage quota free for active config
       try {
         ['riwa_alfan_site_config_v11', 'riwa_alfan_site_config_v10', 'riwa_alfan_site_config_v9'].forEach(k => {
           if (localStorage.getItem(k)) localStorage.removeItem(k);
@@ -345,15 +425,25 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.error('Failed to save site config to localStorage:', e);
     }
 
-    if (skipNextFirestoreSaveRef.current) {
-      skipNextFirestoreSaveRef.current = false;
+    if (!hasLocalConfigEditRef.current || !isAdminUser || firestoreQuotaExceeded) {
       return;
     }
 
-    if (isAdminUser) {
-      saveSiteConfigToFirestore(config);
+    if (saveConfigTimerRef.current) {
+      clearTimeout(saveConfigTimerRef.current);
     }
-  }, [config, isAdminUser]);
+
+    saveConfigTimerRef.current = setTimeout(() => {
+      hasLocalConfigEditRef.current = false;
+      saveSiteConfigToFirestore(config);
+    }, 900);
+
+    return () => {
+      if (saveConfigTimerRef.current) {
+        clearTimeout(saveConfigTimerRef.current);
+      }
+    };
+  }, [config, isAdminUser, firestoreQuotaExceeded]);
 
   // Sync bookings to localStorage
   useEffect(() => {
@@ -365,48 +455,48 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [bookings]);
 
   const updateBrand = (partial: Partial<CenterBrandConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       brand: { ...prev.brand, ...partial }
     }));
   };
 
   const updateHero = (partial: Partial<HeroConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       hero: { ...prev.hero, ...partial }
     }));
   };
 
   const updateInstructor = (partial: Partial<InstructorConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       instructor: { ...prev.instructor, ...partial }
     }));
   };
 
   const updateFemaleInstructor = (partial: Partial<FemaleInstructorConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       femaleInstructor: { ...(prev.femaleInstructor || DEFAULT_CONFIG.femaleInstructor!), ...partial }
     }));
   };
 
   const updateCaptains = (captains: Captain[]) => {
-    setConfig(prev => ({ ...prev, captains }));
+    applyConfigEdit(prev => ({ ...prev, captains }));
   };
 
   const addCaptain = (captainData: Omit<Captain, 'id'>) => {
     const newId = `captain-${Date.now()}`;
     const newCap: Captain = { ...captainData, id: newId };
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       captains: [...(prev.captains || DEFAULT_CAPTAINS), newCap]
     }));
   };
 
   const updateCaptain = (captainId: string, updated: Partial<Captain>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       captains: (prev.captains || DEFAULT_CAPTAINS).map(c => 
         c.id === captainId ? { ...c, ...updated } : c
@@ -415,14 +505,14 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const deleteCaptain = (captainId: string) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       captains: (prev.captains || DEFAULT_CAPTAINS).filter(c => c.id !== captainId)
     }));
   };
 
   const updateAnnouncement = (partial: Partial<AnnouncementConfig>) => {
-    setConfig(prev => {
+    applyConfigEdit(prev => {
       const nextAnnouncement = { ...prev.announcement, ...partial };
       try {
         if (nextAnnouncement.enabled === false) {
@@ -433,136 +523,126 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           localStorage.removeItem('riwa_announcement_dismissed');
         }
       } catch {}
-      const updatedConfig = {
+      return {
         ...prev,
         announcement: nextAnnouncement
       };
-      saveSiteConfigToFirestore(updatedConfig);
-      return updatedConfig;
     });
   };
 
   const updateCourses = (courses: Course[]) => {
-    setConfig(prev => ({ ...prev, courses }));
+    applyConfigEdit(prev => ({ ...prev, courses }));
   };
 
   const updateCourse = (courseId: string, updated: Partial<Course>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       courses: prev.courses.map(c => c.id === courseId ? { ...c, ...updated } : c)
     }));
   };
 
   const addCourse = (newCourse: Course) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       courses: [...prev.courses, newCourse]
     }));
   };
 
   const deleteCourse = (courseId: string) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       courses: prev.courses.filter(c => c.id !== courseId)
     }));
   };
 
   const updateDiveSites = (sites: DiveSite[]) => {
-    setConfig(prev => ({ ...prev, diveSites: sites }));
+    applyConfigEdit(prev => ({ ...prev, diveSites: sites }));
   };
 
   const updateDiveSite = (siteId: string, updated: Partial<DiveSite>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       diveSites: prev.diveSites.map(s => s.id === siteId ? { ...s, ...updated } : s)
     }));
   };
 
   const addDiveSite = (newSite: DiveSite) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       diveSites: [...prev.diveSites, newSite]
     }));
   };
 
   const deleteDiveSite = (siteId: string) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       diveSites: prev.diveSites.filter(s => s.id !== siteId)
     }));
   };
 
   const updateFaqs = (faqs: FAQItem[]) => {
-    setConfig(prev => ({ ...prev, faqs }));
+    applyConfigEdit(prev => ({ ...prev, faqs }));
   };
 
   const updateTestimonials = (testimonials: Testimonial[]) => {
-    setConfig(prev => ({ ...prev, testimonials }));
+    applyConfigEdit(prev => ({ ...prev, testimonials }));
   };
 
   const updateVisibleSections = (partial: Partial<VisibleSectionsConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       visibleSections: { ...(prev.visibleSections || DEFAULT_VISIBLE_SECTIONS), ...partial }
     }));
   };
 
   const updateSocialLinks = (partial: Partial<SocialLinksConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       socialLinks: { ...(prev.socialLinks || DEFAULT_SOCIAL_LINKS), ...partial }
     }));
   };
 
   const updateLocationConfig = (partial: Partial<LocationConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       locationConfig: { ...(prev.locationConfig || DEFAULT_LOCATION_CONFIG), ...partial }
     }));
   };
 
   const updateTrustBadges = (partial: Partial<TrustBadgesConfig>) => {
-    setConfig(prev => ({
+    applyConfigEdit(prev => ({
       ...prev,
       trustBadges: { ...(prev.trustBadges || DEFAULT_TRUST_BADGES), ...partial }
     }));
   };
 
   const updateUnderConstruction = (partial: Partial<UnderConstructionConfig>) => {
-    setConfig(prev => {
+    applyConfigEdit(prev => {
       const current = prev.underConstruction || DEFAULT_UNDER_CONSTRUCTION;
-      const nextUnderConstruction = { ...current, ...partial };
-      const updatedConfig = {
+      return {
         ...prev,
-        underConstruction: nextUnderConstruction
+        underConstruction: { ...current, ...partial }
       };
-      saveSiteConfigToFirestore(updatedConfig);
-      return updatedConfig;
     });
   };
 
   const toggleUnderConstruction = () => {
-    setConfig(prev => {
+    applyConfigEdit(prev => {
       const current = prev.underConstruction || DEFAULT_UNDER_CONSTRUCTION;
-      const nextUnderConstruction = { ...current, enabled: !current.enabled };
-      const updatedConfig = {
+      return {
         ...prev,
-        underConstruction: nextUnderConstruction
+        underConstruction: { ...current, enabled: !current.enabled }
       };
-      saveSiteConfigToFirestore(updatedConfig);
-      return updatedConfig;
     });
   };
 
   const updateDesignContent = (partial: Partial<DesignContentConfig>) => {
-    setConfig(prev => {
+    applyConfigEdit(prev => {
       const updatedDesign = { ...(prev.designContent || DEFAULT_DESIGN_CONTENT), ...partial };
-      const updatedConfig = {
+      return {
         ...prev,
         designContent: updatedDesign
       };
-      saveSiteConfigToFirestore(updatedConfig);
-      return updatedConfig;
     });
   };
 
@@ -651,7 +731,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const resetToDefaults = () => {
-    setConfig(DEFAULT_CONFIG);
+    applyConfigEdit(() => DEFAULT_CONFIG);
     localStorage.removeItem(CONFIG_STORAGE_KEY);
   };
 
@@ -663,7 +743,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       const parsed = JSON.parse(jsonString);
       if (parsed.config && parsed.config.brand) {
-        setConfig(parsed.config);
+        applyConfigEdit(() => parsed.config);
         if (Array.isArray(parsed.bookings)) {
           setBookings(parsed.bookings);
         }
@@ -696,7 +776,7 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.courses) && parsed.courses.length > 0) {
-            setConfig(prev => ({
+            applyConfigEdit(prev => ({
               ...prev,
               courses: parsed.courses
             }));
@@ -750,7 +830,8 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       updateTrustBadges,
       updateUnderConstruction,
       toggleUnderConstruction,
-      updateDesignContent
+      updateDesignContent,
+      firestoreQuotaExceeded
     }}>
       {children}
     </SiteConfigContext.Provider>

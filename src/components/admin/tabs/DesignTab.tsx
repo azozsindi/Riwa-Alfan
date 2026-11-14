@@ -1137,15 +1137,6 @@ export const DesignTab: React.FC<DesignTabProps> = ({
               showEn={showEn}
             />
 
-            <BilingualInput
-              label={isRtl ? 'شارة التوفر اليومي (Daily Availability):' : 'Daily Availability Note:'}
-              valueAr={designForm.availableDailyAr || ''}
-              valueEn={designForm.availableDailyEn || ''}
-              onChangeAr={(val) => setDesignForm({ ...designForm, availableDailyAr: val })}
-              onChangeEn={(val) => setDesignForm({ ...designForm, availableDailyEn: val })}
-              showAr={showAr}
-              showEn={showEn}
-            />
           </div>
         </div>
       )}
@@ -1204,8 +1195,8 @@ export const DesignTab: React.FC<DesignTabProps> = ({
             <BilingualInput
               label={isRtl ? 'مقر ومرسى التدريب بجدة (Marina Location):' : 'Marina Location Label:'}
               icon={<MapPin className="w-3.5 h-3.5 text-cyan-400" />}
-              valueAr={locationForm.marinaNameAr || 'مرسى أبحر الشمالية - جدة'}
-              valueEn={locationForm.marinaNameEn || 'North Obhur Marina - Jeddah'}
+              valueAr={locationForm.marinaNameAr || 'أبحر الشمالية - جدة'}
+              valueEn={locationForm.marinaNameEn || 'North Obhur - Jeddah'}
               onChangeAr={(val) => setLocationForm({ ...locationForm, marinaNameAr: val })}
               onChangeEn={(val) => setLocationForm({ ...locationForm, marinaNameEn: val })}
               showAr={showAr}

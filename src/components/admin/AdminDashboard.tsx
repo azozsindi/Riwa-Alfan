@@ -88,7 +88,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateTrustBadges,
     updateUnderConstruction,
     toggleUnderConstruction,
-    updateDesignContent
+    updateDesignContent,
+    firestoreQuotaExceeded
   } = useSiteConfig();
   const { user, logout } = useAuth();
 
@@ -246,6 +247,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {firestoreQuotaExceeded && (
+        <div className="bg-amber-950/70 border-b border-amber-500/40 px-4 py-2.5 text-xs text-amber-200 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              {isRtl
+                ? 'تنبيه السحابة: تم استنفاد الحصة اليومية المجانية للكتابة في Firestore لهذا اليوم (تتجدد تلقائياً غداً). يتم حفظ تعديلاتك حالياً محلياً دون فقدان.'
+                : 'Cloud Notice: Free daily Firestore write quota reached for today (resets automatically tomorrow). Changes are safely preserved locally.'}
+            </span>
+          </div>
+          <a
+            href="https://firebase.google.com/pricing#cloud-firestore"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-300 hover:text-white underline font-bold shrink-0"
+          >
+            {isRtl ? 'تفاصيل الحصة' : 'Quota Info'}
+          </a>
+        </div>
+      )}
 
       {/* Modern Responsive Mobile Navigation Bar */}
       <div className="md:hidden bg-slate-950 border-b border-slate-800 sticky top-0 z-20 backdrop-blur-md">

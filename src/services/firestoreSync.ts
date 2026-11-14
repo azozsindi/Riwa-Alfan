@@ -51,6 +51,44 @@ export interface PartnerMediaMap {
   };
 }
 
+let writeQuotaExhausted = false;
+let lastWrittenSiteConfigJson = '';
+let lastRemoteSiteConfigJson = '';
+const lastPartnerMediaPayloadMap = new Map<string, string>();
+const quotaListeners = new Set<(exhausted: boolean) => void>();
+
+export const isFirestoreWriteQuotaExhausted = (): boolean => writeQuotaExhausted;
+
+export const subscribeToQuotaStatus = (cb: (exhausted: boolean) => void): (() => void) => {
+  quotaListeners.add(cb);
+  cb(writeQuotaExhausted);
+  return () => {
+    quotaListeners.delete(cb);
+  };
+};
+
+const markQuotaExhausted = () => {
+  if (!writeQuotaExhausted) {
+    writeQuotaExhausted = true;
+    quotaListeners.forEach((cb) => {
+      try {
+        cb(true);
+      } catch {}
+    });
+  }
+};
+
+export const isQuotaExceededError = (err: unknown): boolean => {
+  const code = (err as { code?: string })?.code;
+  const msg = err instanceof Error ? err.message : String(err || '');
+  return (
+    code === 'resource-exhausted' ||
+    msg.includes('resource-exhausted') ||
+    msg.includes('Quota limit exceeded') ||
+    msg.includes('Quota exceeded')
+  );
+};
+
 export const getPartnerMediaDocId = (partnerId: string): string => {
   const safe = String(partnerId || 'partner')
     .replace(/[^a-zA-Z0-9_-]/g, '_')
@@ -59,6 +97,12 @@ export const getPartnerMediaDocId = (partnerId: string): string => {
 };
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  if (isQuotaExceededError(error)) {
+    markQuotaExhausted();
+    console.warn(`[Firestore Quota] Daily free-tier limit reached while attempting ${operationType} on ${path}. Local edits remain saved; Firestore sync pauses until quota resets.`);
+    return null;
+  }
+
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -133,6 +177,9 @@ export const subscribeToSiteConfig = (
           const data = d.data() as Partial<SiteConfig>;
           if (data && Object.keys(data).length > 0) {
             siteConfigData = data;
+            try {
+              lastRemoteSiteConfigJson = JSON.stringify(data);
+            } catch {}
           }
         } else if (d.id.startsWith('partner_media_')) {
           const media = d.data() as {
@@ -143,11 +190,14 @@ export const subscribeToSiteConfig = (
           };
           const pid = media?.partnerId || d.id.replace(/^partner_media_/, '');
           if (pid) {
+            const logoUrl = media.logoUrl ?? '';
+            const licenseImageUrl = media.licenseImageUrl ?? '';
             partnerMedia[pid] = {
-              logoUrl: media.logoUrl ?? '',
-              licenseImageUrl: media.licenseImageUrl ?? '',
+              logoUrl,
+              licenseImageUrl,
               updatedAt: media.updatedAt
             };
+            lastPartnerMediaPayloadMap.set(pid, `${logoUrl}::${licenseImageUrl}`);
           }
         }
       });
@@ -169,19 +219,28 @@ export const savePartnerMediaToFirestore = async (
   logoUrl?: string,
   licenseImageUrl?: string
 ): Promise<boolean> => {
+  if (writeQuotaExhausted) return false;
   const docId = getPartnerMediaDocId(partnerId);
   const path = `settings/${docId}`;
+  const cleanLogo = logoUrl || '';
+  const cleanLicense = licenseImageUrl || '';
+  const fingerprint = `${cleanLogo}::${cleanLicense}`;
+  if (lastPartnerMediaPayloadMap.get(partnerId) === fingerprint) {
+    return true;
+  }
+
   try {
     await setDoc(
       doc(db, 'settings', docId),
       {
         partnerId,
-        logoUrl: logoUrl || '',
-        licenseImageUrl: licenseImageUrl || '',
+        logoUrl: cleanLogo,
+        licenseImageUrl: cleanLicense,
         updatedAt: new Date().toISOString()
       },
       { merge: true }
     );
+    lastPartnerMediaPayloadMap.set(partnerId, fingerprint);
     return true;
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, path);
@@ -190,25 +249,15 @@ export const savePartnerMediaToFirestore = async (
 };
 
 export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<void> => {
+  if (writeQuotaExhausted) return;
   const path = 'settings/site_config';
   try {
     const configDocRef = doc(db, 'settings', 'site_config');
     const cleanConfig = JSON.parse(JSON.stringify(config)) as SiteConfig;
 
-    // Offload partner images into dedicated partner_media_* docs so site_config never hits the 1MB Firestore limit
+    // Strip large inline data:image payloads from site_config copy (explicitly saved via partner_media_* on image upload)
     const partners = cleanConfig.trustBadges?.partnerLogos;
     if (Array.isArray(partners) && partners.length > 0) {
-      await Promise.all(
-        partners.map((p) => {
-          if (!p?.id) return Promise.resolve(true);
-          if (p.logoUrl || p.licenseImageUrl) {
-            return savePartnerMediaToFirestore(p.id, p.logoUrl, p.licenseImageUrl);
-          }
-          return Promise.resolve(true);
-        })
-      );
-
-      // Strip large inline data:image payloads from site_config copy (stored safely in partner_media_*)
       cleanConfig.trustBadges!.partnerLogos = partners.map((p) => ({
         ...p,
         logoUrl: p.logoUrl && p.logoUrl.startsWith('data:image/') && p.logoUrl.length > 20_000 ? '' : (p.logoUrl || ''),
@@ -217,14 +266,21 @@ export const saveSiteConfigToFirestore = async (config: SiteConfig): Promise<voi
     }
 
     // Re-serialize right before setDoc so zero undefined values ever reach Firestore
-    const sanitizedPayload = JSON.parse(JSON.stringify(cleanConfig));
+    const serialized = JSON.stringify(cleanConfig);
+    if (serialized === lastWrittenSiteConfigJson || serialized === lastRemoteSiteConfigJson) {
+      return;
+    }
+
+    const sanitizedPayload = JSON.parse(serialized);
     await setDoc(configDocRef, sanitizedPayload, { merge: true });
+    lastWrittenSiteConfigJson = serialized;
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, path);
   }
 };
 
 export const saveBookingToFirestore = async (booking: BookingRecord): Promise<void> => {
+  if (writeQuotaExhausted) return;
   const path = `bookings/${booking.id}`;
   try {
     const cleanPhoneDigits = String(booking.phone || '').replace(/\D/g, '');
@@ -286,6 +342,7 @@ export const updateBookingStatusInFirestore = async (
   id: string,
   status: BookingRecord['status']
 ): Promise<void> => {
+  if (writeQuotaExhausted) return;
   const path = `bookings/${id}`;
   try {
     await updateDoc(doc(db, 'bookings', id), { status });
@@ -312,6 +369,7 @@ export const updateBookingReviewInFirestore = async (
   >,
   fallbackBooking?: BookingRecord
 ): Promise<void> => {
+  if (writeQuotaExhausted) return;
   const path = `bookings/${id}`;
   try {
     const cleanPatch = JSON.parse(JSON.stringify(reviewUpdate));
@@ -364,6 +422,7 @@ export const fetchBookingStatusFromFirestore = async (
 };
 
 export const deleteBookingFromFirestore = async (id: string): Promise<void> => {
+  if (writeQuotaExhausted) return;
   const path = `bookings/${id}`;
   try {
     await deleteDoc(doc(db, 'bookings', id));

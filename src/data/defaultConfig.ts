@@ -126,10 +126,10 @@ export const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
 
 export const DEFAULT_LOCATION_CONFIG: LocationConfig = {
   googleMapsUrl: 'https://maps.google.com/?q=North+Obhur+Jeddah+Saudi+Arabia',
-  marinaNameAr: 'مرسى أبحر الشمالية - جدة',
-  marinaNameEn: 'North Obhur Marina - Jeddah',
-  addressAr: 'جدة - أبحر الشمالية، ساحل البحر الأحمر',
-  addressEn: 'Jeddah - North Obhur, Red Sea Coast',
+  marinaNameAr: 'أبحر الشمالية - جدة',
+  marinaNameEn: 'North Obhur - Jeddah',
+  addressAr: 'أبحر الشمالية - جدة',
+  addressEn: 'North Obhur - Jeddah',
 };
 
 export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
@@ -265,8 +265,8 @@ export const DEFAULT_DESIGN_CONTENT: DesignContentConfig = {
   contactTitleEn: 'Ready for Your First Dive & Red Sea Exploration?',
   contactDescAr: 'يسعدني جداً الإجابة على كافة تساؤلاتك ومساعدتك في اختيار الدورة الأنسب لك وتقديم استشارة مجانية حول جدول التدريب والمعدات بجدة.',
   contactDescEn: 'Delighted to answer all your inquiries, help select the right PADI course, and provide free guidance on schedule and gear in Jeddah.',
-  regionsTextAr: 'جدة فقط (شرم أبحر وشواطئ جدة البحرية)',
-  regionsTextEn: 'Jeddah only (Sharm Obhur & Marine Coastal Sites)',
+  regionsTextAr: 'أبحر الشمالية - جدة',
+  regionsTextEn: 'North Obhur - Jeddah',
   certAgencyTextAr: 'شهادات PADI معتمدة دولياً',
   certAgencyTextEn: 'Internationally Accredited PADI Licenses',
 
@@ -308,8 +308,8 @@ export const DEFAULT_CONFIG: SiteConfig = {
     whatsappNumber: '966530549675',
     email: 'Riwaalfan@gmail.com',
     city: 'جدة',
-    locationAr: 'جدة - ساحل البحر الأحمر، المملكة العربية السعودية',
-    locationEn: 'Jeddah - Red Sea Coast, Saudi Arabia',
+    locationAr: 'أبحر الشمالية - جدة',
+    locationEn: 'North Obhur - Jeddah',
     padiNumber: 'PADI #499845',
     fontFamily: 'alexandria',
     customDomain: 'riwaalfan.com'

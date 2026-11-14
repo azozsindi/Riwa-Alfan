@@ -48,15 +48,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (email === BOOTSTRAPPED_ADMIN_EMAIL && isVerified) {
         setUserRole('superadmin');
-        // Auto-seed admin document in Firestore /admins/{uid} so UID-based rules also pass
+        // Seed /admins/{uid} ONLY if not created yet (avoid writing on every page reload)
         try {
           const adminDocRef = doc(db, 'admins', currentUser.uid);
-          await setDoc(adminDocRef, {
-            uid: currentUser.uid,
-            email: email,
-            role: 'superadmin',
-            lastLoginAt: new Date().toISOString()
-          }, { merge: true });
+          const existingAdminSnap = await getDoc(adminDocRef);
+          if (!existingAdminSnap.exists()) {
+            await setDoc(adminDocRef, {
+              uid: currentUser.uid,
+              email: email,
+              role: 'superadmin',
+              lastLoginAt: new Date().toISOString()
+            }, { merge: true });
+          }
         } catch (seedErr) {
           console.warn('Auto-seed admin record notice:', seedErr);
         }

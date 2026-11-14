@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, Shield, HeartHandshake, Sparkles, UserCheck, MessageSquare, PhoneCall, Heart } from 'lucide-react';
+import { Award, CheckCircle2, Shield, HeartHandshake, Sparkles, UserCheck, MessageSquare, Heart } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -7,14 +7,13 @@ import { DEFAULT_FEMALE_INSTRUCTOR } from '../data/defaultConfig';
 import { FahadsLogo } from './FahadsLogo';
 
 interface InstructorSectionProps {
-  onOpenBooking: () => void;
+  onOpenBooking?: () => void;
   showCaptainFahad?: boolean;
   showFemaleTraining?: boolean;
   showQuote?: boolean;
 }
 
 export const InstructorSection: React.FC<InstructorSectionProps> = ({ 
-  onOpenBooking,
   showCaptainFahad = true,
   showFemaleTraining = true,
   showQuote = true,
@@ -175,31 +174,6 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     </div>
                   </div>
                 </div>
-
-                {/* Actions: Dual 50% buttons side-by-side */}
-                <div className="pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 sm:gap-3 items-stretch">
-                  <button
-                    onClick={onOpenBooking}
-                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5 min-h-[44px]"
-                  >
-                    <Award className="w-4 h-4 text-slate-950 shrink-0" />
-                    <span className="truncate">{isRtl ? 'احجز تدريبك' : 'Book Training'}</span>
-                  </button>
-
-                  <a
-                    href={`https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(
-                      isRtl 
-                        ? 'السلام عليكم كابتن فهد، أود الاستفسار والتنسيق معك حول دورات الغوص والرحلات القادمة في رواء الفن بجدة.' 
-                        : 'Hello Capt. Fahad, I would like to inquire about diving training courses at Riwa Alfan Jeddah.'
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-[#C59B5F]/40 text-[#E0BA84] hover:text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center min-h-[44px]"
-                  >
-                    <PhoneCall className="w-4 h-4 shrink-0 text-[#C59B5F]" />
-                    <span className="truncate">{isRtl ? 'واتساب مباشر' : 'WhatsApp'}</span>
-                  </a>
-                </div>
               </div>
             )}
 
@@ -256,27 +230,6 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     </div>
                   </div>
 
-                </div>
-
-                {/* Action buttons: Dual 50% buttons side-by-side */}
-                <div className="pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 sm:gap-3 items-stretch">
-                  <button
-                    onClick={onOpenBooking}
-                    className="gold-gradient-btn py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-1.5 min-h-[44px]"
-                  >
-                    <Sparkles className="w-4 h-4 text-slate-950 shrink-0" />
-                    <span className="truncate">{femaleBookingBtn}</span>
-                  </button>
-
-                  <a
-                    href={femaleWhatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-3 sm:py-3.5 px-2 sm:px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 text-emerald-400 hover:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center min-h-[44px]"
-                  >
-                    <PhoneCall className="w-4 h-4 shrink-0 text-emerald-400" />
-                    <span className="truncate">{isRtl ? 'واتساب مباشر' : 'WhatsApp'}</span>
-                  </a>
                 </div>
 
               </div>
@@ -364,16 +317,6 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                       <p className="text-xs text-[#C59B5F] font-medium">
                         {stripOwsi(language === 'ar' ? cap.titleAr : (cap.titleEn || cap.titleAr))}
                       </p>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-800/80 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={onOpenBooking}
-                        className="gold-gradient-btn flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center"
-                      >
-                        {isRtl ? 'احجز تدريبك' : 'Book Training'}
-                      </button>
                     </div>
                   </div>
                 ))}

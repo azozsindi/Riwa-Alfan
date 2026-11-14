@@ -1,15 +1,14 @@
 import React from 'react';
-import { Mail, MapPin, MessageSquare, Calendar, ShieldCheck, PhoneCall, Search } from 'lucide-react';
+import { Mail, MapPin, MessageSquare, ShieldCheck, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface ContactSectionProps {
-  onOpenBooking: () => void;
-  onOpenStatusTracker?: () => void;
+  onOpenBooking?: () => void;
 }
 
-export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, onOpenStatusTracker }) => {
+export const ContactSection: React.FC<ContactSectionProps> = () => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
   const t = UI_TRANSLATIONS[language];
@@ -28,7 +27,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, o
   const contactCardTitle = language === 'ar' ? (d?.contactCardTitleAr || t.contactCardTitle) : (d?.contactCardTitleEn || t.contactCardTitle);
   const contactCardDesc = language === 'ar' ? (d?.contactCardDescAr || t.contactCardDesc) : (d?.contactCardDescEn || t.contactCardDesc);
   const contactCardBtn = language === 'ar' ? (d?.contactCardBtnAr || t.contactCardBtn) : (d?.contactCardBtnEn || t.contactCardBtn);
-  const availableDaily = language === 'ar' ? (d?.availableDailyAr || t.availableDaily) : (d?.availableDailyEn || t.availableDaily);
 
   const whatsAppText = isRtl
     ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل التدريب بجدة`
@@ -144,28 +142,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenBooking, o
                 {contactCardDesc}
               </p>
 
-              <button
-                onClick={onOpenBooking}
-                className="gold-gradient-btn w-full py-3.5 px-6 rounded-xl text-slate-950 font-bold text-sm transition-all shadow-xl shadow-[#C59B5F]/20 active:scale-95 cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsAppText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 px-6 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-bold text-sm transition-all flex items-center justify-center gap-2 min-h-[44px]"
               >
-                <Calendar className="w-4 h-4 text-slate-950 shrink-0" />
-                <span>{contactCardBtn}</span>
-              </button>
-
-              {onOpenStatusTracker && (
-                <button
-                  type="button"
-                  onClick={onOpenStatusTracker}
-                  className="w-full py-3 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-[#C59B5F]/50 text-slate-200 font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
-                >
-                  <Search className="w-4 h-4 text-[#C59B5F] shrink-0" />
-                  <span>{isRtl ? 'متابعة حالة الطلب والدفع' : 'Track Booking Status & Payment'}</span>
-                </button>
-              )}
-
-              <div className="text-[11px] text-slate-500">
-                {availableDaily}
-              </div>
+                <MessageSquare className="w-4 h-4 shrink-0" />
+                <span>{isRtl ? 'تواصل عبر واتساب' : 'Chat on WhatsApp'}</span>
+              </a>
             </div>
 
           </div>

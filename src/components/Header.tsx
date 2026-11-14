@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Anchor, Menu, X, Globe, ShoppingBag } from 'lucide-react';
+import { Menu, X, Globe } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { useCart } from '../context/CartContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 import { FahadsLogo } from './FahadsLogo';
 
 interface HeaderProps {
-  onOpenBooking: (courseId?: string) => void;
+  onOpenBooking?: (courseId?: string) => void;
   onOpenAdmin?: () => void;
   onOpenTools?: () => void;
   onOpenSites?: () => void;
@@ -15,7 +14,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
-  onOpenBooking, 
   onOpenAdmin,
   onOpenTools,
   onOpenSites,
@@ -24,7 +22,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { language, toggleLanguage, isRtl } = useLanguage();
   const { config } = useSiteConfig();
-  const { totalCount, openCart } = useCart();
   const t = UI_TRANSLATIONS[language];
 
   const brandName = language === 'ar' ? config.brand.centerNameAr : config.brand.centerNameEn;
@@ -164,25 +161,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="uppercase font-mono text-[11px] font-bold">{language === 'ar' ? 'EN' : 'عربي'}</span>
           </button>
 
-          {/* Shopping Cart Button */}
-          <button
-            type="button"
-            onClick={openCart}
-            className="relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#E0BA84] hover:text-white bg-slate-900 hover:bg-slate-800 border border-[#C59B5F]/40 hover:border-[#C59B5F] rounded-xl transition-all cursor-pointer shrink-0 min-h-[38px] sm:min-h-[40px] shadow-sm active:scale-95"
-            aria-label={isRtl ? 'سلة الطلبات' : 'Cart'}
-            title={isRtl ? 'سلة الطلبات والحجوزات' : 'Shopping Cart'}
-          >
-            <div className="relative">
-              <ShoppingBag className="w-4 h-4 text-[#C59B5F]" />
-              {totalCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#C59B5F] text-slate-950 font-mono font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
-                  {totalCount}
-                </span>
-              )}
-            </div>
-            <span className="hidden sm:inline font-brand-arabic">{isRtl ? 'السلة' : 'Cart'}</span>
-          </button>
-
           {/* Mobile menu trigger */}
           <button
             type="button"
@@ -275,24 +253,6 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Mobile Cart Trigger */}
-            <button 
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                openCart();
-              }}
-              className="px-4 py-3 rounded-xl bg-slate-900 text-[#E0BA84] hover:bg-slate-800 text-start flex items-center justify-between font-bold min-h-[44px] border border-[#C59B5F]/40"
-            >
-              <span className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#C59B5F]" />
-                <span>{isRtl ? 'سلة الطلبات والحجوزات' : 'Cart & Bookings'}</span>
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#C59B5F] text-slate-950 text-xs font-mono font-black">
-                {totalCount}
-              </span>
-            </button>
-
             {/* Mobile Admin Portal Trigger */}
             {onOpenAdmin && (
               <button 
@@ -311,19 +271,6 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
           </nav>
-
-          <div className="pt-2 border-t border-slate-800/80 flex flex-col gap-2">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenBooking();
-              }}
-              className="w-full py-3.5 px-4 rounded-xl gold-gradient-btn text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#C59B5F]/20 cursor-pointer active:scale-95 min-h-[44px]"
-            >
-              <Anchor className="w-4 h-4 text-slate-950" />
-              <span>{t.ctaBook}</span>
-            </button>
-          </div>
         </div>
       )}
     </header>

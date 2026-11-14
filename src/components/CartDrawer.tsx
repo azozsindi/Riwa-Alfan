@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Lock,
   Check,
-  Search,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -29,11 +28,7 @@ import {
   getIssuingAgencyLabel,
 } from '../utils/eligibilityEngine';
 
-interface CartDrawerProps {
-  onOpenStatusTracker?: (bookingRef?: string) => void;
-}
-
-export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenStatusTracker }) => {
+export const CartDrawer: React.FC = () => {
   const {
     items,
     totalCount,
@@ -400,21 +395,6 @@ ${itemsSummary}
                     <PhoneCall className="w-4 h-4" />
                     <span>{isRtl ? 'إرسال الملخص عبر واتساب' : 'Send Summary via WhatsApp'}</span>
                   </a>
-
-                  {onOpenStatusTracker && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const r = lastRef;
-                        handleResetAfterSuccess();
-                        onOpenStatusTracker(r);
-                      }}
-                      className="w-full py-3 px-5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>{isRtl ? 'متابعة حالة الطلب والدفع' : 'Track Status & Payment'}</span>
-                    </button>
-                  )}
 
                   <button
                     type="button"

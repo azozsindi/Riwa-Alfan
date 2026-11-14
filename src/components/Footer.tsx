@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Shield, Award, MapPin, Instagram, Video, ExternalLink, Building2, X, FileText, Search } from 'lucide-react';
+import { ShieldCheck, Shield, Award, MapPin, Instagram, Video, ExternalLink, Building2, X, FileText } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -12,15 +12,13 @@ interface FooterProps {
   onOpenTools?: () => void;
   onOpenSites?: () => void;
   onOpenFaq?: () => void;
-  onOpenStatusTracker?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ 
   onOpenPolicies, 
   onOpenTools, 
   onOpenSites, 
-  onOpenFaq,
-  onOpenStatusTracker
+  onOpenFaq
 }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
@@ -243,18 +241,6 @@ export const Footer: React.FC<FooterProps> = ({
                     <span>❓</span>
                     <span>{t.navFaq}</span>
                   </a>
-                </li>
-              )}
-              {onOpenStatusTracker && (
-                <li>
-                  <button
-                    type="button"
-                    onClick={onOpenStatusTracker}
-                    className="hover:text-[#E0BA84] text-[#C59B5F] transition-colors cursor-pointer flex items-center gap-1.5 font-medium"
-                  >
-                    <Search className="w-3.5 h-3.5 shrink-0" />
-                    <span>{isRtl ? 'متابعة حالة الطلب والدفع' : 'Track Request & Payment'}</span>
-                  </button>
                 </li>
               )}
               <li>

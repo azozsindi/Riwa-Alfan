@@ -899,7 +899,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
               </label>
               <input
                 type="text"
-                value={location.marinaNameAr || 'مرسى أبحر الشمالية - جدة'}
+                value={location.marinaNameAr || 'أبحر الشمالية - جدة'}
                 onChange={(e) => setLocation({ ...location, marinaNameAr: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none"
               />
@@ -911,7 +911,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
               </label>
               <input
                 type="text"
-                value={location.marinaNameEn || 'North Obhur Marina - Jeddah'}
+                value={location.marinaNameEn || 'North Obhur - Jeddah'}
                 onChange={(e) => setLocation({ ...location, marinaNameEn: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none"
               />

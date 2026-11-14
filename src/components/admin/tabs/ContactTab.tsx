@@ -215,7 +215,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({
               dir="rtl"
               value={designForm.regionsTextAr || ''}
               onChange={(e) => setDesignForm(prev => ({ ...prev, regionsTextAr: e.target.value }))}
-              placeholder="جدة فقط (شرم أبحر وشواطئ جدة البحرية)"
+              placeholder="أبحر الشمالية - جدة"
               className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
             />
           </div>
@@ -229,7 +229,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({
               dir="ltr"
               value={designForm.regionsTextEn || ''}
               onChange={(e) => setDesignForm(prev => ({ ...prev, regionsTextEn: e.target.value }))}
-              placeholder="Jeddah only (Sharm Obhur & Marine Coastal Sites)"
+              placeholder="North Obhur - Jeddah"
               className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
             />
           </div>
@@ -353,33 +353,6 @@ export const ContactTab: React.FC<ContactTabProps> = ({
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {isRtl ? 'شارة التواجد اليومي (بالعربية):' : 'Availability Badge (Arabic):'}
-            </label>
-            <input 
-              type="text"
-              dir="rtl"
-              value={designForm.availableDailyAr || ''}
-              onChange={(e) => setDesignForm(prev => ({ ...prev, availableDailyAr: e.target.value }))}
-              placeholder="متاح يومياً للرد على استفسارات الغواصين بجدة"
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {isRtl ? 'شارة التواجد اليومي (بالإنجليزية):' : 'Availability Badge (English):'}
-            </label>
-            <input 
-              type="text"
-              dir="ltr"
-              value={designForm.availableDailyEn || ''}
-              onChange={(e) => setDesignForm(prev => ({ ...prev, availableDailyEn: e.target.value }))}
-              placeholder="Available daily to support divers in Jeddah"
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
-            />
-          </div>
         </div>
       </div>
 

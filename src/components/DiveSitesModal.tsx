@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { X, MapPin, Compass, Anchor, Fish, Ship, Waves, ShoppingBag, CheckCircle2 } from 'lucide-react';
+import { X, MapPin, Compass, Fish, Waves } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { useCart } from '../context/CartContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface DiveSitesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onBookTrip: (siteName: string) => void;
+  onBookTrip?: (siteName: string) => void;
 }
 
-export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose, onBookTrip }) => {
+export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose }) => {
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
-  const { addToCart, openCart, lastAddedId } = useCart();
   const t = UI_TRANSLATIONS[language];
 
   const sites = config.diveSites || [];
@@ -23,11 +21,6 @@ export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   const activeSite = sites.find(s => s.id === selectedSiteId) || sites[0];
-
-  const handleBook = (siteName: string) => {
-    onClose();
-    onBookTrip(siteName);
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
@@ -160,46 +153,13 @@ export const DiveSitesModal: React.FC<DiveSitesModalProps> = ({ isOpen, onClose,
                 </div>
               </div>
 
-              {/* CTA Book Trip & Add to Cart */}
-              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+              <div className="pt-2 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => {
-                    const tripId = `trip-${activeSite.id}`;
-                    addToCart({
-                      id: tripId,
-                      title: {
-                        ar: `رحلة بحرية إلى موقع ${activeSite.name.ar}`,
-                        en: `Boat Safari to ${activeSite.name.en}`,
-                      },
-                      subtitle: {
-                        ar: `عمق: ${activeSite.depth.ar} | رؤية: ${activeSite.visibility.ar}`,
-                        en: `Depth: ${activeSite.depth.en} | Vis: ${activeSite.visibility.en}`,
-                      },
-                      price: 450,
-                      priceFormatted: {
-                        ar: '450 ر.س',
-                        en: '450 SAR',
-                      },
-                      type: 'trip',
-                      category: activeSite.location.ar,
-                    });
-                    openCart();
-                    onClose();
-                  }}
-                  className="flex-1 gold-gradient-btn py-3 px-4 rounded-xl text-center text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 shadow-lg shadow-[#C59B5F]/20 text-slate-950 flex items-center justify-center gap-2"
+                  onClick={onClose}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer"
                 >
-                  <ShoppingBag className="w-4 h-4 text-slate-950" />
-                  <span>{isRtl ? 'أضف الرحلة للسلة 🛒' : 'Add Safari to Cart 🛒'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleBook(activeSite.name[language])}
-                  className="px-4 py-3 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Ship className="w-4 h-4 text-cyan-400" />
-                  <span>{isRtl ? 'استفسار مباشر' : 'Direct Inquiry'}</span>
+                  {isRtl ? 'إغلاق' : 'Close'}
                 </button>
               </div>
             </div>

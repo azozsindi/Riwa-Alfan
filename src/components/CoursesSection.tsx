@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
 import { Course } from '../data/divingData';
-import { ArrowLeft, ArrowRight, Clock, Check, X, ShieldAlert, BookOpen, Tag, ShoppingBag, CheckCircle2 } from 'lucide-react';
+import { Clock, Check, X, ShieldAlert, BookOpen } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { useCart } from '../context/CartContext';
 import { UI_TRANSLATIONS } from '../data/translations';
 
 interface CoursesSectionProps {
-  onSelectCourseForBooking: (courseId: string) => void;
+  onSelectCourseForBooking?: (courseId: string) => void;
 }
 
-export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseForBooking }) => {
+export const CoursesSection: React.FC<CoursesSectionProps> = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showAllCourses, setShowAllCourses] = useState(false);
   const [selectedCourseDetail, setSelectedCourseDetail] = useState<Course | null>(null);
   const { language, isRtl } = useLanguage();
   const { config } = useSiteConfig();
-  const { addToCart, openCart, lastAddedId } = useCart();
   const t = UI_TRANSLATIONS[language];
-
-  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
   const coursesList = config.courses || [];
   const filteredCourses = activeCategory === 'all' 
@@ -178,46 +174,14 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <button
-                    onClick={() => setSelectedCourseDetail(course)}
-                    className="p-2 sm:p-2.5 rounded-xl border border-slate-700/80 hover:border-[#C59B5F]/50 text-slate-300 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
-                    title={t.viewDetails}
-                    aria-label={t.viewDetails}
-                  >
-                    <BookOpen className="w-4 h-4" />
-                  </button>
-
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      addToCart({
-                        id: course.id,
-                        title: course.title,
-                        subtitle: course.depth,
-                        price: course.price[language],
-                        priceFormatted: course.price,
-                        type: 'course',
-                        category: course.certAgency,
-                      });
-                    }}
-                    className={`inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl font-bold text-xs transition-all whitespace-nowrap cursor-pointer active:scale-95 min-h-[40px] ${
-                      lastAddedId === course.id
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400'
-                        : 'gold-gradient-btn text-slate-950'
-                    }`}
+                    onClick={() => setSelectedCourseDetail(course)}
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#C59B5F]/40 hover:border-[#C59B5F] bg-slate-900 hover:bg-slate-800 text-[#E0BA84] hover:text-white font-bold text-xs transition-colors cursor-pointer min-h-[40px]"
                   >
-                    {lastAddedId === course.id ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                        <span>{isRtl ? 'تمت الإضافة ✓' : 'Added ✓'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingBag className="w-3.5 h-3.5 text-slate-950" />
-                        <span>{isRtl ? 'أضف للسلة' : 'Add to Cart'}</span>
-                      </>
-                    )}
+                    <BookOpen className="w-4 h-4 shrink-0" />
+                    <span>{t.viewDetails}</span>
                   </button>
                 </div>
               </div>
@@ -331,45 +295,18 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-4">
               <div>
                 <span className="text-xs text-slate-400 block">{t.priceLabel}</span>
                 <span className="text-xl font-bold text-[#E0BA84] font-mono">{selectedCourseDetail.price[language]}</span>
               </div>
-              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToCart({
-                      id: selectedCourseDetail.id,
-                      title: selectedCourseDetail.title,
-                      subtitle: selectedCourseDetail.depth,
-                      price: selectedCourseDetail.price[language],
-                      priceFormatted: selectedCourseDetail.price,
-                      type: 'course',
-                      category: selectedCourseDetail.certAgency,
-                    });
-                    openCart();
-                    setSelectedCourseDetail(null);
-                  }}
-                  className="flex-1 sm:flex-none gold-gradient-btn px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-950 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 shadow-lg"
-                >
-                  <ShoppingBag className="w-4 h-4 text-slate-950" />
-                  <span>{isRtl ? 'أضف للسلة والطلب عبر واتساب' : 'Add to Cart & Checkout'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const id = selectedCourseDetail.id;
-                    setSelectedCourseDetail(null);
-                    onSelectCourseForBooking(id);
-                  }}
-                  className="px-4 py-2.5 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm transition-all cursor-pointer"
-                >
-                  {t.confirmBookingCourse}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedCourseDetail(null)}
+                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer"
+              >
+                {isRtl ? 'إغلاق' : 'Close'}
+              </button>
             </div>
 
           </div>
