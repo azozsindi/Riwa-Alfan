@@ -158,10 +158,11 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
   };
 
   const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, partnerId?: string) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (file) {
       try {
-        const base64 = await optimizeImageFile(file);
+        const base64 = await optimizeImageFile(file, 400, 400, 0.85);
         if (partnerId) {
           handleUpdatePartnerItem(partnerId, { logoUrl: base64 });
           showToast(isRtl ? 'تم تحديث لوجو الجهة بنجاح!' : 'Partner logo updated!');
@@ -171,19 +172,24 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
         }
       } catch (err) {
         console.error('Error optimizing image:', err);
+      } finally {
+        input.value = '';
       }
     }
   };
 
   const handlePartnerLicenseUpload = async (e: React.ChangeEvent<HTMLInputElement>, partnerId: string) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (file) {
       try {
-        const base64 = await optimizeImageFile(file);
+        const base64 = await optimizeImageFile(file, 900, 900, 0.82);
         handleUpdatePartnerItem(partnerId, { licenseImageUrl: base64 });
         showToast(isRtl ? 'تم رفع صورة الرخصة بنجاح!' : 'License image uploaded!');
       } catch (err) {
         console.error('Error optimizing license image:', err);
+      } finally {
+        input.value = '';
       }
     }
   };
@@ -355,7 +361,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
                       <img 
                         src={partner.logoUrl} 
                         alt={partner.nameAr} 
-                        className="w-9 h-9 object-contain rounded-lg bg-slate-950 p-1 border border-slate-800 shrink-0" 
+                        className="w-10 h-10 object-contain rounded-lg bg-white p-1 border border-slate-700 shrink-0" 
                       />
                     ) : (
                       <div className="w-9 h-9 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
@@ -566,7 +572,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <Award className="w-4 h-4 text-blue-400" />
-            <span>{isRtl ? '3. قائمة شهادات واعتمادات PADI (PADI Certified)' : '3. PADI Certifications Catalog'}</span>
+            <span>{isRtl ? '3. قائمة شهادات واعتمادات PADI' : '3. PADI Certifications Catalog'}</span>
           </h4>
           <span className="text-[11px] font-mono text-blue-400">
             {trust.certificates?.length || 0} {isRtl ? 'شهادات مسجلة' : 'Certificates'}

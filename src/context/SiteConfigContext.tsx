@@ -305,7 +305,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => {
     try {
       localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
-      localStorage.setItem('riwa_alfan_site_config_v11', JSON.stringify(config));
       saveSiteConfigToFirestore(config);
     } catch (e) {
       console.error('Failed to save site config:', e);

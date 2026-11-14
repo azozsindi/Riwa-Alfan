@@ -1438,7 +1438,7 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 <span>{isRtl ? '11. شريط حقوق الملكية وتوثيق المملكة بالكامل' : '11. Footer Copyright & Country Bar'}</span>
               </h4>
               <p className="text-xs text-slate-400 mt-1">
-                {isRtl ? 'السطر النهائي في أسفل الموقع مع الدولة وشارة PADI Certified باللغتين' : 'Bottom copyright line and legal credentials in AR and EN'}
+                {isRtl ? 'السطر النهائي في أسفل الموقع مع حقوق الملكية واسم الدولة باللغتين' : 'Bottom copyright line and country bar in AR and EN'}
               </p>
             </div>
             <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full">
@@ -1477,7 +1477,6 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <span>{trustForm.countryTextAr}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-500/30 text-blue-400 text-[10px] font-bold">PADI Certified</span>
                   </div>
                 </div>
               )}
@@ -1488,7 +1487,6 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                   </div>
                   <div className="flex items-center gap-2 text-slate-400">
                     <span>{trustForm.countryTextEn}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-blue-950/60 border border-blue-500/30 text-blue-400 text-[10px] font-bold">PADI Certified</span>
                   </div>
                 </div>
               )}

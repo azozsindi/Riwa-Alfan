@@ -153,7 +153,6 @@ function AppContent() {
       {/* Footer with Modals Triggers */}
       {sections.footer && (
         <Footer 
-          onOpenAdmin={() => navigate('/admin')}
           onOpenPolicies={() => setIsPoliciesOpen(true)} 
           onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
           onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
