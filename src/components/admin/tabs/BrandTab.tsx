@@ -48,7 +48,7 @@ export const BrandTab: React.FC<BrandTabProps> = ({
   };
 
   return (
-    <form onSubmit={handleSaveBrand} className="space-y-6 max-w-4xl">
+    <form onSubmit={handleSaveBrand} className="space-y-6 w-full">
       <div className="pb-4 border-b border-slate-800">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
           <Building2 className="w-5 h-5 text-blue-400" />

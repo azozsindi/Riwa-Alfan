@@ -161,14 +161,14 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Inbox className="w-5 h-5 text-blue-400" />
-            {isRtl
+            <Inbox className="w-5 h-5 text-blue-400 shrink-0" />
+            <span>{isRtl
               ? 'صندوق مراجعة الكابتن والحجوزات'
-              : 'Captain Review & Bookings Inbox'}
+              : 'Captain Review & Bookings Inbox'}</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1">
             {isRtl
@@ -586,9 +586,9 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
                         <button
                           type="button"
                           onClick={() => handleCaptainAction(b, 'approved')}
-                          className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                          className="min-h-[38px] px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                           <span>
                             {isRtl ? 'موافقة وتفعيل الدفع' : 'Approve & Unlock Payment'}
                           </span>
@@ -597,27 +597,27 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
                         <button
                           type="button"
                           onClick={() => handleCaptainAction(b, 'request_info')}
-                          className="px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                          className="min-h-[38px] px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
-                          <HelpCircle className="w-3.5 h-3.5" />
+                          <HelpCircle className="w-3.5 h-3.5 shrink-0" />
                           <span>{isRtl ? 'طلب معلومات إضافية' : 'Request Info'}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleCaptainAction(b, 'request_requirement')}
-                          className="px-3 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                          className="min-h-[38px] px-3 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
-                          <FileWarning className="w-3.5 h-3.5" />
+                          <FileWarning className="w-3.5 h-3.5 shrink-0" />
                           <span>{isRtl ? 'طلب استكمال متطلب' : 'Request Requirement'}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleCaptainAction(b, 'rejected')}
-                          className="px-3 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                          className="min-h-[38px] px-3 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
+                          <XCircle className="w-3.5 h-3.5 shrink-0" />
                           <span>{isRtl ? 'رفض مع السبب' : 'Reject'}</span>
                         </button>
                       </div>
@@ -626,9 +626,9 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
                         href={waLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3.5 py-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        className="min-h-[38px] px-3.5 py-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
+                        <MessageCircle className="w-3.5 h-3.5 shrink-0" />
                         <span>{isRtl ? 'مراسلة واتساب' : 'WhatsApp'}</span>
                       </a>
                     </div>

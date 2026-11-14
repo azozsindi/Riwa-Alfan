@@ -42,7 +42,7 @@ export const ContactTab: React.FC<ContactTabProps> = ({
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 max-w-4xl">
+    <form onSubmit={handleSave} className="space-y-6 w-full">
       {/* Header */}
       <div className="pb-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

@@ -36,12 +36,12 @@ export const TestimonialsTab: React.FC<TestimonialsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-400" />
-            {isRtl ? 'إدارة آراء وتجارب المتدربين والخرجين' : 'Student Testimonials & Reviews'}
+            <MessageSquare className="w-5 h-5 text-blue-400 shrink-0" />
+            <span>{isRtl ? 'إدارة آراء وتجارب المتدربين والخرجين' : 'Student Testimonials & Reviews'}</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1">
             {isRtl 
@@ -50,11 +50,11 @@ export const TestimonialsTab: React.FC<TestimonialsTabProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
           <button
             type="button"
             onClick={() => setShowHeaderEditor(!showHeaderEditor)}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            className="min-h-[38px] px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
           >
             <Edit3 className="w-3.5 h-3.5 text-blue-400" />
             <span>{isRtl ? 'تعديل عنوان ومقدمة القسم' : 'Edit Section Header'}</span>
@@ -263,21 +263,21 @@ export const TestimonialsTab: React.FC<TestimonialsTabProps> = ({
               </div>
             ) : (
               <div>
-                <p className="text-xs text-slate-200 italic leading-relaxed">
+                <p className="text-xs text-slate-200 italic leading-relaxed break-words">
                   &ldquo;{testi.quote.ar}&rdquo;
                 </p>
 
-                <div className="pt-3 border-t border-slate-850 flex items-center justify-between mt-3 text-xs">
-                  <div>
-                    <div className="font-bold text-white text-xs">{testi.name.ar}</div>
-                    <div className="text-[10px] text-blue-400 font-medium">{testi.course.ar}</div>
+                <div className="pt-3 border-t border-slate-850 flex items-center justify-between gap-2 mt-3 text-xs">
+                  <div className="min-w-0">
+                    <div className="font-bold text-white text-xs truncate">{testi.name.ar}</div>
+                    <div className="text-[10px] text-blue-400 font-medium truncate">{testi.course.ar}</div>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
                       onClick={() => setEditingTestimonialIndex(idx)}
-                      className="p-1 rounded-md bg-slate-900 hover:bg-blue-600 text-slate-300 hover:text-white"
+                      className="min-h-[34px] min-w-[34px] p-1.5 rounded-md bg-slate-900 hover:bg-blue-600 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
                       title={isRtl ? 'تعديل' : 'Edit'}
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -290,7 +290,7 @@ export const TestimonialsTab: React.FC<TestimonialsTabProps> = ({
                           onUpdateTestimonials(updated);
                           showToast(isRtl ? 'تم حذف الرأي' : 'Testimonial removed');
                         }}
-                        className="p-1 rounded-md bg-red-950/40 hover:bg-red-600 text-red-400 hover:text-white"
+                        className="min-h-[34px] min-w-[34px] p-1.5 rounded-md bg-red-950/40 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center cursor-pointer"
                         title={isRtl ? 'حذف' : 'Delete'}
                       >
                         <Trash2 className="w-3.5 h-3.5" />

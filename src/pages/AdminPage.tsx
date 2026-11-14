@@ -4,13 +4,16 @@ import { useSiteConfig } from '../context/SiteConfigContext';
 import { useRouter } from '../context/RouterContext';
 import { useAuth } from '../context/AuthContext';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
+import { PWAInstallButton } from '../components/admin/PWAInstallButton';
 import { FahadsLogo } from '../components/FahadsLogo';
-import { Lock, ShieldCheck, Mail, KeyRound, AlertCircle, ArrowLeft, ArrowRight, Globe, LogIn, ExternalLink, Loader2, Info } from 'lucide-react';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { Lock, ShieldCheck, Mail, KeyRound, AlertCircle, ArrowLeft, ArrowRight, Globe, LogIn, Loader2, Info, WifiOff } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
   const { language, isRtl, toggleLanguage } = useLanguage();
   const { config } = useSiteConfig();
   const { navigate } = useRouter();
+  const isOnline = useOnlineStatus();
   const { 
     user, 
     isAdminUser, 
@@ -75,27 +78,38 @@ export const AdminPage: React.FC = () => {
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Top Navbar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-4 sm:px-8 py-4 flex items-center justify-between">
+      <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sticky top-0 z-20">
         <button
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-800 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 min-h-[42px] text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 px-3 sm:px-4 py-2 rounded-xl border border-slate-800 transition-colors cursor-pointer min-w-0"
         >
-          <ArrowBackIcon className="w-4 h-4 text-blue-400" />
-          <span>{isRtl ? 'الرجوع للموقع الرئيسي' : 'Return to Public Site'}</span>
+          <ArrowBackIcon className="w-4 h-4 text-blue-400 shrink-0" />
+          <span className="truncate">{isRtl ? 'الرجوع للموقع الرئيسي' : 'Return to Public Site'}</span>
         </button>
 
-        <button
-          onClick={toggleLanguage}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 cursor-pointer"
-        >
-          <Globe className="w-3.5 h-3.5 text-blue-400" />
-          <span>{language === 'ar' ? 'English' : 'عربي'}</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <PWAInstallButton isRtl={isRtl} variant="header" />
+
+          <button
+            onClick={toggleLanguage}
+            className="inline-flex items-center gap-1.5 min-h-[42px] text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800 cursor-pointer shrink-0"
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-400" />
+            <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+          </button>
+        </div>
       </header>
 
+      {!isOnline && (
+        <div className="bg-amber-950/80 border-b border-amber-500/40 px-4 py-2 text-xs text-amber-200 flex items-center justify-center gap-2">
+          <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>{isRtl ? 'أنت غير متصل بالإنترنت حالياً — يتطلب تسجيل الدخول اتصالاً بالشبكة.' : 'You are currently offline — network connection is required to sign in.'}</span>
+        </div>
+      )}
+
       {/* Main Authentication Box */}
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-blue-950/40 relative">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8">
+        <div className="w-full max-w-md sm:max-w-lg bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl shadow-blue-950/40 relative">
           
           {/* Header branding */}
           <div className="flex flex-col items-center text-center mb-6">
@@ -113,15 +127,15 @@ export const AdminPage: React.FC = () => {
               />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] sm:text-xs font-bold mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
               <span>{isRtl ? 'بوابة إدارة الموقع المؤمنة سحابياً' : 'Protected Firebase Admin Portal'}</span>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
               {brandName}
             </h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-xs">
+            <p className="text-xs text-slate-400 mt-1 max-w-sm">
               {isRtl 
                 ? 'الدخول محصور بحساب المدير المعتمد عبر بروتوكول Firebase Authentication.' 
                 : 'Access restricted to authorized administrators via Firebase Authentication.'}
@@ -148,7 +162,7 @@ export const AdminPage: React.FC = () => {
                   <p>
                     توجه إلى <strong>Firebase Console</strong> ⬅️ <strong>Authentication</strong> ⬅️ <strong>Settings</strong> ⬅️ <strong>Authorized domains</strong>، وأضف النطاق التالي:
                   </p>
-                  <code className="block bg-slate-950 p-2 rounded text-cyan-300 font-mono text-[10px] select-all">
+                  <code className="block bg-slate-950 p-2 rounded text-cyan-300 font-mono text-[10px] select-all break-all">
                     {typeof window !== 'undefined' ? window.location.hostname : 'riwaalfan.com'}
                   </code>
                 </div>
@@ -163,7 +177,7 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={isSubmitting}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 cursor-pointer transition-all shadow-lg shadow-blue-600/30 active:scale-95 disabled:opacity-50"
+              className="w-full min-h-[48px] py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 cursor-pointer transition-all shadow-lg shadow-blue-600/30 active:scale-95 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -273,7 +287,8 @@ export const AdminPage: React.FC = () => {
 
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 text-center space-y-1">
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 text-center space-y-3">
+            <PWAInstallButton isRtl={isRtl} variant="banner" />
             <p className="flex items-center justify-center gap-1 text-slate-400">
               <Lock className="w-3.5 h-3.5 text-emerald-400" />
               <span>{isRtl ? 'مشروع Firebase المعتمد: tenacious-circuit-f07pf' : 'Firebase Project: tenacious-circuit-f07pf'}</span>

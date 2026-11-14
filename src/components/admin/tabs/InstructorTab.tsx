@@ -151,48 +151,48 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl animate-in fade-in duration-200">
+    <div className="space-y-6 w-full animate-in fade-in duration-200">
       
       {/* Sub-Tabs Switcher */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800">
         <button
           type="button"
           onClick={() => setActiveSubTab('lead')}
-          className={`flex-1 min-w-[200px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`min-h-[42px] py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeSubTab === 'lead'
               ? 'gold-gradient-btn text-slate-950 shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
           }`}
         >
-          <span>👑</span>
-          <span>{isRtl ? 'كابتن فهد الهويملي (كبير المدربين)' : 'Capt. Fahad (Lead Instructor)'}</span>
+          <span className="shrink-0">👑</span>
+          <span className="truncate">{isRtl ? 'كابتن فهد الهويملي (كبير المدربين)' : 'Capt. Fahad (Lead Instructor)'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveSubTab('female')}
-          className={`flex-1 min-w-[200px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`min-h-[42px] py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeSubTab === 'female'
               ? 'gold-gradient-btn text-slate-950 shadow-md'
               : 'text-[#E0BA84] hover:text-white hover:bg-slate-900'
           }`}
         >
-          <span>🧕</span>
-          <span>{isRtl ? 'قسم التدريب النسائي (المدربة النسائية)' : 'Women\'s Training Division'}</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm" />
+          <span className="shrink-0">🧕</span>
+          <span className="truncate">{isRtl ? 'قسم التدريب النسائي (المدربة النسائية)' : 'Women\'s Training Division'}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shrink-0" />
         </button>
 
         <button
           type="button"
           onClick={() => setActiveSubTab('philosophy')}
-          className={`flex-1 min-w-[200px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`min-h-[42px] py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeSubTab === 'philosophy'
               ? 'gold-gradient-btn text-slate-950 shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-900'
           }`}
         >
-          <span>💬</span>
-          <span>{isRtl ? 'مقولة الكابتن وركائز التدريب والسلامة' : 'Quote & 3 Safety Pillars'}</span>
+          <span className="shrink-0">💬</span>
+          <span className="truncate">{isRtl ? 'مقولة الكابتن وركائز التدريب والسلامة' : 'Quote & 3 Safety Pillars'}</span>
         </button>
       </div>
 
@@ -406,18 +406,18 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
 
             <div className="space-y-2">
               {(instructorForm.specialtiesAr || []).map((specAr, index) => (
-                <div key={index} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-400" />
-                    <span className="font-bold">{specAr}</span>
+                <div key={index} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
+                    <span className="font-bold break-words">{specAr}</span>
                     {instructorForm.specialtiesEn?.[index] && (
-                      <span className="text-slate-400 font-mono text-[11px]">({instructorForm.specialtiesEn[index]})</span>
+                      <span className="text-slate-400 font-mono text-[11px] break-words">({instructorForm.specialtiesEn[index]})</span>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveSpecialty(index)}
-                    className="p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="min-h-[34px] min-w-[34px] p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -686,18 +686,18 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
 
             <div className="space-y-2">
               {(femaleForm.featuresListAr || []).map((feat, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{feat}</span>
+                <div key={idx} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="break-words">{feat}</span>
                     {femaleForm.featuresListEn?.[idx] && (
-                      <span className="text-slate-400 font-mono text-[11px]">({femaleForm.featuresListEn[idx]})</span>
+                      <span className="text-slate-400 font-mono text-[11px] break-words">({femaleForm.featuresListEn[idx]})</span>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveFeature(idx)}
-                    className="p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="min-h-[34px] min-w-[34px] p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -740,18 +740,18 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
 
             <div className="space-y-2">
               {(femaleForm.specialtiesAr || []).map((spec, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#C59B5F]" />
-                    <span>{spec}</span>
+                <div key={idx} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-[#C59B5F] shrink-0" />
+                    <span className="break-words">{spec}</span>
                     {femaleForm.specialtiesEn?.[idx] && (
-                      <span className="text-slate-400 font-mono text-[11px]">({femaleForm.specialtiesEn[idx]})</span>
+                      <span className="text-slate-400 font-mono text-[11px] break-words">({femaleForm.specialtiesEn[idx]})</span>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveFemaleSpec(idx)}
-                    className="p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="min-h-[34px] min-w-[34px] p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

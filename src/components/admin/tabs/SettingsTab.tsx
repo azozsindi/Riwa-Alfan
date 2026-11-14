@@ -19,11 +19,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   return (
-    <div className="space-y-6 max-w-4xl" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="space-y-6 w-full" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="pb-4 border-b border-slate-800">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Settings className="w-5 h-5 text-blue-400" />
-          {isRtl ? 'إعدادات الأمان والنسخ الاحتياطي' : 'Security & Backup Settings'}
+          <Settings className="w-5 h-5 text-blue-400 shrink-0" />
+          <span>{isRtl ? 'إعدادات الأمان والنسخ الاحتياطي' : 'Security & Backup Settings'}</span>
         </h3>
         <p className="text-xs text-slate-400 mt-1">
           {isRtl 
@@ -33,22 +33,22 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       {/* Cloud Security & Auth Status */}
-      <div className="p-5 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="text-xs font-bold text-white block">
                 {isRtl ? 'نظام الحماية والمصادقة السحابية (Firebase Zero-Trust)' : 'Firebase Zero-Trust Security'}
               </span>
-              <span className="text-[11px] text-emerald-400 font-medium">
+              <span className="text-[11px] text-emerald-400 font-medium block">
                 {isRtl ? 'مفعّل ومحمي بقواعد Firestore Security Rules السحابية' : 'Enforced by Firestore Cloud Security Rules'}
               </span>
             </div>
           </div>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+          <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold shrink-0">
             {isRtl ? 'محمي 100%' : '100% Protected'}
           </span>
         </div>
@@ -56,7 +56,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         <div className="pt-3 border-t border-slate-800/80 text-xs text-slate-300 space-y-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-slate-400">{isRtl ? 'المدراء الرئيسيون المصرح لهم:' : 'Root Super Admins:'}</span>
-            <span className="font-mono font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+            <span className="font-mono font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 break-all">
               {BOOTSTRAPPED_ADMIN_EMAILS.join(' · ')}
             </span>
           </div>

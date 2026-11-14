@@ -190,7 +190,7 @@ export const CaptainsTab: React.FC<CaptainsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       {/* Header & Add Button */}
       <div className="pb-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
