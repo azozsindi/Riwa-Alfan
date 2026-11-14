@@ -28,9 +28,6 @@ export const Header: React.FC<HeaderProps> = ({
   const t = UI_TRANSLATIONS[language];
 
   const brandName = language === 'ar' ? config.brand.centerNameAr : config.brand.centerNameEn;
-  const brandSub = language === 'ar' 
-    ? (config.brand.subtitleAr || 'دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI')
-    : (config.brand.subtitleEn || 'Certified PADI Diving Training · Capt. Fahad Al-Huwaimli');
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
@@ -82,9 +79,6 @@ export const Header: React.FC<HeaderProps> = ({
                   }
                   return <span className="text-[#C59B5F] group-hover:text-[#E0BA84] transition-colors">{brandName}</span>;
                 })()}
-              </span>
-              <span className="text-[9px] sm:text-[10px] xl:text-[11px] text-[#C59B5F] font-semibold -mt-0.5 tracking-wider uppercase truncate block">
-                {brandSub}
               </span>
             </div>
           </a>

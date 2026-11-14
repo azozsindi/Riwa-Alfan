@@ -31,13 +31,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
     ? `السلام عليكم كابتن فهد، أود الاستفسار عن تفاصيل دورات الغوص والرحلات القادمة بجدة`
     : `Hello Captain Fahad, I would like to inquire about certified scuba courses and upcoming boat expeditions in Jeddah.`;
 
-  const heroBadge = language === 'ar' ? config.hero.badgeAr : config.hero.badgeEn;
   const heroHeadline = language === 'ar' ? config.hero.headlineAr : config.hero.headlineEn;
   const heroHighlight = language === 'ar' ? config.hero.headlineHighlightAr : config.hero.headlineHighlightEn;
   const heroSubhead = language === 'ar' ? config.hero.subheadAr : config.hero.subheadEn;
-  const heroLocationKicker = language === 'ar' 
-    ? (config.hero.locationKickerAr || t.heroLocation) 
-    : (config.hero.locationKickerEn || t.heroLocation);
   const heroCtaBook = language === 'ar'
     ? (config.hero.ctaBookAr || t.heroCtaBook)
     : (config.hero.ctaBookEn || t.heroCtaBook);
@@ -88,14 +84,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
           {/* Main Content Column */}
           <div className={`lg:col-span-7 space-y-4 sm:space-y-6 ${isRtl ? 'text-right' : 'text-left'}`}>
             
-            {/* Clean unboxed editorial metadata kicker */}
-            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-[#C59B5F] tracking-wide">
-              <Award className="w-4 h-4 text-[#C59B5F] shrink-0" />
-              <span>{heroBadge}</span>
-              <span aria-hidden="true" className="text-slate-600">·</span>
-              <span className="text-slate-400">{heroLocationKicker}</span>
-            </div>
-
             {/* High-impact headline in brand gold & white with generous Arabic line-height */}
             <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-normal leading-[1.35] sm:leading-[1.4] lg:leading-[1.42] font-brand-arabic">
               <span className="block mb-2 sm:mb-3">
