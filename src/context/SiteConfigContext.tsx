@@ -8,7 +8,6 @@ import {
   FemaleInstructorConfig,
   AnnouncementConfig,
   Captain,
-  PaymobPaymentConfig,
   VisibleSectionsConfig,
   SocialLinksConfig,
   LocationConfig,
@@ -55,7 +54,6 @@ interface SiteConfigContextType {
   addCaptain: (captain: Omit<Captain, 'id'>) => void;
   updateCaptain: (captainId: string, updated: Partial<Captain>) => void;
   deleteCaptain: (captainId: string) => void;
-  updatePaymentConfig: (partial: Partial<PaymobPaymentConfig>) => void;
   updateAnnouncement: (partial: Partial<AnnouncementConfig>) => void;
   updateCourses: (courses: Course[]) => void;
   updateCourse: (courseId: string, updated: Partial<Course>) => void;
@@ -177,7 +175,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}), photoUrl: '' },
         femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
         captains: Array.isArray(base.captains) && base.captains.length > 0 ? base.captains : DEFAULT_CAPTAINS,
-        payment: { ...(DEFAULT_CONFIG.payment || {}), ...(base.payment || {}) },
         announcement: initialAnnouncement,
         courses: recoveredCourses || (Array.isArray(base.courses) && base.courses.length > 0 ? base.courses : DEFAULT_CONFIG.courses),
         diveSites: Array.isArray(base.diveSites) && base.diveSites.length > 0 ? base.diveSites : DEFAULT_CONFIG.diveSites,
@@ -378,13 +375,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setConfig(prev => ({
       ...prev,
       captains: (prev.captains || DEFAULT_CAPTAINS).filter(c => c.id !== captainId)
-    }));
-  };
-
-  const updatePaymentConfig = (partial: Partial<PaymobPaymentConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      payment: { ...(prev.payment || DEFAULT_CONFIG.payment!), ...partial }
     }));
   };
 
@@ -650,7 +640,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addCaptain,
       updateCaptain,
       deleteCaptain,
-      updatePaymentConfig,
       updateAnnouncement,
       updateCourses,
       updateCourse,

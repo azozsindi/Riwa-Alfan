@@ -21,12 +21,12 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
 
   const filteredBookings = bookings.filter(b => {
     if (bookingFilter === 'all') return true;
-    if (bookingFilter === 'paid') return b.status === 'paid' || b.paymentMethod === 'paymob';
+    if (bookingFilter === 'paid') return b.status === 'paid';
     return b.status === bookingFilter;
   });
 
   const newBookingsCount = bookings.filter(b => b.status === 'new').length;
-  const paidBookingsCount = bookings.filter(b => b.status === 'paid' || b.paymentMethod === 'paymob').length;
+  const paidBookingsCount = bookings.filter(b => b.status === 'paid').length;
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -132,18 +132,12 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
                       }`}
                     >
                       <option value="new" className="bg-slate-900 text-white">{isRtl ? 'طلب جديد' : 'New'}</option>
-                      <option value="pending_payment" className="bg-slate-900 text-amber-300">⏳ {isRtl ? 'بانتظار الدفع (Paymob)' : 'Pending Paymob'}</option>
-                      <option value="paid" className="bg-slate-900 text-emerald-400">💳 {isRtl ? 'مدفوع مؤكد (Paymob)' : 'Paid (Paymob)'}</option>
+                      <option value="pending_payment" className="bg-slate-900 text-amber-300">⏳ {isRtl ? 'بانتظار الدفع' : 'Pending Payment'}</option>
+                      <option value="paid" className="bg-slate-900 text-emerald-400">💳 {isRtl ? 'مدفوع مؤكد' : 'Paid'}</option>
                       <option value="contacted" className="bg-slate-900 text-white">{isRtl ? 'تم التواصل' : 'Contacted'}</option>
                       <option value="confirmed" className="bg-slate-900 text-white">{isRtl ? 'تم التأكيد' : 'Confirmed'}</option>
                       <option value="completed" className="bg-slate-900 text-white">{isRtl ? 'مكتمل' : 'Completed'}</option>
                     </select>
-
-                    {b.paymentMethod === 'paymob' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#C59B5F]/15 text-[#E0BA84] border border-[#C59B5F]/30">
-                        Paymob 💳
-                      </span>
-                    )}
                   </div>
 
                   <div className="text-xs text-slate-300 flex flex-wrap gap-x-4 gap-y-1">

@@ -14,7 +14,6 @@ export interface Course {
   prerequisites: Record<Lang, string>;
   highlights: Record<Lang, string[]>;
   curriculum: Record<Lang, string[]>;
-  paymobUrl?: string;
 }
 
 export interface DiveSite {

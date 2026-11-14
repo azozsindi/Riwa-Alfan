@@ -107,7 +107,7 @@ export interface BookingRecord {
   timing: string;
   notes?: string;
   status: 'new' | 'contacted' | 'confirmed' | 'completed' | 'cancelled' | 'paid' | 'pending_payment';
-  paymentMethod?: 'paymob' | 'cash' | 'transfer' | 'whatsapp';
+  paymentMethod?: 'cash' | 'transfer' | 'whatsapp';
   paymentAmount?: string;
   paymentReference?: string;
 }
@@ -133,18 +133,6 @@ export interface TraineeRecord {
   padiNumber?: string;
   notes?: string;
   createdAt: string;
-}
-
-export interface PaymobPaymentConfig {
-  enabled: boolean;
-  paymentUrl: string;
-  depositAmount?: number;
-  requirePaymentBeforeBooking: boolean;
-  paymentInstructionsAr: string;
-  paymentInstructionsEn: string;
-  supportMada: boolean;
-  supportApplePay: boolean;
-  supportCards: boolean;
 }
 
 export interface FemaleInstructorConfig {
@@ -392,7 +380,6 @@ export interface SiteConfig {
   captains?: Captain[];
   announcement: AnnouncementConfig;
   underConstruction?: UnderConstructionConfig;
-  payment?: PaymobPaymentConfig;
   courses: Course[];
   diveSites: DiveSite[];
   faqs: FAQItem[];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Award, RotateCcw, Plus, Database, Edit3, X, Save, Trash2, AlertTriangle, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Course } from '../../../data/divingData';
@@ -31,17 +31,54 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
   const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign);
   const [showHeaderEditor, setShowHeaderEditor] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialDesign) setDesignForm(initialDesign);
   }, [initialDesign]);
 
+  const startEditingCourse = (course: Course) => {
+    setEditingCourse({
+      ...course,
+      title: { ...course.title },
+      price: { ...course.price },
+      duration: { ...course.duration },
+      depth: { ...course.depth },
+      summary: { ...course.summary },
+      prerequisites: { ...course.prerequisites },
+      highlights: {
+        ar: [...(course.highlights?.ar || [])],
+        en: [...(course.highlights?.en || [])]
+      },
+      curriculum: {
+        ar: [...(course.curriculum?.ar || [])],
+        en: [...(course.curriculum?.en || [])]
+      }
+    });
+    setTimeout(() => {
+      editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
   const handleSaveCourseEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCourse) return;
-    onUpdateCourse(editingCourse.id, editingCourse);
+    const cleanedCourse: Course = {
+      ...editingCourse,
+      seaDives: Math.max(0, Number(editingCourse.seaDives) || 0),
+      poolSessions: Math.max(0, Number(editingCourse.poolSessions) || 0),
+      highlights: {
+        ar: editingCourse.highlights.ar.map(s => s.trim()).filter(Boolean),
+        en: editingCourse.highlights.en.map(s => s.trim()).filter(Boolean),
+      },
+      curriculum: {
+        ar: editingCourse.curriculum.ar.map(s => s.trim()).filter(Boolean),
+        en: editingCourse.curriculum.en.map(s => s.trim()).filter(Boolean),
+      }
+    };
+    onUpdateCourse(cleanedCourse.id, cleanedCourse);
     setEditingCourse(null);
-    showToast();
+    showToast(isRtl ? 'تم حفظ وتحديث جميع تفاصيل الدورة بنجاح!' : 'All course details updated successfully!');
   };
 
   const handleSaveHeader = (e: React.FormEvent) => {
@@ -275,9 +312,9 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
                 />
                 <button
                   type="button"
-                  onClick={() => setEditingCourse(course)}
+                  onClick={() => startEditingCourse(course)}
                   className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                  title={isRtl ? 'تعديل باقي تفاصيل الدورة' : 'Edit full details'}
+                  title={isRtl ? 'تعديل العمق والغوصات وكافة التفاصيل' : 'Edit full details'}
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                 </button>
@@ -289,21 +326,23 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
 
       {/* Course Edit Modal / Panel */}
       {editingCourse && (
-        <div className="p-5 rounded-2xl bg-slate-950 border border-blue-500/40 shadow-xl space-y-4 animate-in fade-in">
+        <div ref={editorRef} className="p-5 sm:p-6 rounded-2xl bg-slate-950 border border-blue-500/40 shadow-xl space-y-5 animate-in fade-in">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <span className="text-sm font-bold text-blue-400 flex items-center gap-2">
               <Edit3 className="w-4 h-4" />
               {isRtl ? `تعديل الدورة: ${editingCourse.title.ar}` : `Edit Course: ${editingCourse.title.en}`}
             </span>
             <button
+              type="button"
               onClick={() => setEditingCourse(null)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <form onSubmit={handleSaveCourseEdit} className="space-y-4">
+          <form onSubmit={handleSaveCourseEdit} className="space-y-5">
+            {/* Titles */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -335,7 +374,26 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Category, Price, Duration */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'التصنيف:' : 'Category:'}
+                </label>
+                <select
+                  value={editingCourse.category}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    category: e.target.value as Course['category']
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                >
+                  <option value="beginner">{isRtl ? 'مبتدئ (Beginner)' : 'Beginner'}</option>
+                  <option value="advanced">{isRtl ? 'متقدم (Advanced)' : 'Advanced'}</option>
+                  <option value="specialty">{isRtl ? 'تخصص (Specialty)' : 'Specialty'}</option>
+                  <option value="professional">{isRtl ? 'احترافي (Pro)' : 'Professional'}</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   {isRtl ? 'السعر (عربي):' : 'Price (Arabic):'}
@@ -368,55 +426,233 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  {isRtl ? 'المدة:' : 'Duration:'}
+                  {isRtl ? 'المدة (عربي):' : 'Duration (Arabic):'}
                 </label>
                 <input 
                   type="text"
                   value={editingCourse.duration.ar}
                   onChange={(e) => setEditingCourse({
                     ...editingCourse,
-                    duration: { ...editingCourse.duration, ar: e.target.value, en: e.target.value }
+                    duration: { ...editingCourse.duration, ar: e.target.value }
+                  })}
+                  placeholder="مثال: 3-4 أيام"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المدة (إنجليزي):' : 'Duration (English):'}
+                </label>
+                <input 
+                  type="text"
+                  value={editingCourse.duration.en}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    duration: { ...editingCourse.duration, en: e.target.value }
+                  })}
+                  placeholder="e.g. 3-4 Days"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Depth, Sea Dives, Pool Sessions */}
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-[#C59B5F]/35 space-y-3">
+              <div className="text-xs font-bold text-[#E0BA84] flex items-center gap-2">
+                <span>🌊 {isRtl ? 'مواصفات العمق والغوصات والمسبح:' : 'Depth, Sea Dives & Pool Sessions:'}</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    {isRtl ? 'العمق الأقصى (عربي):' : 'Max Depth (Arabic):'}
+                  </label>
+                  <input 
+                    type="text"
+                    value={editingCourse.depth.ar}
+                    onChange={(e) => setEditingCourse({
+                      ...editingCourse,
+                      depth: { ...editingCourse.depth, ar: e.target.value }
+                    })}
+                    placeholder="مثال: حتى 20 متر"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    {isRtl ? 'العمق الأقصى (إنجليزي):' : 'Max Depth (English):'}
+                  </label>
+                  <input 
+                    type="text"
+                    value={editingCourse.depth.en}
+                    onChange={(e) => setEditingCourse({
+                      ...editingCourse,
+                      depth: { ...editingCourse.depth, en: e.target.value }
+                    })}
+                    placeholder="e.g. Up to 20m"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    {isRtl ? 'غوصات البحر (عدد):' : 'Sea Dives (Count):'}
+                  </label>
+                  <input 
+                    type="number"
+                    min={0}
+                    value={editingCourse.seaDives}
+                    onChange={(e) => setEditingCourse({
+                      ...editingCourse,
+                      seaDives: Math.max(0, parseInt(e.target.value || '0', 10) || 0)
+                    })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-mono font-bold text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    {isRtl ? 'المسبح التدريبي (0 = لا يشترط):' : 'Pool Sessions (0 = N/A):'}
+                  </label>
+                  <input 
+                    type="number"
+                    min={0}
+                    value={editingCourse.poolSessions}
+                    onChange={(e) => setEditingCourse({
+                      ...editingCourse,
+                      poolSessions: Math.max(0, parseInt(e.target.value || '0', 10) || 0)
+                    })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-mono font-bold text-center"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Prerequisites */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المتطلبات المسبقة (عربي):' : 'Prerequisites (Arabic):'}
+                </label>
+                <input 
+                  type="text"
+                  value={editingCourse.prerequisites.ar}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    prerequisites: { ...editingCourse.prerequisites, ar: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المتطلبات المسبقة (إنجليزي):' : 'Prerequisites (English):'}
+                </label>
+                <input 
+                  type="text"
+                  value={editingCourse.prerequisites.en}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    prerequisites: { ...editingCourse.prerequisites, en: e.target.value }
                   })}
                   className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                {isRtl ? 'موجز الدورة (عربي):' : 'Summary (Arabic):'}
-              </label>
-              <textarea 
-                rows={2}
-                value={editingCourse.summary.ar}
-                onChange={(e) => setEditingCourse({
-                  ...editingCourse,
-                  summary: { ...editingCourse.summary, ar: e.target.value }
-                })}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
-              />
+            {/* Summaries */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'موجز الدورة (عربي):' : 'Summary (Arabic):'}
+                </label>
+                <textarea 
+                  rows={2}
+                  value={editingCourse.summary.ar}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    summary: { ...editingCourse.summary, ar: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'موجز الدورة (إنجليزي):' : 'Summary (English):'}
+                </label>
+                <textarea 
+                  rows={2}
+                  value={editingCourse.summary.en}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    summary: { ...editingCourse.summary, en: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[#E0BA84] mb-1 flex items-center gap-1.5">
-                <span>💳 {isRtl ? 'رابط دفع Paymob الخاص بهذه الدورة (اختياري):' : 'Paymob Payment Link for this Course (Optional):'}</span>
-              </label>
-              <input 
-                type="url"
-                placeholder="https://accept.paymob.com/..."
-                value={editingCourse.paymobUrl || ''}
-                onChange={(e) => setEditingCourse({
-                  ...editingCourse,
-                  paymobUrl: e.target.value
-                })}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-mono"
-              />
+            {/* Highlights & Curriculum */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المميزات الرئيسية (عربي - سطر لكل ميزة):' : 'Highlights (Arabic - 1 per line):'}
+                </label>
+                <textarea 
+                  rows={4}
+                  value={editingCourse.highlights.ar.join('\n')}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    highlights: { ...editingCourse.highlights, ar: e.target.value.split('\n') }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المميزات الرئيسية (إنجليزي - سطر لكل ميزة):' : 'Highlights (English - 1 per line):'}
+                </label>
+                <textarea 
+                  rows={4}
+                  value={editingCourse.highlights.en.join('\n')}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    highlights: { ...editingCourse.highlights, en: e.target.value.split('\n') }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المنهج التدريبي (عربي - سطر لكل بند):' : 'Curriculum (Arabic - 1 per line):'}
+                </label>
+                <textarea 
+                  rows={4}
+                  value={editingCourse.curriculum.ar.join('\n')}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    curriculum: { ...editingCourse.curriculum, ar: e.target.value.split('\n') }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {isRtl ? 'المنهج التدريبي (إنجليزي - سطر لكل بند):' : 'Curriculum (English - 1 per line):'}
+                </label>
+                <textarea 
+                  rows={4}
+                  value={editingCourse.curriculum.en.join('\n')}
+                  onChange={(e) => setEditingCourse({
+                    ...editingCourse,
+                    curriculum: { ...editingCourse.curriculum, en: e.target.value.split('\n') }
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:border-blue-500 outline-none leading-relaxed"
+                />
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/30"
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/30"
               >
                 <Save className="w-4 h-4" />
                 <span>{isRtl ? 'حفظ التعديلات على الدورة' : 'Save Course Edits'}</span>
@@ -424,7 +660,7 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
               <button
                 type="button"
                 onClick={() => setEditingCourse(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
               >
                 {isRtl ? 'إلغاء' : 'Cancel'}
               </button>
@@ -433,7 +669,7 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setCourseToDelete(editingCourse)}
-                  className="ms-auto px-4 py-2 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-800 text-red-300 hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                  className="ms-auto px-4 py-2.5 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-800 text-red-300 hover:text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{isRtl ? 'حذف هذه الدورة' : 'Delete Course'}</span>
@@ -480,16 +716,22 @@ export const CoursesTab: React.FC<CoursesTabProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-850">
-              <span className="text-[11px] text-slate-500 font-mono">
-                {course.depth.ar}
-              </span>
+            <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-850 gap-2 flex-wrap">
+              <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono flex-wrap">
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800">{course.depth.ar}</span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
+                  {isRtl ? `بحر: ${course.seaDives}` : `Sea: ${course.seaDives}`}
+                </span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
+                  {isRtl ? `مسبح: ${course.poolSessions}` : `Pool: ${course.poolSessions}`}
+                </span>
+              </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setEditingCourse(course)}
+                  onClick={() => startEditingCourse(course)}
                   className="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors cursor-pointer text-xs flex items-center gap-1"
-                  title={isRtl ? 'تعديل السعر والتفاصيل' : 'Edit course'}
+                  title={isRtl ? 'تعديل العمق والغوصات والسعر وكافة التفاصيل' : 'Edit course'}
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>{isRtl ? 'تعديل' : 'Edit'}</span>

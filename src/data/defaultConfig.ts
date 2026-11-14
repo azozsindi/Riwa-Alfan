@@ -408,17 +408,6 @@ export const DEFAULT_CONFIG: SiteConfig = {
   },
   femaleInstructor: DEFAULT_FEMALE_INSTRUCTOR,
   captains: DEFAULT_CAPTAINS,
-  payment: {
-    enabled: true,
-    paymentUrl: '', // Admin can paste their Paymob link here
-    depositAmount: 500,
-    requirePaymentBeforeBooking: false,
-    paymentInstructionsAr: 'يمكنك تأكيد حجزك بدفع الرسوم أو العربون إلكترونياً وبأمان عبر منصة Paymob الرسمية بواسطة بطاقات مدى، Apple Pay، أو فيزا وماستركارد.',
-    paymentInstructionsEn: 'You can secure your booking by paying fees or deposit online via Paymob using Mada, Apple Pay, Visa, or Mastercard.',
-    supportMada: true,
-    supportApplePay: true,
-    supportCards: true
-  },
   announcement: {
     enabled: false,
     badgeAr: 'عرض خاص بجدة',

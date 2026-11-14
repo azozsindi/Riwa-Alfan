@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   X, Tag, Building2, Compass, Waves, Inbox, Settings, 
   Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, 
-  CreditCard, Globe, Eye, Share2, Shield, AlertTriangle, Palette, Sparkles, PhoneCall,
+  Globe, Eye, Share2, Shield, AlertTriangle, Palette, Sparkles, PhoneCall,
   Menu, ChevronDown, Search
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
@@ -21,7 +21,6 @@ import { SitesTab } from './tabs/SitesTab';
 import { FaqsTab } from './tabs/FaqsTab';
 import { TestimonialsTab } from './tabs/TestimonialsTab';
 import { SectionsVisibilityTab } from './tabs/SectionsVisibilityTab';
-import { PaymentTab } from './tabs/PaymentTab';
 import { BookingsTab } from './tabs/BookingsTab';
 import { DomainTab } from './tabs/DomainTab';
 import { AdminsTab } from './tabs/AdminsTab';
@@ -41,7 +40,6 @@ type AdminTab =
   | 'faqs' 
   | 'testimonials' 
   | 'sections' 
-  | 'payment' 
   | 'bookings' 
   | 'domain' 
   | 'admins' 
@@ -69,7 +67,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     addCaptain,
     updateCaptain,
     deleteCaptain,
-    updatePaymentConfig,
     updateAnnouncement, 
     updateCourse, 
     addCourse, 
@@ -137,7 +134,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'testimonials', labelAr: 'آراء المتدربين', labelEn: 'Testimonials', icon: '⭐', category: 'pages', badge: (config.testimonials || []).length },
     { id: 'social', labelAr: 'الاعتمادات والفوتر', labelEn: 'Footer & Policies', icon: '🏛️', category: 'pages' },
     { id: 'sections', labelAr: 'إخفاء وظهور الأقسام', labelEn: 'Show/Hide Sections', icon: '👁️', category: 'settings' },
-    { id: 'payment', labelAr: 'الدفع الإلكتروني (Paymob)', labelEn: 'Paymob Payments', icon: '💳', category: 'settings' },
     { id: 'domain', labelAr: 'ربط الدومين', labelEn: 'Custom Domain', icon: '🌐', category: 'settings' },
     { id: 'settings', labelAr: 'الإعدادات والنسخ', labelEn: 'Settings & Backup', icon: '⚙️', category: 'settings' },
   ];
@@ -614,22 +610,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <span>{isRtl ? 'إخفاء وظهور الأقسام 👁️' : 'Show / Hide Sections 👁️'}</span>
           </button>
 
-          {/* 13. Paymob Payments */}
-          <button
-            onClick={() => setActiveTab('payment')}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'payment' 
-                ? 'gold-gradient-btn' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <CreditCard className="w-4 h-4 shrink-0" />
-            <span>{isRtl ? 'الدفع الإلكتروني (Paymob) 💳' : 'Paymob Payments 💳'}</span>
-            {config.payment?.enabled && (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 ms-auto shrink-0 shadow-sm shadow-emerald-400/50" />
-            )}
-          </button>
-
           {/* 14. Bookings Inbox */}
           <button
             onClick={() => setActiveTab('bookings')}
@@ -815,16 +795,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <SectionsVisibilityTab
               visibleSections={config.visibleSections}
               onUpdate={updateVisibleSections}
-              showToast={showToast}
-            />
-          )}
-
-          {activeTab === 'payment' && (
-            <PaymentTab 
-              initialPayment={config.payment}
-              courses={config.courses}
-              onUpdatePayment={updatePaymentConfig}
-              onUpdateCourse={updateCourse}
               showToast={showToast}
             />
           )}

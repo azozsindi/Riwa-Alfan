@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Send, PhoneCall, AlertCircle, ShieldCheck, ChevronDown, ChevronUp, Ship, GraduationCap, AlertTriangle, CreditCard, ExternalLink, Smartphone } from 'lucide-react';
+import { X, Check, Send, PhoneCall, AlertCircle, ShieldCheck, ChevronDown, ChevronUp, Ship, GraduationCap, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -28,7 +28,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [experienceLevel, setExperienceLevel] = useState('beginner');
   const [preferredDays, setPreferredDays] = useState('weekend');
   const [selectedCaptain, setSelectedCaptain] = useState('');
-  const [paymentChoice, setPaymentChoice] = useState<'paymob' | 'whatsapp'>('whatsapp');
   const [notes, setNotes] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
@@ -43,9 +42,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     c.title.en === selectedInterest ||
     c.id === preSelectedCourseId
   );
-
-  const activePaymobUrl = matchedCourse?.paymobUrl || config.payment?.paymentUrl || '';
-  const isPaymobEnabled = Boolean(config.payment?.enabled && activePaymobUrl);
 
   useEffect(() => {
     if (preSelectedCourseId) {
@@ -95,12 +91,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         : t.timeFlexible,
       notes: [
         notes,
-        selectedCaptain ? (isRtl ? `الكابتن المفضل: ${selectedCaptain}` : `Preferred Instructor: ${selectedCaptain}`) : '',
-        paymentChoice === 'paymob' ? (isRtl ? 'طريقة الدفع: دفع إلكتروني عبر Paymob' : 'Payment Method: Paymob Online') : ''
+        selectedCaptain ? (isRtl ? `الكابتن المفضل: ${selectedCaptain}` : `Preferred Instructor: ${selectedCaptain}`) : ''
       ].filter(Boolean).join(' · '),
-      paymentMethod: paymentChoice === 'paymob' ? 'paymob' : 'whatsapp',
-      paymentAmount: matchedCourse ? matchedCourse.price[language] : (config.payment?.depositAmount ? `${config.payment.depositAmount} SAR` : undefined),
-      status: paymentChoice === 'paymob' ? 'pending_payment' : 'new'
+      paymentMethod: 'whatsapp',
+      paymentAmount: matchedCourse ? matchedCourse.price[language] : undefined,
+      status: 'new'
     });
 
     setBookingRef(ref);
@@ -113,13 +108,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 الاسم: ${fullName}
 ${selectedCaptain ? `الكابتن المفضل للتدريب: ${selectedCaptain}\n` : ''}مستوى الخبرة: ${experienceLevel === 'beginner' ? 'مبتدئ جديد' : 'غواص مرخص'}
 الأوقات المفضلة: ${preferredDays === 'weekend' ? 'عطلة نهاية الأسبوع' : 'أيام الأسبوع'}
-${paymentChoice === 'paymob' ? 'طريقة الدفع: أرغب بالسداد إلكترونياً عبر Paymob\n' : ''}${notes ? `ملاحظات: ${notes}` : ''}`
+${notes ? `ملاحظات: ${notes}` : ''}`
     : `Hello Captain Fahad Al-Huwaimli & Riwa Alfan Team,
 I would like to inquire/enroll for: ${selectedInterest}
 Name: ${fullName}
 ${selectedCaptain ? `Preferred Instructor: ${selectedCaptain}\n` : ''}Experience Level: ${experienceLevel}
 Preferred Schedule: ${preferredDays}
-${paymentChoice === 'paymob' ? 'Payment Method: Paymob Online Payment\n' : ''}${notes ? `Notes: ${notes}` : ''}`;
+${notes ? `Notes: ${notes}` : ''}`;
 
   const whatsAppUrl = `https://wa.me/${config.brand.whatsappNumber}?text=${encodeURIComponent(whatsAppMessage)}`;
 
@@ -181,50 +176,6 @@ ${paymentChoice === 'paymob' ? 'Payment Method: Paymob Online Payment\n' : ''}${
                 {t.modalSuccessNote}
               </p>
             </div>
-
-            {/* Paymob Payment Card if URL is configured */}
-            {isPaymobEnabled && (
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-950 via-[#162E52]/40 to-slate-950 border border-[#C59B5F]/40 space-y-4 text-center">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-[#C59B5F]/15 border border-[#C59B5F]/30 text-[#E0BA84] font-bold text-xs flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-[#C59B5F]" />
-                    <span>PAYMOB GATEWAY</span>
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
-                    {isRtl ? 'دفع إلكتروني آمن' : 'Secure Online Payment'}
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h5 className="text-base font-black text-white">
-                    {isRtl ? 'تأكيد الحجز بالدفع الإلكتروني المباشر' : 'Secure Your Spot with Online Payment'}
-                  </h5>
-                  <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-                    {language === 'ar' ? config.payment?.paymentInstructionsAr : config.payment?.paymentInstructionsEn}
-                  </p>
-                </div>
-
-                {/* Badges: Mada, Apple Pay, Cards */}
-                <div className="flex items-center justify-center gap-2 text-xs">
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-bold text-[10px]">مدى mada</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-bold text-[10px]">Apple Pay</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-bold text-[10px]">VISA / MC</span>
-                </div>
-
-                {/* Action Link to Paymob */}
-                <div className="pt-1">
-                  <a
-                    href={activePaymobUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="gold-gradient-btn w-full py-3 px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#C59B5F]/20 active:scale-95 transition-all text-slate-950"
-                  >
-                    <CreditCard className="w-4 h-4 text-slate-950" />
-                    <span>{isRtl ? 'الانتقال إلى صفحة سداد Paymob ↗' : 'Proceed to Paymob Checkout ↗'}</span>
-                  </a>
-                </div>
-              </div>
-            )}
 
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
@@ -444,63 +395,6 @@ ${paymentChoice === 'paymob' ? 'Payment Method: Paymob Online Payment\n' : ''}${
               {errors.terms && <p className="text-xs text-red-400">{errors.terms}</p>}
             </div>
 
-            {/* Payment Method Preference */}
-            {isPaymobEnabled && (
-              <div className="space-y-2 pt-1">
-                <label className="text-xs font-semibold text-slate-300 block">
-                  {isRtl ? 'طريقة تأكيد الحجز والدفع:' : 'Booking Confirmation & Payment Method:'}
-                </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentChoice('paymob')}
-                    className={`p-3 rounded-xl border text-start transition-all cursor-pointer flex items-start gap-2.5 ${
-                      paymentChoice === 'paymob'
-                        ? 'bg-[#162E52]/40 border-[#C59B5F] ring-1 ring-[#C59B5F]/40'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 border-[#C59B5F]">
-                      {paymentChoice === 'paymob' && <div className="w-2 h-2 rounded-full bg-[#C59B5F]" />}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <CreditCard className="w-3.5 h-3.5 text-[#C59B5F]" />
-                        <span>{isRtl ? 'دفع إلكتروني (Paymob)' : 'Paymob Online'}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400">
-                        {isRtl ? 'مدى، Apple Pay، فيزا (سداد فوري)' : 'Mada, Apple Pay, Cards (Instant)'}
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentChoice('whatsapp')}
-                    className={`p-3 rounded-xl border text-start transition-all cursor-pointer flex items-start gap-2.5 ${
-                      paymentChoice === 'whatsapp'
-                        ? 'bg-emerald-950/20 border-emerald-500 ring-1 ring-emerald-500/40'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 border-emerald-500">
-                      {paymentChoice === 'whatsapp' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{isRtl ? 'تنسيق عبر واتساب' : 'WhatsApp Consultation'}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400">
-                        {isRtl ? 'حجز واستشارة الكابتن بدون دفع مسبق' : 'No pre-payment required'}
-                      </p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Submit with Brand Gold Button */}
             <div className="pt-2 flex items-center justify-between gap-3">
               <button
@@ -512,16 +406,8 @@ ${paymentChoice === 'paymob' ? 'Payment Method: Paymob Online Payment\n' : ''}${
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 }`}
               >
-                {paymentChoice === 'paymob' ? (
-                  <CreditCard className="w-4 h-4 text-slate-950" />
-                ) : (
-                  <Send className="w-4 h-4 text-slate-950" />
-                )}
-                <span>
-                  {paymentChoice === 'paymob' 
-                    ? (isRtl ? 'تأكيد الحجز والانتقال للدفع (Paymob)' : 'Confirm & Proceed to Payment') 
-                    : t.formSubmit}
-                </span>
+                <Send className="w-4 h-4 text-slate-950" />
+                <span>{t.formSubmit}</span>
               </button>
             </div>
 
