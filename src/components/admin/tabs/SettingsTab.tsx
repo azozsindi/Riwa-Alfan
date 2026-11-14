@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Download, RotateCcw, AlertTriangle, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useAuth, BOOTSTRAPPED_ADMIN_EMAILS } from '../../../context/AuthContext';
+import { TelegramNotificationsCard } from '../TelegramNotificationsCard';
 
 interface SettingsTabProps {
   onExportBackupJson: () => string;
@@ -23,14 +24,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <div className="pb-4 border-b border-slate-800">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
           <Settings className="w-5 h-5 text-blue-400 shrink-0" />
-          <span>{isRtl ? 'إعدادات الأمان والنسخ الاحتياطي' : 'Security & Backup Settings'}</span>
+          <span>{isRtl ? 'إعدادات الإشعارات والأمان والنسخ الاحتياطي' : 'Notifications, Security & Backup Settings'}</span>
         </h3>
         <p className="text-xs text-slate-400 mt-1">
           {isRtl 
-            ? 'حالة أمان لوحة التحكم، المصادقة السحابية، وتصدير نسخة احتياطية من كافة البيانات.'
-            : 'Dashboard security status, cloud authentication, and full data backups.'}
+            ? 'ربط إشعارات تلجرام الفورية، حالة المصادقة السحابية، وتصدير نسخة احتياطية من كافة البيانات.'
+            : 'Link instant Telegram booking alerts, check cloud authentication status, and download backups.'}
         </p>
       </div>
+
+      {/* Telegram Instant Notifications Integration */}
+      <TelegramNotificationsCard showToast={showToast} />
 
       {/* Cloud Security & Auth Status */}
       <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-4">

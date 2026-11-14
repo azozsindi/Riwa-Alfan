@@ -417,27 +417,4 @@ export const DEFAULT_CONFIG: SiteConfig = {
   designContent: DEFAULT_DESIGN_CONTENT
 };
 
-export const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [
-  {
-    id: 'BK-1082',
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    name: 'سعود بن ناصر العتيبي',
-    phone: '0555987654',
-    interest: 'دورة غواص المياه المفتوحة (Open Water)',
-    experience: 'مبتدئ تماماً (أول مرة)',
-    timing: 'عطلة نهاية الأسبوع (خميس/جمعة/سبت)',
-    notes: 'أرغب ببدء التدريب العملي في شرم أبحر الأسبوع القادم إن أمكن.',
-    status: 'new'
-  },
-  {
-    id: 'BK-1079',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    name: 'سارة خالد المنصور',
-    phone: '0509876543',
-    interest: 'دورة غواص المياه المفتوحة المتقدم (Advanced)',
-    experience: 'غواص مياه مفتوحة مرخص',
-    timing: 'أيام الأسبوع (فترات مسائية)',
-    notes: 'معي رخصة أوبن واتر سابقة وأرغب بالتأهيل للغوص العميق حتى 30 متر.',
-    status: 'contacted'
-  }
-];
+export const INITIAL_DEMO_BOOKINGS: BookingRecord[] = [];

@@ -27,7 +27,6 @@ import {
   DEFAULT_TRUST_BADGES,
   DEFAULT_UNDER_CONSTRUCTION,
   DEFAULT_DESIGN_CONTENT,
-  INITIAL_DEMO_BOOKINGS, 
   CONFIG_STORAGE_KEY, 
   BOOKINGS_STORAGE_KEY 
 } from '../data/defaultConfig';
@@ -42,6 +41,7 @@ import {
   updateBookingStatusInFirestore,
   updateBookingReviewInFirestore,
   deleteBookingFromFirestore,
+  clearAllBookingsFromFirestore,
   subscribeToQuotaStatus,
   PartnerMediaMap
 } from '../services/firestoreSync';
@@ -283,24 +283,20 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return DEFAULT_CONFIG;
   });
 
-  const [bookings, setBookings] = useState<BookingRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem(BOOKINGS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch (e) {
-      console.error('Failed to load bookings from storage:', e);
-    }
-    return INITIAL_DEMO_BOOKINGS;
-  });
+  const [bookings, setBookings] = useState<BookingRecord[]>([]);
 
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [firestoreQuotaExceeded, setFirestoreQuotaExceeded] = useState(false);
   const { isAdminUser } = useAuth();
   const hasLocalConfigEditRef = React.useRef(false);
   const saveConfigTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Purge any legacy cached demo/local bookings on boot so stale local data never leaks
+  useEffect(() => {
+    try {
+      localStorage.removeItem(BOOKINGS_STORAGE_KEY);
+    } catch {}
+  }, []);
 
   // Subscribe to Firestore quota circuit breaker
   useEffect(() => {
@@ -314,9 +310,12 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     validateFirestoreConnection();
   }, []);
 
-  // Real-time Firestore sync for Bookings (strictly restricted to verified administrators)
+  // Real-time Firestore sync for Bookings (authoritative cloud truth shared across ALL admins)
   useEffect(() => {
-    if (!isAdminUser) return;
+    if (!isAdminUser) {
+      setBookings([]);
+      return;
+    }
     const unsub = subscribeToBookings((remoteBookings) => {
       setBookings(remoteBookings);
     });
@@ -485,13 +484,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, [config, isAdminUser, firestoreQuotaExceeded]);
 
-  // Sync bookings to localStorage
+  // Keep local storage clear of stale bookings cache (Firestore is single source of truth)
   useEffect(() => {
     try {
-      localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookings));
-    } catch (e) {
-      console.error('Failed to save bookings:', e);
-    }
+      localStorage.removeItem(BOOKINGS_STORAGE_KEY);
+    } catch {}
   }, [bookings]);
 
   const updateBrand = (partial: Partial<CenterBrandConfig>) => {
@@ -763,11 +760,15 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const deleteBooking = (id: string) => {
     setBookings(prev => prev.filter(b => b.id !== id));
-    deleteBookingFromFirestore(id);
+    void deleteBookingFromFirestore(id);
   };
 
   const clearAllBookings = () => {
     setBookings([]);
+    try {
+      localStorage.removeItem(BOOKINGS_STORAGE_KEY);
+    } catch {}
+    void clearAllBookingsFromFirestore();
   };
 
   const resetToDefaults = () => {
@@ -784,9 +785,6 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const parsed = JSON.parse(jsonString);
       if (parsed.config && parsed.config.brand) {
         applyConfigEdit(() => parsed.config);
-        if (Array.isArray(parsed.bookings)) {
-          setBookings(parsed.bookings);
-        }
         return true;
       }
     } catch (e) {

@@ -94,6 +94,23 @@
         "createdAt": { "type": "string", "maxLength": 50 }
       },
       "required": ["id", "name", "phone", "createdAt"]
+    },
+    "TelegramSubscriber": {
+      "title": "TelegramSubscriber",
+      "description": "Authorized Telegram chat, group, or channel linked to receive instant booking alerts.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "chatId": { "type": "string", "maxLength": 64 },
+        "label": { "type": "string", "maxLength": 150 },
+        "username": { "type": "string", "maxLength": 100 },
+        "chatType": { "type": "string", "enum": ["private", "group", "supergroup", "channel"] },
+        "enabled": { "type": "boolean" },
+        "addedByEmail": { "type": "string", "maxLength": 150 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "chatId", "label", "enabled", "createdAt"]
     }
   },
   "firestore": {
@@ -116,6 +133,10 @@
     "/trainees/{traineeId}": {
       "schema": "#/entities/Trainee",
       "description": "Collection of registered trainees and diving students."
+    },
+    "/telegram_subscribers/{subscriberId}": {
+      "schema": "#/entities/TelegramSubscriber",
+      "description": "Collection of linked Telegram chats/groups receiving live booking notifications."
     }
   }
 }

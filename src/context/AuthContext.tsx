@@ -93,18 +93,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const adminDocSnap = await getDoc(adminDocRef);
         if (adminDocSnap.exists()) {
           const data = adminDocSnap.data();
-          if (data && ['admin', 'superadmin', 'instructor', 'viewer'].includes(data.role)) {
+          if (data && data.status !== 'suspended' && ['admin', 'superadmin', 'instructor', 'viewer'].includes(data.role)) {
             setUserRole(data.role as any);
             return true;
           }
         }
 
-        // 4. Check by email in /admins collection (if registered before first login)
+        // 3b. Check deterministic email invite document /admins/email_{sanitizedEmail}
+        const emailInviteDocId = `email_${email.replace(/[^a-z0-9]/g, '_').slice(0, 110)}`;
+        try {
+          const inviteSnap = await getDoc(doc(db, 'admins', emailInviteDocId));
+          if (inviteSnap.exists()) {
+            const inviteData = inviteSnap.data();
+            if (inviteData && inviteData.status !== 'suspended' && ['admin', 'superadmin', 'instructor', 'viewer'].includes(inviteData.role)) {
+              setUserRole(inviteData.role as any);
+              try {
+                await setDoc(doc(db, 'admins', currentUser.uid), {
+                  ...inviteData,
+                  uid: currentUser.uid,
+                  email,
+                  lastLoginAt: new Date().toISOString()
+                }, { merge: true });
+              } catch (syncErr) {
+                console.warn('Link invite UID notice:', syncErr);
+              }
+              return true;
+            }
+          }
+        } catch (inviteErr) {
+          console.warn('Invite lookup notice:', inviteErr);
+        }
+
+        // 4. Fallback: Check by email query in /admins collection
         const emailQuery = query(collection(db, 'admins'), where('email', '==', email));
         const emailSnap = await getDocs(emailQuery);
         if (!emailSnap.empty) {
           const matchedDoc = emailSnap.docs[0].data();
-          if (matchedDoc && ['admin', 'superadmin', 'instructor', 'viewer'].includes(matchedDoc.role)) {
+          if (matchedDoc && matchedDoc.status !== 'suspended' && ['admin', 'superadmin', 'instructor', 'viewer'].includes(matchedDoc.role)) {
             setUserRole(matchedDoc.role as any);
             try {
               await setDoc(doc(db, 'admins', currentUser.uid), {

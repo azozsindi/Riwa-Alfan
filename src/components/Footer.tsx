@@ -59,7 +59,7 @@ export const Footer: React.FC<FooterProps> = ({
     : null;
 
   return (
-    <footer className={`bg-slate-950 border-t border-slate-900 text-slate-400 py-12 sm:py-16 ${
+    <footer id="footer" className={`bg-slate-950 border-t border-[#C59B5F]/20 text-slate-400 py-12 sm:py-16 ${
       isRtl ? 'text-right' : 'text-left'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
@@ -107,16 +107,18 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Marina Location GPS Link */}
             {config.locationConfig?.googleMapsUrl && (
-              <a 
-                href={config.locationConfig.googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
-              >
-                <MapPin className="w-4 h-4 shrink-0 text-cyan-400" />
-                <span>{language === 'ar' ? config.locationConfig.marinaNameAr : config.locationConfig.marinaNameEn}</span>
-                <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
-              </a>
+              <address className="not-italic">
+                <a 
+                  href={config.locationConfig.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                >
+                  <MapPin className="w-4 h-4 shrink-0 text-cyan-400" />
+                  <span>{language === 'ar' ? config.locationConfig.marinaNameAr : config.locationConfig.marinaNameEn}</span>
+                  <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                </a>
+              </address>
             )}
 
             {/* Social Media Links */}

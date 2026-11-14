@@ -34,6 +34,7 @@ interface BookingsTabProps {
     }
   ) => void;
   onDeleteBooking: (id: string) => void;
+  onClearAllBookings?: () => void;
   showToast: (msg?: string) => void;
 }
 
@@ -50,6 +51,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
   onUpdateStatus,
   onUpdateReview,
   onDeleteBooking,
+  onClearAllBookings,
   showToast,
 }) => {
   const { language, isRtl } = useLanguage();
@@ -57,6 +59,7 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
   const [reviewNotesDraft, setReviewNotesDraft] = useState<Record<string, string>>({});
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   const getEffectiveEligibility = (b: Booking): EligibilityStatus => {
     if (b.eligibilityStatus) return b.eligibilityStatus;
@@ -177,46 +180,86 @@ export const BookingsTab: React.FC<BookingsTabProps> = ({
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar max-w-full shrink-0">
-          {(
-            [
-              { key: 'all', label: isRtl ? `الكل (${bookings.length})` : `All (${bookings.length})` },
-              {
-                key: 'pending_instructor_review',
-                label: isRtl ? `بانتظار المراجعة (${pendingCount})` : `Pending (${pendingCount})`,
-              },
-              {
-                key: 'approved',
-                label: isRtl ? `معتمد للدفع (${approvedCount})` : `Approved (${approvedCount})`,
-              },
-              {
-                key: 'missing_requirements',
-                label: isRtl ? `متطلبات ناقصة (${missingCount})` : `Missing Req (${missingCount})`,
-              },
-              {
-                key: 'rejected',
-                label: isRtl ? `مرفوض (${rejectedCount})` : `Rejected (${rejectedCount})`,
-              },
-              {
-                key: 'paid',
-                label: isRtl ? `مدفوع (${paidCount})` : `Paid (${paidCount})`,
-              },
-            ] as { key: FilterKey; label: string }[]
-          ).map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setBookingFilter(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                bookingFilter === tab.key
-                  ? 'gold-gradient-btn text-slate-950 font-bold'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Filter Tabs & Bulk Clear */}
+        <div className="flex flex-wrap items-center gap-2 max-w-full shrink-0">
+          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar max-w-full">
+            {(
+              [
+                { key: 'all', label: isRtl ? `الكل (${bookings.length})` : `All (${bookings.length})` },
+                {
+                  key: 'pending_instructor_review',
+                  label: isRtl ? `بانتظار المراجعة (${pendingCount})` : `Pending (${pendingCount})`,
+                },
+                {
+                  key: 'approved',
+                  label: isRtl ? `معتمد للدفع (${approvedCount})` : `Approved (${approvedCount})`,
+                },
+                {
+                  key: 'missing_requirements',
+                  label: isRtl ? `متطلبات ناقصة (${missingCount})` : `Missing Req (${missingCount})`,
+                },
+                {
+                  key: 'rejected',
+                  label: isRtl ? `مرفوض (${rejectedCount})` : `Rejected (${rejectedCount})`,
+                },
+                {
+                  key: 'paid',
+                  label: isRtl ? `مدفوع (${paidCount})` : `Paid (${paidCount})`,
+                },
+              ] as { key: FilterKey; label: string }[]
+            ).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setBookingFilter(tab.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  bookingFilter === tab.key
+                    ? 'gold-gradient-btn text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {onClearAllBookings && bookings.length > 0 && (
+            confirmClearAll ? (
+              <div className="flex items-center gap-1.5 bg-red-950/70 border border-red-500/40 rounded-xl px-2.5 py-1">
+                <span className="text-[11px] font-bold text-red-200 whitespace-nowrap">
+                  {isRtl ? 'حذف كل الحجوزات؟' : 'Delete all?'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClearAllBookings();
+                    setConfirmClearAll(false);
+                    showToast(isRtl ? 'تم مسح جميع الحجوزات من كافة الحسابات ✓' : 'All bookings cleared ✓');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold cursor-pointer whitespace-nowrap"
+                >
+                  {isRtl ? 'تأكيد الحذف' : 'Confirm'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClearAll(false)}
+                  className="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 text-[11px] cursor-pointer whitespace-nowrap"
+                >
+                  {isRtl ? 'إلغاء' : 'Cancel'}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmClearAll(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-950/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                title={isRtl ? 'مسح كافة الحجوزات' : 'Clear all bookings'}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isRtl ? 'مسح كل الحجوزات' : 'Clear All'}</span>
+              </button>
+            )
+          )}
         </div>
       </div>
 

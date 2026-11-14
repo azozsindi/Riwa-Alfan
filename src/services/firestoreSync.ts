@@ -11,11 +11,13 @@ import {
   updateDoc,
   onSnapshot,
   getDoc,
+  getDocs,
   getDocFromServer,
   Unsubscribe
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { SiteConfig, BookingRecord, BookingStatusPublic } from '../types/admin';
+import { notifyTelegramOnNewBooking } from './telegramService';
 
 export enum OperationType {
   CREATE = 'create',
@@ -133,23 +135,37 @@ export const validateFirestoreConnection = async (): Promise<void> => {
   }
 };
 
+export const LEGACY_DEMO_BOOKING_IDS = new Set(['BK-1082', 'BK-1079']);
+
+export const isLegacyDemoBooking = (b: Partial<BookingRecord> | null | undefined): boolean => {
+  if (!b) return false;
+  if (b.id && LEGACY_DEMO_BOOKING_IDS.has(String(b.id).toUpperCase())) return true;
+  const name = String(b.name || '').trim();
+  return name === 'سعود بن ناصر العتيبي' || name === 'سارة خالد المنصور';
+};
+
 export const subscribeToBookings = (
   onUpdate: (bookings: BookingRecord[]) => void
 ): Unsubscribe => {
   const path = 'bookings';
   try {
     return onSnapshot(collection(db, path), (snapshot) => {
-      if (!snapshot.empty) {
-        const list: BookingRecord[] = [];
-        snapshot.forEach(d => {
-          const data = d.data() as BookingRecord;
-          if (data && data.id) {
-            list.push(data);
-          }
-        });
-        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        onUpdate(list);
-      }
+      const list: BookingRecord[] = [];
+      snapshot.forEach(d => {
+        const data = d.data() as BookingRecord;
+        const normalizedId = data?.id || d.id;
+        if (isLegacyDemoBooking({ ...data, id: normalizedId })) {
+          // Purge any legacy demo bookings from Firestore automatically so all admins stay clean
+          deleteDoc(doc(db, 'bookings', d.id)).catch(() => {});
+          deleteDoc(doc(db, 'booking_status', normalizedId)).catch(() => {});
+          return;
+        }
+        if (data && normalizedId) {
+          list.push({ ...data, id: normalizedId });
+        }
+      });
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      onUpdate(list);
     }, (err) => {
       handleFirestoreError(err, OperationType.LIST, path);
     });
@@ -333,6 +349,7 @@ export const saveBookingToFirestore = async (booking: BookingRecord): Promise<vo
     };
     const sanitizedStatusDoc = JSON.parse(JSON.stringify(statusDoc));
     await setDoc(doc(db, 'booking_status', rawBooking.id), sanitizedStatusDoc);
+    void notifyTelegramOnNewBooking(rawBooking);
   } catch (err) {
     handleFirestoreError(err, OperationType.CREATE, path);
   }
@@ -432,4 +449,32 @@ export const deleteBookingFromFirestore = async (id: string): Promise<void> => {
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, path);
   }
+};
+
+export const clearAllBookingsFromFirestore = async (): Promise<number> => {
+  if (writeQuotaExhausted) return 0;
+  let deletedCount = 0;
+  try {
+    const snap = await getDocs(collection(db, 'bookings'));
+    const deletions: Promise<void>[] = [];
+    snap.forEach((d) => {
+      const data = d.data() as Partial<BookingRecord>;
+      const statusId = data?.id || d.id;
+      deletions.push(deleteDoc(doc(db, 'bookings', d.id)));
+      if (statusId) {
+        deletions.push(deleteDoc(doc(db, 'booking_status', statusId)).catch(() => {}));
+      }
+      deletedCount++;
+    });
+
+    const statusSnap = await getDocs(collection(db, 'booking_status'));
+    statusSnap.forEach((d) => {
+      deletions.push(deleteDoc(doc(db, 'booking_status', d.id)).catch(() => {}));
+    });
+
+    await Promise.all(deletions);
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, 'bookings');
+  }
+  return deletedCount;
 };

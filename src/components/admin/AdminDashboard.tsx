@@ -3,7 +3,7 @@ import {
   X, Tag, Building2, Compass, Waves, Inbox, Settings, 
   Check, ExternalLink, Award, HelpCircle, MessageSquare, LogOut, UserCheck, Users, 
   Globe, Eye, Share2, Shield, AlertTriangle, Palette, Sparkles, PhoneCall,
-  Menu, ChevronDown, Search, Bell, BellRing, Volume2, VolumeX, WifiOff, CheckCheck
+  Menu, ChevronDown, Search, Bell, BellRing, Volume2, VolumeX, WifiOff, CheckCheck, Send
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSiteConfig } from '../../context/SiteConfigContext';
@@ -13,6 +13,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { useBookingNotifications } from '../../hooks/useBookingNotifications';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
+import { syncExistingTelegramSubscribersOnBoot } from '../../services/telegramService';
 import { HeroTab } from './tabs/HeroTab';
 import { BrandTab } from './tabs/BrandTab';
 import { InstructorTab } from './tabs/InstructorTab';
@@ -83,6 +84,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     updateBookingStatus,
     updateBookingReview,
     deleteBooking,
+    clearAllBookings,
     resetToDefaults,
     exportBackupJson,
     restorePreviousPrices,
@@ -133,6 +135,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [showNotifPanel]);
+
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    void syncExistingTelegramSubscribersOnBoot();
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -376,6 +383,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </button>
                     )}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNotifPanel(false);
+                      setActiveTab('settings');
+                    }}
+                    className="w-full min-h-[36px] px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 hover:text-white text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <Send className="w-3.5 h-3.5 text-sky-400" />
+                    <span>{isRtl ? 'إعداد وربط إشعارات التلجرام (@Riwaa_alfan_bot)' : 'Configure Telegram Bot Alerts'}</span>
+                  </button>
                 </div>
 
                 {/* Notification List */}
@@ -1131,6 +1150,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onUpdateStatus={updateBookingStatus}
               onUpdateReview={updateBookingReview}
               onDeleteBooking={deleteBooking}
+              onClearAllBookings={clearAllBookings}
               showToast={showToast}
             />
           )}

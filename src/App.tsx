@@ -25,12 +25,15 @@ import { FaqModal } from './components/FaqModal';
 import { AdminPage } from './pages/AdminPage';
 import { DEFAULT_VISIBLE_SECTIONS } from './data/defaultConfig';
 import { CartProvider } from './context/CartContext';
+import { useSeoSync } from './hooks/useSeoSync';
 
 function AppContent() {
-  const { isRtl } = useLanguage();
+  const { language, isRtl } = useLanguage();
   const { navigate, isAdmin } = useRouter();
   const { config } = useSiteConfig();
   const sections = config.visibleSections || DEFAULT_VISIBLE_SECTIONS;
+
+  useSeoSync(config, language, isAdmin);
   
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);

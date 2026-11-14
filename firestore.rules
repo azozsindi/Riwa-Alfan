@@ -2,7 +2,7 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Global Safety Net: default deny all unmapped documents
     match /{document=**} {
       allow read, write: if false;
@@ -28,33 +28,59 @@ service cloud.firestore {
     // Strict Email Verification Check (Anti-Email Spoofing)
     function isVerifiedUser() {
       return isSignedIn() && (
-        request.auth.token.email_verified == true || 
+        request.auth.token.email_verified == true ||
         request.auth.token.firebase.sign_in_provider == 'google.com'
       );
     }
 
     // Root Super Admin Gate:
-    // Matches azozsindi23@gmail.com and riwaalfan@gmail.com (case-insensitive)
+    // Matches azozsindi23@gmail.com and riwaalfan@gmail.com (case-insensitive, verified only)
     function isSuperAdmin() {
-      return isSignedIn() 
-        && isVerifiedUser()
-        && request.auth.token.email != null 
+      return isVerifiedUser()
+        && request.auth.token.email != null
         && (
           request.auth.token.email.matches('(?i)^azozsindi23@gmail\\.com$') ||
           request.auth.token.email.matches('(?i)^riwaalfan@gmail\\.com$')
         );
     }
 
-    // General Admin Gate:
-    function isAdmin() {
-      return isSignedIn() && (
-        isSuperAdmin() ||
-        (request.auth.token.admin == true) ||
-        (
-          exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['admin', 'superadmin']
-        )
-      );
+    // Role lookup against trusted /admins/{uid} document with active status enforcement
+    function hasActiveAdminRole(allowedRoles) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in allowedRoles
+        && (
+          !('status' in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data) ||
+          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.status == 'active'
+        );
+    }
+
+    // Admin Manager Gate: Full control over admins whitelist & site settings
+    function isAdminManager() {
+      return isSuperAdmin() || hasActiveAdminRole(['superadmin', 'admin']);
+    }
+
+    // Booking & Trainee Manager Gate: All admins & instructors can review, update, and delete bookings
+    function isBookingManager() {
+      return isSuperAdmin() || hasActiveAdminRole(['superadmin', 'admin', 'instructor']);
+    }
+
+    // Staff Reader Gate: All active admin/staff roles share the exact same live dashboard view
+    function isStaffReader() {
+      return isSuperAdmin() || hasActiveAdminRole(['superadmin', 'admin', 'instructor', 'viewer']);
+    }
+
+    // Verified email owner of the queried/fetched /admins document (for invite lookup before UID linking)
+    function isOwnVerifiedAdminDoc() {
+      return isVerifiedUser()
+        && request.auth.token.email != null
+        && existing().email is string
+        && existing().email.lower() == request.auth.token.email.lower();
+    }
+
+    // Deterministic email invite doc ID helper matching AuthContext & AdminsTab
+    function emailInviteIdForAuth() {
+      return 'email_' + request.auth.token.email.lower().replace('[^a-z0-9]', '_');
     }
 
     // Booking Schema Validator with Strict Allowed Keys (Supports Legacy + Q&A Eligibility Fields)
@@ -119,7 +145,7 @@ service cloud.firestore {
     function isValidAdminRecord(data) {
       return data.keys().hasAll(['email', 'role'])
         && data.keys().hasOnly(['uid', 'email', 'name', 'phone', 'role', 'status', 'notes', 'createdAt', 'lastLoginAt'])
-        && data.email is string && data.email.size() <= 150
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 150
         && data.role in ['superadmin', 'admin', 'instructor', 'viewer']
         && (!('name' in data) || (data.name is string && data.name.size() <= 150))
         && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
@@ -134,7 +160,7 @@ service cloud.firestore {
     function isValidTrainee(data) {
       return data.keys().hasAll(['id', 'name', 'phone', 'createdAt'])
         && data.keys().hasOnly(['id', 'name', 'phone', 'email', 'course', 'status', 'padiNumber', 'notes', 'createdAt'])
-        && data.id is string && data.id.size() <= 128
+        && data.id is string && data.id.size() > 0 && data.id.size() <= 128
         && data.name is string && data.name.size() > 0 && data.name.size() <= 150
         && data.phone is string && data.phone.size() > 0 && data.phone.size() <= 50
         && (!('email' in data) || (data.email is string && data.email.size() <= 150))
@@ -145,34 +171,54 @@ service cloud.firestore {
         && data.createdAt is string && data.createdAt.size() <= 50;
     }
 
+    // Telegram Subscriber Validator with Strict Allowed Keys
+    function isValidTelegramSubscriber(data) {
+      return data.keys().hasAll(['id', 'chatId', 'label', 'enabled', 'createdAt'])
+        && data.keys().hasOnly(['id', 'chatId', 'label', 'username', 'chatType', 'enabled', 'addedByEmail', 'createdAt', 'updatedAt'])
+        && data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.chatId is string && data.chatId.size() > 0 && data.chatId.size() <= 64
+        && data.label is string && data.label.size() > 0 && data.label.size() <= 150
+        && (!('username' in data) || (data.username is string && data.username.size() <= 100))
+        && (!('chatType' in data) || (data.chatType in ['private', 'group', 'supergroup', 'channel']))
+        && data.enabled is bool
+        && (!('addedByEmail' in data) || (data.addedByEmail is string && data.addedByEmail.size() <= 150))
+        && data.createdAt is string && data.createdAt.size() <= 50
+        && (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 50));
+    }
+
     // 1. Bookings Collection:
     // - Public visitors can ONLY submit new bookings with paymentAllowed == false and status == 'new'.
-    // - Public visitors CANNOT approve requests or set paymentAllowed == true or status == 'paid'.
-    // - Customer PII is strictly restricted to admins.
+    // - Customer PII is strictly restricted to active staff/admins.
+    // - Every active admin & instructor sees and deletes the exact same shared Firestore collection.
     match /bookings/{bookingId} {
-      allow create: if isValidId(bookingId) 
-        && isValidBooking(incoming()) 
+      allow create: if isValidId(bookingId)
+        && isValidBooking(incoming())
         && incoming().id == bookingId
         && (
-          isAdmin() ||
+          isBookingManager() ||
           (
             incoming().status == 'new'
             && (!('paymentAllowed' in incoming()) || incoming().paymentAllowed == false)
             && (!('eligibilityStatus' in incoming()) || incoming().eligibilityStatus == 'pending_instructor_review')
           )
         );
-      allow update: if isValidId(bookingId) && isAdmin() && isValidBooking(incoming()) && incoming().id == existing().id;
-      allow get, delete: if isValidId(bookingId) && isAdmin();
-      allow list: if isAdmin();
+      allow update: if isValidId(bookingId)
+        && isBookingManager()
+        && isValidBooking(incoming())
+        && incoming().id == existing().id
+        && incoming().createdAt == existing().createdAt;
+      allow get: if isValidId(bookingId) && isStaffReader();
+      allow delete: if isValidId(bookingId) && isBookingManager();
+      allow list: if isStaffReader();
     }
 
-    // 1b. Non-PII Booking Status Projection (customer lookup by exact Booking ID only, no listing):
+    // 1b. Non-PII Booking Status Projection (customer lookup by exact Booking ID only, no listing by public):
     match /booking_status/{bookingId} {
       allow create: if isValidId(bookingId)
         && isValidBookingStatus(incoming())
         && incoming().id == bookingId
         && (
-          isAdmin() ||
+          isBookingManager() ||
           (
             incoming().status == 'new'
             && incoming().paymentAllowed == false
@@ -180,35 +226,60 @@ service cloud.firestore {
           )
         );
       allow get: if isValidId(bookingId);
-      allow update: if isValidId(bookingId) && isAdmin() && isValidBookingStatus(incoming());
-      allow delete: if isValidId(bookingId) && isAdmin();
-      allow list: if isAdmin();
+      allow update: if isValidId(bookingId)
+        && isBookingManager()
+        && isValidBookingStatus(incoming())
+        && incoming().id == existing().id;
+      allow delete: if isValidId(bookingId) && isBookingManager();
+      allow list: if isStaffReader();
     }
 
     // 2. Settings Collection:
     match /settings/{settingId} {
       allow get: if isValidId(settingId);
       allow list: if true;
-      allow write: if isValidId(settingId) && isAdmin();
+      allow write: if isValidId(settingId) && isAdminManager();
     }
 
     // 3. Admin Whitelist (/admins collection):
     match /admins/{adminId} {
-      allow get: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      allow list: if isAdmin();
-      allow create: if isValidId(adminId) && (
-        isAdmin() ||
+      allow get: if isValidId(adminId) && isSignedIn() && (
+        request.auth.uid == adminId ||
+        isStaffReader() ||
+        isOwnVerifiedAdminDoc()
+      );
+      allow list: if isStaffReader() || isOwnVerifiedAdminDoc();
+      allow create: if isValidId(adminId) && isValidAdminRecord(incoming()) && (
+        isAdminManager() ||
+        (isSuperAdmin() && request.auth.uid == adminId) ||
         (
-          isSuperAdmin()
-          && request.auth.uid == adminId 
-          && isValidAdminRecord(incoming())
+          isVerifiedUser()
+          && request.auth.uid == adminId
+          && request.auth.token.email != null
+          && request.auth.token.email.size() <= 110
+          && incoming().email.lower() == request.auth.token.email.lower()
+          && (!('status' in incoming()) || incoming().status == 'active')
+          && incoming().role in ['admin', 'instructor', 'viewer']
+          && exists(/databases/$(database)/documents/admins/$(emailInviteIdForAuth()))
+          && get(/databases/$(database)/documents/admins/$(emailInviteIdForAuth())).data.email.lower() == request.auth.token.email.lower()
+          && get(/databases/$(database)/documents/admins/$(emailInviteIdForAuth())).data.role == incoming().role
+          && (
+            !('status' in get(/databases/$(database)/documents/admins/$(emailInviteIdForAuth())).data) ||
+            get(/databases/$(database)/documents/admins/$(emailInviteIdForAuth())).data.status == 'active'
+          )
         )
       );
-      allow update: if isValidId(adminId) && (
-        isAdmin() ||
-        (isSuperAdmin() && request.auth.uid == adminId && isValidAdminRecord(incoming()))
+      allow update: if isValidId(adminId) && isValidAdminRecord(incoming()) && (
+        isAdminManager() ||
+        (isSuperAdmin() && request.auth.uid == adminId) ||
+        (
+          isSignedIn()
+          && request.auth.uid == adminId
+          && incoming().diff(existing()).affectedKeys().hasOnly(['lastLoginAt'])
+        )
       );
-      allow delete: if isValidId(adminId) && isAdmin() && (
+      allow delete: if isValidId(adminId) && isAdminManager() && (
+        !('email' in resource.data) ||
         resource.data.email == null || (
           resource.data.email is string &&
           !resource.data.email.matches('(?i)^azozsindi23@gmail\\.com$') &&
@@ -219,9 +290,22 @@ service cloud.firestore {
 
     // 4. Trainees & Students (/trainees collection):
     match /trainees/{traineeId} {
-      allow create, update: if isValidId(traineeId) && isAdmin() && isValidTrainee(incoming()) && incoming().id == traineeId;
-      allow get, delete: if isValidId(traineeId) && isAdmin();
-      allow list: if isAdmin();
+      allow create, update: if isValidId(traineeId) && isBookingManager() && isValidTrainee(incoming()) && incoming().id == traineeId;
+      allow get: if isValidId(traineeId) && isStaffReader();
+      allow delete: if isValidId(traineeId) && isBookingManager();
+      allow list: if isStaffReader();
+    }
+
+    // 5. Telegram Subscribers (/telegram_subscribers collection):
+    // Contains private Telegram Chat IDs for admin booking alerts (never exposed publicly)
+    match /telegram_subscribers/{subscriberId} {
+      allow create, update: if isValidId(subscriberId)
+        && isAdminManager()
+        && isValidTelegramSubscriber(incoming())
+        && incoming().id == subscriberId;
+      allow get: if isValidId(subscriberId) && isStaffReader();
+      allow delete: if isValidId(subscriberId) && isAdminManager();
+      allow list: if isStaffReader();
     }
   }
 }

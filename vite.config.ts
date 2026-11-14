@@ -12,6 +12,11 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [
+          'favicon.ico',
+          'favicon-48x48.png',
+          'favicon-96x96.png',
+          'google-logo-192x192.png',
+          'og-cover.jpg',
           'logo-riwa-alfan.svg',
           'apple-touch-icon.png',
           'pwa-192x192.png',

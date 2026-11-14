@@ -14,6 +14,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
+  onOpenBooking,
   onOpenAdmin,
   onOpenTools,
   onOpenSites,
@@ -35,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 transition-all">
+    <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-lg border-b border-[#C59B5F]/20 shadow-lg shadow-black/30 transition-all">
       <div className="w-full max-w-[1536px] mx-auto px-3.5 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2.5 sm:gap-4 lg:gap-6">
         
         {/* Zone 1: Brand Wordmark & Logo */}
@@ -128,10 +129,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button 
             type="button"
-            onClick={() => scrollTo('contact')}
+            onClick={() => onOpenBooking ? onOpenBooking() : scrollTo('footer')}
             className="px-2.5 py-1.5 rounded-xl hover:text-[#E0BA84] hover:bg-slate-900/90 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
           >
-            {language === 'ar' ? 'تواصل معنا' : 'Contact'}
+            {language === 'ar' ? 'احجز تدريبك' : 'Book Dive'}
           </button>
         </nav>
 
@@ -232,11 +233,15 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button 
               type="button"
-              onClick={() => scrollTo('contact')}
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenBooking) onOpenBooking();
+                else scrollTo('footer');
+              }}
               className="px-4 py-3 rounded-xl hover:bg-slate-900 active:bg-slate-800 text-slate-200 hover:text-[#E0BA84] text-start flex items-center justify-between font-bold min-h-[44px]"
             >
-              <span>{language === 'ar' ? 'تواصل معنا' : 'Contact'}</span>
-              <span className="text-sm text-emerald-400">📞</span>
+              <span>{language === 'ar' ? 'احجز دورة أو تجربة غوص' : 'Book a Dive or Course'}</span>
+              <span className="text-sm text-[#E0BA84]">✦</span>
             </button>
 
             {onOpenTools && (

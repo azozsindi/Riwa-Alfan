@@ -179,22 +179,20 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
 
             {/* Card 2: Female Training Division */}
             {showFemaleTraining && (
-              <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b from-slate-900 via-[#16253D]/40 to-slate-900 border border-[#C59B5F]/45 p-5 sm:p-7 space-y-5 sm:space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ring-1 ring-[#C59B5F]/25 ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b from-slate-900 via-[#16253D]/40 to-slate-900 border border-[#C59B5F]/45 p-5 sm:p-7 space-y-5 sm:space-y-6 flex flex-col justify-between shadow-xl shadow-black/30 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
                 
                 {/* Top decorative banner */}
                 <div className="space-y-5 sm:space-y-6">
                   
-                  {/* Header Badge */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#DDB67E]/20 via-[#C59B5F]/25 to-[#A4783B]/20 text-[#E0BA84] border border-[#C59B5F]/40 font-bold text-xs flex items-center gap-1.5 shadow-sm">
-                      <span>🧕</span>
-                      <span>{femaleBadge}</span>
-                    </span>
+                  {/* Clean Architectural Kicker */}
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#E0BA84] tracking-wide">
+                    <Sparkles className="w-4 h-4 text-[#C59B5F] shrink-0" />
+                    <span>{femaleBadge}</span>
                   </div>
 
                   {/* Profile Header without image box */}
                   <div className="space-y-2 border-b border-slate-800/80 pb-4">
-                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-1">{femaleName}</h3>
+                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-0.5">{femaleName}</h3>
                     <p className="text-xs text-[#C59B5F] font-semibold">{femaleTitle}</p>
                     <p className="text-xs text-slate-400 font-medium font-sans">
                       {femalePadiLabel} · {femaleInst.experienceYears || '6+ سنوات خبرة'}

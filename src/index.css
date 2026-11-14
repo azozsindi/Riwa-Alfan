@@ -44,6 +44,7 @@
     letter-spacing: normal;
     line-height: 1.35;
     word-break: break-word;
+    text-wrap: balance;
   }
 }
 
@@ -86,28 +87,29 @@
 
 /* Custom underwater ambience themed to the brand gold and royal marine navy */
 .ocean-gradient-hero {
-  background: radial-gradient(circle at 50% 15%, rgba(197, 155, 95, 0.12) 0%, rgba(22, 46, 82, 0.45) 35%, rgba(13, 28, 51, 0.95) 70%, #050811 100%);
+  background: radial-gradient(circle at 50% 10%, rgba(197, 155, 95, 0.14) 0%, rgba(22, 46, 82, 0.5) 35%, rgba(7, 15, 32, 0.96) 72%, #020617 100%);
 }
 
 .gold-gradient-btn {
-  background: linear-gradient(135deg, #DDB67E 0%, #C59B5F 50%, #A4783B 100%);
+  background: linear-gradient(135deg, #E5C18A 0%, #C59B5F 52%, #A4783B 100%);
   color: #070D18;
   font-weight: 800;
-  box-shadow: 0 4px 20px -2px rgba(197, 155, 95, 0.35);
+  box-shadow: 0 8px 26px -4px rgba(197, 155, 95, 0.38);
 }
 
 .gold-gradient-btn:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.07);
+  box-shadow: 0 10px 30px -4px rgba(224, 186, 132, 0.45);
 }
 
 .gold-border-glow {
   border-color: rgba(197, 155, 95, 0.3);
-  box-shadow: 0 0 15px -3px rgba(197, 155, 95, 0.15);
+  box-shadow: 0 0 18px -3px rgba(197, 155, 95, 0.16);
 }
 
 .caustics-pattern {
-  background-image: radial-gradient(rgba(197, 155, 95, 0.1) 1px, transparent 1px),
-    radial-gradient(rgba(36, 72, 125, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(197, 155, 95, 0.08) 1px, transparent 1px),
+    radial-gradient(rgba(36, 72, 125, 0.12) 1px, transparent 1px);
   background-size: 32px 32px;
   background-position: 0 0, 16px 16px;
 }

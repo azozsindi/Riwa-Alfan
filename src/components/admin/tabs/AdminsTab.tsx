@@ -124,27 +124,90 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   const [editingTraineeId, setEditingTraineeId] = useState<string | null>(null);
   const [isSubmittingTrainee, setIsSubmittingTrainee] = useState(false);
 
+  const getEmailInviteDocId = (email: string): string =>
+    `email_${email.trim().toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 110)}`;
+
+  const makeFallbackAdminDocId = (email: string): string => {
+    const clean = email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_').slice(0, 80);
+    return `adm_${Date.now()}_${clean}`.slice(0, 128);
+  };
+
+  const getAdminIdPriority = (uid: string): number => {
+    if (uid.startsWith('superadmin_')) return 0;
+    if (uid.startsWith('email_')) return 1;
+    if (uid.startsWith('adm_')) return 2;
+    return 3; // Real Firebase Auth UID
+  };
+
+  const syncAdminDocsByEmail = async (
+    email: string,
+    patch: Partial<AdminUserRecord>,
+    primaryDocId?: string
+  ) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const targets = new Set<string>([getEmailInviteDocId(normalizedEmail)]);
+    if (primaryDocId) targets.add(primaryDocId.slice(0, 128));
+
+    try {
+      const q = query(collection(db, 'admins'), where('email', '==', normalizedEmail));
+      const snap = await getDocs(q);
+      snap.forEach((d) => targets.add(d.id));
+    } catch (err) {
+      console.warn('Query sibling admin docs notice:', err);
+    }
+
+    await Promise.all(
+      Array.from(targets).map((docId) =>
+        setDoc(doc(db, 'admins', docId), patch, { merge: true }).catch((err) => {
+          console.warn('Sync admin doc notice:', docId, err);
+        })
+      )
+    );
+  };
+
   // --- Fetch Admins ---
   const fetchAdmins = async () => {
     try {
       setLoadingAdmins(true);
       const snap = await getDocs(collection(db, 'admins'));
-      const list: AdminUserRecord[] = [];
+      const byEmail = new Map<string, AdminUserRecord>();
+      const existingDocIds = new Set<string>();
+
       snap.forEach(d => {
+        existingDocIds.add(d.id);
         const data = d.data();
         if (data && data.email) {
-          list.push({
+          const normalizedEmail = String(data.email).trim().toLowerCase();
+          const candidate: AdminUserRecord = {
             uid: d.id,
-            email: data.email,
+            email: normalizedEmail,
             name: data.name || '',
             phone: data.phone || '',
             role: data.role || 'admin',
             status: data.status || 'active',
             notes: data.notes || '',
             createdAt: data.createdAt
-          });
+          };
+
+          const existing = byEmail.get(normalizedEmail);
+          if (!existing || getAdminIdPriority(candidate.uid) >= getAdminIdPriority(existing.uid)) {
+            byEmail.set(normalizedEmail, candidate);
+          }
         }
       });
+
+      const list = Array.from(byEmail.values());
+
+      // Auto-heal legacy pre-invited records that lack deterministic email_* lookup doc
+      if (canCurrentUserManageUsers) {
+        list.forEach((adm) => {
+          if (isBootstrappedAdminEmail(adm.email)) return;
+          const inviteId = getEmailInviteDocId(adm.email);
+          if (!existingDocIds.has(inviteId)) {
+            setDoc(doc(db, 'admins', inviteId), adm, { merge: true }).catch(() => {});
+          }
+        });
+      }
 
       // Ensure root superadmins are always listed
       [...BOOTSTRAPPED_ADMIN_EMAILS].reverse().forEach((rootEmail) => {
@@ -160,21 +223,6 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
           });
         }
       });
-
-      // Merge with locally cached admins so created users never disappear
-      try {
-        const cachedStr = localStorage.getItem('riwa_cached_admins');
-        if (cachedStr) {
-          const cachedAdmins: AdminUserRecord[] = JSON.parse(cachedStr);
-          cachedAdmins.forEach(c => {
-            if (c.email && !list.some(l => l.email.toLowerCase() === c.email.toLowerCase() || l.uid === c.uid)) {
-              list.push(c);
-            }
-          });
-        }
-      } catch (err) {
-        console.warn('Cache merge error:', err);
-      }
 
       setAdminsList(list);
       try {
@@ -254,13 +302,14 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     const nameTrimmed = quickName.trim();
 
     if (!emailTrimmed || !emailTrimmed.includes('@')) {
-      alert(isRtl ? 'يرجى إدخال بريد إلكتروني صالح.' : 'Please enter a valid email.');
+      showToast(isRtl ? 'يرجى إدخال بريد إلكتروني صالح.' : 'Please enter a valid email.');
       return;
     }
 
     try {
       setIsSubmittingQuick(true);
-      const targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const targetUid = makeFallbackAdminDocId(emailTrimmed);
+      const inviteDocId = getEmailInviteDocId(emailTrimmed);
       const adminDoc: AdminUserRecord = {
         uid: targetUid,
         email: emailTrimmed,
@@ -270,11 +319,10 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
         createdAt: new Date().toISOString()
       };
 
-      try {
-        await setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true });
-      } catch (e) {
-        console.warn('Quick add Firestore notice:', e);
-      }
+      await Promise.all([
+        setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true }),
+        setDoc(doc(db, 'admins', inviteDocId), adminDoc, { merge: true }),
+      ]);
 
       setAdminsList(prev => {
         const updated = [adminDoc, ...prev.filter(a => a.email.toLowerCase() !== emailTrimmed && a.uid !== targetUid)];
@@ -288,7 +336,8 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       setQuickName('');
       showToast(isRtl ? `تمت إضافة (${emailTrimmed}) إلى المستخدمين بنجاح! 🎉` : `Added ${emailTrimmed} successfully!`);
     } catch (err: any) {
-      alert(err.message || 'Error adding user');
+      console.error('Error adding quick admin:', err);
+      showToast((isRtl ? 'تعذر إضافة المستخدم: ' : 'Error adding user: ') + (err.message || ''));
     } finally {
       setIsSubmittingQuick(false);
     }
@@ -312,7 +361,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     try {
       setIsSubmittingAdmin(true);
 
-      let targetUid = newUid.trim();
+      let targetUid = newUid.trim().slice(0, 128);
 
       if (creationMode === 'instant') {
         if (!newPassword || newPassword.length < 6) {
@@ -337,17 +386,18 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
         } catch (authErr: any) {
           console.warn('Auth creation notice (fallback to Firestore record):', authErr);
           if (!targetUid) {
-            targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            targetUid = makeFallbackAdminDocId(emailTrimmed);
           }
         }
       } else {
         // UID Mode
         if (!targetUid) {
-          targetUid = `adm_${Date.now()}_${emailTrimmed.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          targetUid = makeFallbackAdminDocId(emailTrimmed);
         }
       }
 
-      // Save to Firestore /admins/{uid}
+      // Save to Firestore /admins/{uid} + deterministic email invite doc
+      const inviteDocId = getEmailInviteDocId(emailTrimmed);
       const adminDoc: AdminUserRecord = {
         uid: targetUid,
         email: emailTrimmed,
@@ -359,13 +409,14 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       if (phoneTrimmed) adminDoc.phone = phoneTrimmed;
       if (notesTrimmed) adminDoc.notes = notesTrimmed;
 
-      try {
-        await setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true });
-      } catch (dbErr: any) {
-        console.warn('Firestore setDoc notice:', dbErr);
-      }
+      await Promise.all([
+        setDoc(doc(db, 'admins', targetUid), adminDoc, { merge: true }),
+        targetUid !== inviteDocId
+          ? setDoc(doc(db, 'admins', inviteDocId), adminDoc, { merge: true })
+          : Promise.resolve(),
+      ]);
 
-      // Optimistically update state and cache immediately!
+      // Optimistically update state and cache immediately
       setAdminsList(prev => {
         const updated = [adminDoc, ...prev.filter(a => a.email.toLowerCase() !== emailTrimmed && a.uid !== targetUid)];
         try {
@@ -428,7 +479,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
         notes: updatedNotes
       };
 
-      await setDoc(doc(db, 'admins', editingAdmin.uid), updatedData, { merge: true });
+      await syncAdminDocsByEmail(updatedEmail || editingAdmin.email, updatedData, editingAdmin.uid);
 
       setAdminsList(prev => {
         const updated = prev.map(a => a.uid === editingAdmin.uid ? { ...a, ...updatedData } : a);
@@ -452,12 +503,12 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   // --- Toggle User Status (Active / Suspended) ---
   const handleToggleAdminStatus = async (adm: AdminUserRecord) => {
     if (isBootstrappedAdminEmail(adm.email)) {
-      alert(isRtl ? 'لا يمكن تعليق حساب المدير الرئيسي.' : 'Cannot suspend Root Super Admin.');
+      showToast(isRtl ? 'لا يمكن تعليق حساب المدير الرئيسي.' : 'Cannot suspend Root Super Admin.');
       return;
     }
     const newStatus: 'active' | 'suspended' = adm.status === 'suspended' ? 'active' : 'suspended';
     try {
-      await setDoc(doc(db, 'admins', adm.uid), { status: newStatus }, { merge: true });
+      await syncAdminDocsByEmail(adm.email, { status: newStatus }, adm.uid);
       setAdminsList(prev => {
         const updated = prev.map(a => a.uid === adm.uid ? { ...a, status: newStatus } : a);
         try {
@@ -478,7 +529,12 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
   // --- Update Admin Role ---
   const handleUpdateAdminRole = async (uid: string, updatedRole: 'admin' | 'instructor' | 'viewer') => {
     try {
-      await setDoc(doc(db, 'admins', uid), { role: updatedRole }, { merge: true });
+      const targetAdmin = adminsList.find(a => a.uid === uid);
+      if (targetAdmin?.email) {
+        await syncAdminDocsByEmail(targetAdmin.email, { role: updatedRole }, uid);
+      } else {
+        await setDoc(doc(db, 'admins', uid), { role: updatedRole }, { merge: true });
+      }
       setAdminsList(prev => {
         const updated = prev.map(a => a.uid === uid ? { ...a, role: updatedRole } : a);
         try {
@@ -498,6 +554,7 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
     if (!userToDelete) return;
     const emailToDelete = userToDelete.email.toLowerCase().trim();
     const uidToDelete = userToDelete.uid;
+    const inviteDocId = getEmailInviteDocId(emailToDelete);
 
     if (isBootstrappedAdminEmail(emailToDelete)) {
       showToast(isRtl ? 'لا يمكن حذف حساب المدير الرئيسي المعتمد.' : 'Cannot delete Root Super Admin.');
@@ -509,21 +566,18 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       setIsDeletingUser(true);
       setDeleteUserError(null);
 
-      // 1. Delete main document by UID
-      try {
-        await deleteDoc(doc(db, 'admins', uidToDelete));
-      } catch (err1) {
-        console.warn('Delete admin by UID warning:', err1);
-      }
+      // 1. Delete primary doc & email invite doc
+      await Promise.all([
+        deleteDoc(doc(db, 'admins', uidToDelete)).catch(() => {}),
+        inviteDocId !== uidToDelete ? deleteDoc(doc(db, 'admins', inviteDocId)).catch(() => {}) : Promise.resolve(),
+      ]);
 
       // 2. Also delete any matching document by email query in /admins
       try {
         const q = query(collection(db, 'admins'), where('email', '==', emailToDelete));
         const qSnap = await getDocs(q);
         for (const docItem of qSnap.docs) {
-          if (docItem.id !== uidToDelete) {
-            await deleteDoc(docItem.ref);
-          }
+          await deleteDoc(docItem.ref);
         }
       } catch (err2) {
         console.warn('Delete admin by email query warning:', err2);
@@ -654,14 +708,14 @@ export const AdminsTab: React.FC<AdminsTabProps> = ({ showToast, courses = [], b
       showToast(isRtl ? `تم استيراد ${b.name} إلى سجل المتدربين بنجاح! 🤿` : `Imported ${b.name} to trainees!`);
     } catch (err: any) {
       console.error('Error importing booking:', err);
-      alert(err.message || 'Error importing booking');
+      showToast(err.message || 'Error importing booking');
     }
   };
 
   // --- Export Trainees to CSV ---
   const handleExportTraineesCsv = () => {
     if (traineesList.length === 0) {
-      alert(isRtl ? 'لا يوجد متدربون للتصدير.' : 'No trainees to export.');
+      showToast(isRtl ? 'لا يوجد متدربون للتصدير.' : 'No trainees to export.');
       return;
     }
     const headers = ['ID', 'الاسم', 'الجوال', 'البريد', 'الدورة', 'الحالة', 'رقم بادي PADI', 'تاريخ التسجيل', 'ملاحظات'];
