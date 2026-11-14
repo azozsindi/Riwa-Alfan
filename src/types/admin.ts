@@ -233,6 +233,10 @@ export interface PartnerLogoItem {
   badgeTextEn?: string;
   logoUrl?: string;
   linkUrl?: string;
+  licenseNumber?: string;
+  licenseDetailsAr?: string;
+  licenseDetailsEn?: string;
+  licenseImageUrl?: string;
   active: boolean;
 }
 

@@ -23,21 +23,21 @@ export const DEFAULT_FEMALE_INSTRUCTOR: FemaleInstructorConfig = {
   titleEn: 'Private Ladies Training by Certified Female Instructors',
   badgeAr: 'يوجد قسم خاص نسائي بتدريب النساء',
   badgeEn: 'Private Women\'s Diving Training Division',
-  bioAr: 'دورات وبرامج تدريب غوص نسائية خاصة بجدة في مسابح مغلقة ومحمية بخصوصية تامة 100%، تدريب صبور واحترافي للسيدات والفتيات من الصفر وحتى رخص الغوص الدولية المعتمدة.',
-  bioEn: 'Private women\'s diving courses in Jeddah in private indoor pools with 100% full privacy, patient coaching from beginners to certified PADI divers.',
+  bioAr: 'دورات وبرامج تدريب غوص نسائية خاصة بجدة في مسابح مغلقة، تدريب صبور واحترافي للسيدات والفتيات من الصفر وحتى رخص الغوص الدولية المعتمدة.',
+  bioEn: 'Private women\'s diving courses in Jeddah in private indoor pools, patient coaching from beginners to certified PADI divers.',
   photoUrl: '',
   phone: '+966530549675',
   whatsappNumber: '966530549675',
   padiNumber: 'مدربات PADI معتمدات',
   experienceYears: '6+ سنوات خبرة',
   featuresListAr: [
-    'مسابح خاصة مغلقة بجدة مع خصوصية تامة 100%',
+    'مسابح خاصة مغلقة بجدة',
     'شهادات ورخص دولية معتمدة رسمياً من منظمة PADI',
     'تدريب نسائي صبور خطوة بخطوة في بيئة هادئة ومريحة',
     'أوقات مرنة تتناسب مع جداول المتدربات'
   ],
   featuresListEn: [
-    'Private indoor pools in Jeddah with 100% privacy',
+    'Private indoor pools in Jeddah',
     'Officially certified PADI international licenses',
     'Patient female-led coaching step-by-step',
     'Flexible timings tailored for ladies schedules'
@@ -138,84 +138,58 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
   sectionSubtitleAr: 'توثيق رسمي ومعتمد بالمملكة العربية السعودية',
   sectionSubtitleEn: 'Officially Verified & Registered in Saudi Arabia',
   crNumber: '',
-  freelanceDocNumber: 'FL-2918401',
-    owsiNumber: 'PADI Open Water Scuba Instructor (499845)',
-    msdtNumber: '',
-    vatNumber: '',
-    padiFiveStar: true,
-    copyrightTextAr: 'جميع الحقوق محفوظة © 2026 رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI',
-    copyrightTextEn: 'All rights reserved © 2026 Riwa Alfan Diving · Capt. Fahad Al-Huwaimli (PADI)',
-    countryTextAr: 'المملكة العربية السعودية',
-    countryTextEn: 'Kingdom of Saudi Arabia',
-    certificates: [
-      {
-        id: 'cert-owsi',
-        titleAr: 'مدرب غوص مياه مفتوحة معتمد (PADI)',
-        titleEn: 'PADI Open Water Scuba Instructor (499845)',
-        codeOrNumber: 'PADI #499845',
-        issuer: 'منظمة PADI الدولية',
-        active: true
-      },
-      {
-        id: 'cert-freelance',
-        titleAr: 'وثيقة العمل الحر الرسمية',
-        titleEn: 'Official Freelance License',
-        codeOrNumber: 'FL-2918401',
-        issuer: 'وزارة الموارد البشرية والتنمية الاجتماعية',
-        active: true
-      },
-      {
-        id: 'cert-efr',
-        titleAr: 'مدرب إسعافات أولية وإنعاش قلبي معتمد (EFR)',
-        titleEn: 'Emergency First Response (EFR) Instructor',
-        codeOrNumber: 'EFR Instructor #499845',
-        issuer: 'Emergency First Response Worldwide',
-        active: true
-      },
-      {
-        id: 'cert-dan',
-        titleAr: 'عضو شبكة تنبيه الغواصين الدولية (DAN Europe/World)',
-        titleEn: 'Diver Alert Network (DAN) Active Member',
-        codeOrNumber: 'DAN Pro Member',
-        issuer: 'Divers Alert Network (DAN)',
-        active: true
-      },
-      {
-        id: 'cert-nitrox',
-        titleAr: 'مدرب غوص الهواء المخصب (Enriched Air Nitrox)',
-        titleEn: 'Enriched Air (Nitrox) Specialty Instructor',
-        codeOrNumber: 'Nitrox Specialist #499845',
-        issuer: 'منظمة PADI الدولية',
-        active: true
-      },
-      {
-        id: 'cert-deep',
-        titleAr: 'مدرب غوص الأعماق حتى 40 متر (Deep Diver)',
-        titleEn: 'Deep Diver Specialty Instructor',
-        codeOrNumber: 'Deep Specialist #499845',
-        issuer: 'منظمة PADI الدولية',
-        active: true
-      },
-      {
-        id: 'cert-wreck',
-        titleAr: 'مدرب غوص حطام السفن التاريخية (Wreck Diver)',
-        titleEn: 'Wreck Diver Specialty Instructor',
-        codeOrNumber: 'Wreck Specialist #499845',
-        issuer: 'منظمة PADI الدولية',
-        active: true
-      }
-    ],
-  partnerLogos: [
+  freelanceDocNumber: '',
+  owsiNumber: '',
+  msdtNumber: '',
+  vatNumber: '',
+  padiFiveStar: true,
+  copyrightTextAr: 'جميع الحقوق محفوظة © 2026 رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI',
+  copyrightTextEn: 'All rights reserved © 2026 Riwa Alfan Diving · Capt. Fahad Al-Huwaimli (PADI)',
+  countryTextAr: 'المملكة العربية السعودية',
+  countryTextEn: 'Kingdom of Saudi Arabia',
+  certificates: [
     {
-      id: 'partner-saudi-business',
-      nameAr: 'منصة الأعمال السعودية',
-      nameEn: 'Saudi Business Platform',
-      badgeTextAr: 'معتمد رسمي',
-      badgeTextEn: 'Verified',
-      logoUrl: '',
-      linkUrl: 'https://business.sa',
+      id: 'cert-owsi',
+      titleAr: 'مدرب غوص مياه مفتوحة معتمد (PADI)',
+      titleEn: 'PADI Open Water Scuba Instructor (499845)',
+      codeOrNumber: 'PADI #499845',
+      issuer: 'منظمة PADI الدولية',
       active: true
     },
+    {
+      id: 'cert-efr',
+      titleAr: 'مدرب إسعافات أولية وإنعاش قلبي معتمد (EFR)',
+      titleEn: 'Emergency First Response (EFR) Instructor',
+      codeOrNumber: 'EFR Instructor #499845',
+      issuer: 'Emergency First Response Worldwide',
+      active: true
+    },
+    {
+      id: 'cert-nitrox',
+      titleAr: 'مدرب غوص الهواء المخصب (Enriched Air Nitrox)',
+      titleEn: 'Enriched Air (Nitrox) Specialty Instructor',
+      codeOrNumber: 'Nitrox Specialist #499845',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-deep',
+      titleAr: 'مدرب غوص الأعماق حتى 40 متر (Deep Diver)',
+      titleEn: 'Deep Diver Specialty Instructor',
+      codeOrNumber: 'Deep Specialist #499845',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    },
+    {
+      id: 'cert-wreck',
+      titleAr: 'مدرب غوص حطام السفن التاريخية (Wreck Diver)',
+      titleEn: 'Wreck Diver Specialty Instructor',
+      codeOrNumber: 'Wreck Specialist #499845',
+      issuer: 'منظمة PADI الدولية',
+      active: true
+    }
+  ],
+  partnerLogos: [
     {
       id: 'partner-watersports-fed',
       nameAr: 'الاتحاد السعودي للرياضات البحرية والغوص',
@@ -224,16 +198,10 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: '',
-      active: true
-    },
-    {
-      id: 'partner-freelance',
-      nameAr: 'منصة العمل الحر (FL-2918401)',
-      nameEn: 'Freelance Platform (FL-2918401)',
-      badgeTextAr: 'معتمد رسمي',
-      badgeTextEn: 'Verified',
-      logoUrl: '',
-      linkUrl: 'https://freelance.sa',
+      licenseNumber: '',
+      licenseDetailsAr: 'مدرب غوص معتمد لدى الاتحاد السعودي للرياضات البحرية والغوص',
+      licenseDetailsEn: 'Certified Scuba Instructor — Saudi Water Sports & Diving Federation',
+      licenseImageUrl: '',
       active: true
     },
     {
@@ -244,6 +212,24 @@ export const DEFAULT_TRUST_BADGES: TrustBadgesConfig = {
       badgeTextEn: 'Verified',
       logoUrl: '',
       linkUrl: 'https://www.padi.com',
+      licenseNumber: '499845',
+      licenseDetailsAr: 'PADI Open Water Scuba Instructor (499845)',
+      licenseDetailsEn: 'PADI Open Water Scuba Instructor (499845)',
+      licenseImageUrl: '',
+      active: true
+    },
+    {
+      id: 'partner-efr',
+      nameAr: 'منظمة EFR الدولية (الإسعافات الأولية والإنعاش القلبي)',
+      nameEn: 'Emergency First Response (EFR)',
+      badgeTextAr: 'معتمد رسمي',
+      badgeTextEn: 'Verified',
+      logoUrl: '',
+      linkUrl: 'https://www.emergencyfirstresponse.com',
+      licenseNumber: '499845',
+      licenseDetailsAr: 'مدرب معتمد للإسعافات الأولية والإنعاش القلبي الرئوي (EFR Instructor)',
+      licenseDetailsEn: 'Certified Emergency First Response (EFR) & CPR Instructor',
+      licenseImageUrl: '',
       active: true
     }
   ]
@@ -311,7 +297,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     subtitleEn: 'Certified PADI Diving Training · Capt. Fahad Al-Huwaimli',
     bioAr: 'رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.',
     bioEn: 'Riwa Alfan Diving in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest safety and professional standards in the Red Sea.',
-    freelanceDocNumber: 'FL-2918401',
+    freelanceDocNumber: '',
     owsiNumber: 'PADI Open Water Scuba Instructor (499845)',
     logoType: 'vector',
     customLogoUrl: '',

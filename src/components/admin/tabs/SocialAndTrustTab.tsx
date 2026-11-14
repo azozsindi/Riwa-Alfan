@@ -20,6 +20,24 @@ interface SocialAndTrustTabProps {
   showToast: (msg?: string) => void;
 }
 
+const normalizePartners = (partners?: PartnerLogoItem[]): PartnerLogoItem[] => {
+  const source = partners && partners.length > 0 ? partners : (DEFAULT_TRUST_BADGES.partnerLogos || []);
+  const cleaned = source.filter(
+    (p) =>
+      p.id !== 'partner-saudi-business' &&
+      p.id !== 'partner-freelance' &&
+      !/منصة الأعمال|منصة العمل الحر|FL-2918401/i.test(`${p.nameAr} ${p.nameEn}`)
+  );
+  const hasEfr = cleaned.some(
+    (p) => p.id === 'partner-efr' || /\befr\b/i.test(`${p.nameAr} ${p.nameEn}`)
+  );
+  const defaultEfr = (DEFAULT_TRUST_BADGES.partnerLogos || []).find((p) => p.id === 'partner-efr');
+  if (!hasEfr && defaultEfr) {
+    return [...cleaned, defaultEfr];
+  }
+  return cleaned;
+};
+
 export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
   initialSocial = DEFAULT_SOCIAL_LINKS,
   initialLocation = DEFAULT_LOCATION_CONFIG,
@@ -35,7 +53,17 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
 
   const [social, setSocial] = useState<SocialLinksConfig>(initialSocial);
   const [location, setLocation] = useState<LocationConfig>(initialLocation);
-  const [trust, setTrust] = useState<TrustBadgesConfig>(initialTrust);
+  const [trust, setTrust] = useState<TrustBadgesConfig>(() => ({
+    ...DEFAULT_TRUST_BADGES,
+    ...initialTrust,
+    freelanceDocNumber: '',
+    owsiNumber: '',
+    msdtNumber: '',
+    partnerLogos: normalizePartners(initialTrust?.partnerLogos),
+    certificates: (initialTrust?.certificates || DEFAULT_TRUST_BADGES.certificates || []).filter(
+      (c) => c.id !== 'cert-freelance' && !/FL-2918401|482910/i.test(`${c.titleAr} ${c.codeOrNumber || ''}`)
+    )
+  }));
   const [designForm, setDesignForm] = useState<DesignContentConfig>(initialDesign);
 
   // New Certificate state
@@ -147,6 +175,22 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
     }
   };
 
+  const handlePartnerLicenseUpload = async (e: React.ChangeEvent<HTMLInputElement>, partnerId: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await optimizeImageFile(file);
+        handleUpdatePartnerItem(partnerId, { licenseImageUrl: base64 });
+        showToast(isRtl ? 'تم رفع صورة الرخصة بنجاح!' : 'License image uploaded!');
+      } catch (err) {
+        console.error('Error optimizing license image:', err);
+      }
+    }
+  };
+
+  const getPartnerById = (id: string) =>
+    (trust.partnerLogos || []).find((p) => p.id === id);
+
   return (
     <form onSubmit={handleSave} className="space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       
@@ -157,75 +201,92 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
           <span>{isRtl ? 'الاعتمادات الرسمية، التوثيق، والتذييل' : 'Official Accreditations & Trust'}</span>
         </div>
         <h3 className="text-xl sm:text-2xl font-black text-white font-brand-arabic">
-          {isRtl ? 'التحكم في منصات التوثيق، أرقام الرخص، والفوتر' : 'Accreditations, License IDs & Footer'}
+          {isRtl ? 'التحكم في التراخيص الرسمية، بطاقات التوثيق، والفوتر' : 'Accreditations, Licenses & Footer'}
         </h3>
         <p className="text-xs sm:text-sm text-slate-400">
           {isRtl 
-            ? 'تعديل أسماء وشعارات منصات التوثيق الشريكة (منصة الأعمال، الاتحاد السعودي، منصة العمل الحر، PADI)، نصوص التذييل، ورقم وثيقة العمل الحر.'
-            : 'Customize partner platform badges, verification labels, license numbers, and footer copyright text.'}
+            ? 'إدارة التراخيص القابلة للعرض عند الضغط في الفوتر (الاتحاد السعودي للرياضات البحرية والغوص، منظمة PADI، ومنظمة EFR) مع إمكانية تعديل رقم الرخصة وتفاصيلها ورفع صورتها.'
+            : 'Manage clickable accreditation licenses in the footer (Saudi Federation, PADI, EFR), including license numbers, details, and certificate images.'}
         </p>
       </div>
 
-      {/* Section 1: Official Licenses & IDs */}
+      {/* Section 1: Official Licenses & IDs (Clickable in Footer) */}
       <div className="p-6 rounded-3xl bg-slate-950 border border-[#C59B5F]/40 space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-          <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#C59B5F]" />
-            <span>{isRtl ? '1. التراخيص وأرقام الوثائق الرسمية' : '1. Official Licenses & IDs'}</span>
-          </h4>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#C59B5F]" />
+              <span>{isRtl ? '1. أرقام التراخيص الرسمية (تظهر عند الضغط على البطاقة بالفوتر)' : '1. Official License Numbers (Displayed on Click)'}</span>
+            </h4>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {isRtl ? 'عند ضغط الزائر على أي بطاقة اعتماد في الفوتر، ستفتح نافذة تعرض رقم الرخصة وتفاصيلها وصورتها.' : 'Clicking any badge in the footer opens a modal with its license number, details, and image.'}
+            </p>
+          </div>
           <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-            {isRtl ? 'تظهر مباشرة في الفوتر' : 'Visible in Footer'}
+            {isRtl ? 'تفاعلية في الفوتر' : 'Interactive in Footer'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Freelance License */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isRtl ? 'رقم وثيقة العمل الحر:' : 'Freelance Document #:'}</span>
-            </label>
-            <input
-              type="text"
-              value={trust.freelanceDocNumber || 'FL-2918401'}
-              onChange={(e) => setTrust({ ...trust, freelanceDocNumber: e.target.value })}
-              placeholder="FL-2918401"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-emerald-500 focus:outline-none"
-            />
-            <span className="text-[10px] text-slate-500 block">مثال: FL-2918401</span>
-          </div>
+          {/* Saudi Water Sports & Diving Federation License */}
+          {(() => {
+            const fed = getPartnerById('partner-watersports-fed');
+            return (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isRtl ? 'رخصة الاتحاد السعودي للرياضات البحرية والغوص:' : 'Saudi Federation License #:'}</span>
+                </label>
+                <input
+                  type="text"
+                  value={fed?.licenseNumber || ''}
+                  onChange={(e) => fed && handleUpdatePartnerItem(fed.id, { licenseNumber: e.target.value })}
+                  placeholder={isRtl ? 'أدخل رقم رخصة الاتحاد السعودي...' : 'Enter Federation License #'}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+            );
+          })()}
 
-          {/* PADI OWSI License */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-blue-400" />
-              <span>{isRtl ? 'رقم رخصة PADI OWSI:' : 'PADI OWSI License #:'}</span>
-            </label>
-            <input
-              type="text"
-              value={trust.owsiNumber || 'PADI OWSI #482910'}
-              onChange={(e) => setTrust({ ...trust, owsiNumber: e.target.value })}
-              placeholder="PADI OWSI #482910"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-blue-500 focus:outline-none"
-            />
-            <span className="text-[10px] text-slate-500 block">مثال: PADI OWSI #482910</span>
-          </div>
+          {/* PADI Worldwide License */}
+          {(() => {
+            const padi = getPartnerById('partner-padi');
+            return (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-blue-400" />
+                  <span>{isRtl ? 'رقم رخصة منظمة PADI الدولية:' : 'PADI License #:'}</span>
+                </label>
+                <input
+                  type="text"
+                  value={padi?.licenseNumber || ''}
+                  onChange={(e) => padi && handleUpdatePartnerItem(padi.id, { licenseNumber: e.target.value })}
+                  placeholder="499845"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+            );
+          })()}
 
-          {/* PADI MSDT Rating */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isRtl ? 'رتبة PADI MSDT:' : 'PADI MSDT Rating:'}</span>
-            </label>
-            <input
-              type="text"
-              value={trust.msdtNumber || 'PADI MSDT #482910'}
-              onChange={(e) => setTrust({ ...trust, msdtNumber: e.target.value })}
-              placeholder="PADI MSDT #482910"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-amber-500 focus:outline-none"
-            />
-            <span className="text-[10px] text-slate-500 block">مثال: PADI MSDT #482910</span>
-          </div>
+          {/* EFR License */}
+          {(() => {
+            const efr = getPartnerById('partner-efr');
+            return (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-rose-400" />
+                  <span>{isRtl ? 'رقم رخصة منظمة EFR:' : 'EFR License #:'}</span>
+                </label>
+                <input
+                  type="text"
+                  value={efr?.licenseNumber || ''}
+                  onChange={(e) => efr && handleUpdatePartnerItem(efr.id, { licenseNumber: e.target.value })}
+                  placeholder="499845"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-rose-500 focus:outline-none"
+                />
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -385,6 +446,70 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
                     />
                   </div>
                 </div>
+
+                {/* License Details & Image Upload (Opened when clicked in Footer) */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2 border-t border-slate-800/70">
+                  <div className="sm:col-span-4 space-y-1">
+                    <label className="text-[11px] text-[#E0BA84] block font-semibold">
+                      {isRtl ? 'رقم / رمز الرخصة (يظهر عند الضغط):' : 'License Number:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={partner.licenseNumber || ''}
+                      onChange={(e) => handleUpdatePartnerItem(partner.id, { licenseNumber: e.target.value })}
+                      placeholder={isRtl ? 'مثال: 499845' : 'e.g. 499845'}
+                      className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-[#C59B5F]/40 text-xs text-[#E0BA84] focus:border-[#C59B5F] focus:outline-none font-mono font-bold"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-5 space-y-1">
+                    <label className="text-[11px] text-slate-300 block font-medium">
+                      {isRtl ? 'تفاصيل الرخصة (تظهر في نافذة الرخصة):' : 'License Details:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={partner.licenseDetailsAr || ''}
+                      onChange={(e) => handleUpdatePartnerItem(partner.id, { licenseDetailsAr: e.target.value })}
+                      placeholder={isRtl ? 'وصف أو مسمى الرخصة...' : 'License description...'}
+                      className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 space-y-1">
+                    <label className="text-[11px] text-slate-300 block font-medium">
+                      {isRtl ? 'صورة الرخصة / الشهادة:' : 'License Image:'}
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <label className="flex-1 px-2.5 py-1.5 rounded-lg bg-[#C59B5F]/15 hover:bg-[#C59B5F]/25 border border-[#C59B5F]/40 text-[#E0BA84] text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors">
+                        <Upload className="w-3 h-3" />
+                        <span>{partner.licenseImageUrl ? (isRtl ? 'تغيير الصورة' : 'Change') : (isRtl ? 'رفع صورة الرخصة' : 'Upload')}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handlePartnerLicenseUpload(e, partner.id)}
+                          className="hidden"
+                        />
+                      </label>
+                      {partner.licenseImageUrl && (
+                        <>
+                          <img
+                            src={partner.licenseImageUrl}
+                            alt="License"
+                            className="w-7 h-7 object-cover rounded border border-slate-700 shrink-0"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleUpdatePartnerItem(partner.id, { licenseImageUrl: '' })}
+                            className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-500/30 cursor-pointer shrink-0"
+                            title={isRtl ? 'حذف صورة الرخصة' : 'Remove image'}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -400,7 +525,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
               type="text"
               value={newPartnerNameAr}
               onChange={(e) => setNewPartnerNameAr(e.target.value)}
-              placeholder={isRtl ? 'اسم الجهة (مثال: منصة الأعمال)' : 'Platform Name'}
+              placeholder={isRtl ? 'اسم الجهة (مثال: منظمة EFR)' : 'Platform Name'}
               className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
             <input
@@ -510,7 +635,7 @@ export const SocialAndTrustTab: React.FC<SocialAndTrustTabProps> = ({
               type="text"
               value={newCertNumber}
               onChange={(e) => setNewCertNumber(e.target.value)}
-              placeholder={isRtl ? 'رقم أو رمز الشهادة (مثال: #482910)' : 'Number / Code'}
+              placeholder={isRtl ? 'رقم أو رمز الشهادة (مثال: #499845)' : 'Number / Code'}
               className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-blue-500"
             />
             <button

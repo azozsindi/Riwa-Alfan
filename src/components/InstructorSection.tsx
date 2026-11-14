@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, Shield, HeartHandshake, Sparkles, UserCheck, MessageSquare, PhoneCall, Lock, Heart } from 'lucide-react';
+import { Award, CheckCircle2, Shield, HeartHandshake, Sparkles, UserCheck, MessageSquare, PhoneCall, Heart } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { UI_TRANSLATIONS } from '../data/translations';
@@ -88,12 +88,18 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   const femalePadiLabel = (!rawFemalePadi || /514209|owsi/i.test(rawFemalePadi))
     ? (language === 'ar' ? 'مدربات PADI معتمدات' : 'Certified PADI Female Instructors')
     : rawFemalePadi;
-  const femaleBio = language === 'ar' ? femaleInst.bioAr : femaleInst.bioEn;
-  const femaleFeatures = language === 'ar' ? femaleInst.featuresListAr : femaleInst.featuresListEn;
+  const stripPrivacy = (val?: string) =>
+    (val || '')
+      .replace(/\s*(مع|بـ|ب)?\s*خصوصية تامة\s*100%\s*/gi, ' ')
+      .replace(/\s*with\s*100%\s*(full\s*)?privacy\s*/gi, ' ')
+      .replace(/\s+([،,.])/g, '$1')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  const femaleBio = stripPrivacy(language === 'ar' ? femaleInst.bioAr : femaleInst.bioEn);
+  const femaleFeatures = (language === 'ar' ? femaleInst.featuresListAr : femaleInst.featuresListEn)
+    .map(stripPrivacy)
+    .filter(Boolean);
   const femaleSpecialties = language === 'ar' ? femaleInst.specialtiesAr : femaleInst.specialtiesEn;
-  const femalePrivacyText = language === 'ar' 
-    ? (femaleInst.privacyTextAr || 'خصوصية تامة 100%') 
-    : (femaleInst.privacyTextEn || '100% Full Privacy');
   const femaleBookingBtn = language === 'ar'
     ? (femaleInst.bookingBtnAr || 'حجز تدريب نسائي خاص')
     : (femaleInst.bookingBtnEn || 'Book Ladies Training');
@@ -209,10 +215,6 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#DDB67E]/20 via-[#C59B5F]/25 to-[#A4783B]/20 text-[#E0BA84] border border-[#C59B5F]/40 font-bold text-xs flex items-center gap-1.5 shadow-sm">
                       <span>🧕</span>
                       <span>{femaleBadge}</span>
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px] flex items-center gap-1">
-                      <Lock className="w-3 h-3 text-emerald-400" />
-                      <span>{femalePrivacyText}</span>
                     </span>
                   </div>
 

@@ -213,9 +213,22 @@ export const DesignTab: React.FC<DesignTabProps> = ({
 
   const [activeSubSection, setActiveSubSection] = useState<string>('all');
 
-  const partnerLogos: PartnerLogoItem[] = trustForm.partnerLogos && trustForm.partnerLogos.length > 0
+  const rawPartners: PartnerLogoItem[] = trustForm.partnerLogos && trustForm.partnerLogos.length > 0
     ? trustForm.partnerLogos
     : DEFAULT_TRUST_BADGES.partnerLogos || [];
+
+  const cleanedPartners = rawPartners.filter(
+    (p) =>
+      p.id !== 'partner-saudi-business' &&
+      p.id !== 'partner-freelance' &&
+      !/منصة الأعمال|منصة العمل الحر|FL-2918401/i.test(`${p.nameAr} ${p.nameEn}`)
+  );
+  const hasEfrPartner = cleanedPartners.some(
+    (p) => p.id === 'partner-efr' || /\befr\b/i.test(`${p.nameAr} ${p.nameEn}`)
+  );
+  const defaultEfrPartner = (DEFAULT_TRUST_BADGES.partnerLogos || []).find((p) => p.id === 'partner-efr');
+  const partnerLogos: PartnerLogoItem[] =
+    hasEfrPartner || !defaultEfrPartner ? cleanedPartners : [...cleanedPartners, defaultEfrPartner];
 
   const handleUpdatePartner = (id: string, updates: Partial<PartnerLogoItem>) => {
     const updated = partnerLogos.map(item => item.id === id ? { ...item, ...updates } : item);
@@ -1179,29 +1192,16 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 sm:col-span-2">
                 <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>{isRtl ? 'رقم رخصة PADI OWSI:' : 'PADI OWSI #:'}</span>
+                  <span>{isRtl ? 'رقم عضوية PADI:' : 'PADI Member #:'}</span>
                 </label>
                 <input
                   type="text"
-                  value={brandForm.owsiNumber || 'PADI OWSI #482910'}
-                  onChange={(e) => setBrandForm({ ...brandForm, owsiNumber: e.target.value })}
+                  value={brandForm.padiNumber || 'PADI #499845'}
+                  onChange={(e) => setBrandForm({ ...brandForm, padiNumber: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono font-bold focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{isRtl ? 'وثيقة العمل الحر:' : 'Freelance Doc #:'}</span>
-                </label>
-                <input
-                  type="text"
-                  value={brandForm.freelanceDocNumber || 'FL-2918401'}
-                  onChange={(e) => setBrandForm({ ...brandForm, freelanceDocNumber: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 text-xs font-mono font-bold focus:border-emerald-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -1304,11 +1304,11 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 <span>{isRtl ? '10. الاعتمادات الرسمية ومنصات التوثيق الشريكة بالمملكة' : '10. Official Accreditations & Partner Platforms'}</span>
               </h4>
               <p className="text-xs text-slate-400 mt-1">
-                {isRtl ? 'المنصات الأربعة المعتمدة: منصة الأعمال، الاتحاد السعودي، منصة العمل الحر، ومنظمة PADI' : 'The 4 officially accredited partner platforms in AR & EN'}
+                {isRtl ? 'الجهات المعتمدة: الاتحاد السعودي للرياضات البحرية والغوص، منظمة PADI، ومنظمة EFR' : 'Officially accredited partner organizations in AR & EN'}
               </p>
             </div>
             <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-              4 {isRtl ? 'منصات' : 'Partners'}
+              {partnerLogos.length} {isRtl ? 'جهات' : 'Partners'}
             </span>
           </div>
 
@@ -1333,10 +1333,10 @@ export const DesignTab: React.FC<DesignTabProps> = ({
               showEn={showEn}
             />
 
-            {/* The 4 Partner Cards */}
+            {/* Partner Cards */}
             <div className="space-y-3 pt-2">
               <span className="text-xs font-bold text-slate-300 block">
-                {isRtl ? 'بطاقات المنصات الشريكة الأربعة (عربي وإنجليزي):' : 'The 4 Partner Cards (AR & EN):'}
+                {isRtl ? 'بطاقات الاعتماد الرسمية (عربي وإنجليزي + رقم الرخصة):' : 'Official Accreditation Cards (AR, EN & License #):'}
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1387,16 +1387,38 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                         isMono={true}
                       />
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 block">{isRtl ? 'رابط التحقق (اختياري):' : 'Link URL:'}</label>
-                        <input
-                          type="text"
-                          value={partner.linkUrl || ''}
-                          onChange={(e) => handleUpdatePartner(partner.id, { linkUrl: e.target.value })}
-                          placeholder="https://..."
-                          className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-mono focus:border-emerald-500 focus:outline-none"
-                        />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-[#E0BA84] font-semibold block">{isRtl ? 'رقم / رمز الرخصة:' : 'License #:'}</label>
+                          <input
+                            type="text"
+                            value={partner.licenseNumber || ''}
+                            onChange={(e) => handleUpdatePartner(partner.id, { licenseNumber: e.target.value })}
+                            placeholder="499845"
+                            className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-[#C59B5F]/40 text-xs text-[#E0BA84] font-mono font-bold focus:border-[#C59B5F] focus:outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-slate-400 block">{isRtl ? 'رابط التحقق (اختياري):' : 'Link URL:'}</label>
+                          <input
+                            type="text"
+                            value={partner.linkUrl || ''}
+                            onChange={(e) => handleUpdatePartner(partner.id, { linkUrl: e.target.value })}
+                            placeholder="https://..."
+                            className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-cyan-300 font-mono focus:border-emerald-500 focus:outline-none"
+                          />
+                        </div>
                       </div>
+
+                      <BilingualInput
+                        label={isRtl ? 'تفاصيل الرخصة (عند الضغط):' : 'License Details:'}
+                        valueAr={partner.licenseDetailsAr || ''}
+                        valueEn={partner.licenseDetailsEn || ''}
+                        onChangeAr={(val) => handleUpdatePartner(partner.id, { licenseDetailsAr: val })}
+                        onChangeEn={(val) => handleUpdatePartner(partner.id, { licenseDetailsEn: val })}
+                        showAr={showAr}
+                        showEn={showEn}
+                      />
                     </div>
                   </div>
                 ))}
@@ -1452,10 +1474,6 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2" dir="rtl">
                   <div className="flex flex-wrap items-center gap-2">
                     <span>{trustForm.copyrightTextAr}</span>
-                    <span>·</span>
-                    <span className="font-mono text-emerald-400">وثيقة العمل الحر: {brandForm.freelanceDocNumber || 'FL-2918401'}</span>
-                    <span>·</span>
-                    <span className="font-mono text-blue-400">{brandForm.owsiNumber || 'PADI OWSI #482910'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span>{trustForm.countryTextAr}</span>
@@ -1467,10 +1485,6 @@ export const DesignTab: React.FC<DesignTabProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/60" dir="ltr">
                   <div className="flex flex-wrap items-center gap-2 text-slate-400">
                     <span>{trustForm.copyrightTextEn}</span>
-                    <span>·</span>
-                    <span className="font-mono text-emerald-400">Freelance: {brandForm.freelanceDocNumber || 'FL-2918401'}</span>
-                    <span>·</span>
-                    <span className="font-mono text-blue-400">{brandForm.owsiNumber || 'PADI OWSI #482910'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-400">
                     <span>{trustForm.countryTextEn}</span>

@@ -379,8 +379,8 @@ export const BrandTab: React.FC<BrandTabProps> = ({
               </span>
               <span className="text-[11px] text-slate-400 block mt-0.5">
                 {isRtl 
-                  ? 'منصة الأعمال، الاتحاد السعودي، منصة العمل الحر (FL-2918401)، PADI OWSI #482910، ونصوص التذييل' 
-                  : 'Saudi Business, Saudi Federation, Freelance, PADI certifications & copyright text'}
+                  ? 'الاتحاد السعودي للرياضات البحرية والغوص، منظمة PADI، ومنظمة EFR، وإدارة الرخص الرسمية' 
+                  : 'Saudi Federation, PADI, EFR accreditations, license details & footer text'}
               </span>
             </div>
           </div>
