@@ -34,7 +34,7 @@ export const Footer: React.FC<FooterProps> = ({
     : (config.brand.bioEn || 'Riwa Alfan Diving in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest professional safety standards for diver training and exploring the Red Sea.');
 
   const freelanceDoc = config.trustBadges?.freelanceDocNumber || config.brand.freelanceDocNumber || 'FL-2918401';
-  const owsiLicense = config.trustBadges?.owsiNumber || config.brand.owsiNumber || 'PADI OWSI #482910';
+  const owsiLicense = config.trustBadges?.owsiNumber || config.brand.owsiNumber || 'PADI #499845';
 
   // Partner logos & accreditation list
   const partnerLogos = config.trustBadges?.partnerLogos || [
@@ -62,7 +62,7 @@ export const Footer: React.FC<FooterProps> = ({
     {
       id: 'partner-padi',
       nameAr: 'منظمة PADI الدولية للغوص',
-      nameEn: 'PADI Worldwide (#482910)',
+      nameEn: 'PADI Worldwide (#499845)',
       linkUrl: 'https://www.padi.com',
       active: true
     }

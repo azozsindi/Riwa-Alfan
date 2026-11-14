@@ -50,10 +50,10 @@ export const INSTRUCTOR_INFO = {
     en: "Capt. Fahad Al-Huwaimli"
   },
   title: {
-    ar: "PADI Open Water Scuba Instructor (OWSI)",
-    en: "PADI Open Water Scuba Instructor (OWSI)"
+    ar: "PADI Open Water Scuba Instructor",
+    en: "PADI Open Water Scuba Instructor"
   },
-  agencies: ["PADI OWSI #482910", "PADI EFR Emergency First Response Instructor"],
+  agencies: ["PADI #499845", "PADI EFR Emergency First Response Instructor"],
   experienceYears: 10,
   loggedDives: 1450,
   certifiedStudents: 520,

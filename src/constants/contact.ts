@@ -10,7 +10,7 @@ export const DEFAULT_CONTACT = {
   email: 'fahad@riwaalfan.com',
   locationAr: 'جدة، المملكة العربية السعودية - أبحر الشمالية',
   locationEn: 'Jeddah, Saudi Arabia - North Obhur',
-  padiMemberNumber: '482910',
+  padiMemberNumber: '499845',
 } as const;
 
 export const generateWhatsAppLink = (number: string, message: string): string => {

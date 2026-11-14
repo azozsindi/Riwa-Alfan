@@ -28,17 +28,30 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   }
 
   const inst = config.instructor;
+  const stripOwsi = (val?: string) => (val || '').replace(/\s*\(OWSI\)/gi, '').trim();
   const name = language === 'ar' ? inst.nameAr : inst.nameEn;
-  const title = language === 'ar' ? inst.titleAr : inst.titleEn;
-  const accreditation = language === 'ar' 
-    ? (inst.accreditationAr || 'مدرب محترف معتمد دولياً لدى منظمة PADI') 
-    : (inst.accreditationEn || 'Internationally Certified PADI Diving Professional');
+  const title = stripOwsi(language === 'ar' ? inst.titleAr : inst.titleEn);
+  const accreditation = stripOwsi(
+    language === 'ar'
+      ? (inst.accreditationAr || 'مدرب محترف معتمد دولياً لدى منظمة PADI')
+      : (inst.accreditationEn || 'Internationally Certified PADI Diving Professional')
+  );
   const bio = language === 'ar' ? inst.bioAr : inst.bioEn;
   const quote = language === 'ar' ? inst.quoteAr : inst.quoteEn;
   const specialties = language === 'ar' ? inst.specialtiesAr : inst.specialtiesEn;
-  const certsList = (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn) && (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn)!.length > 0
+  const rawCertsList = (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn) && (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn)!.length > 0
     ? (language === 'ar' ? inst.certificatesListAr : inst.certificatesListEn)!
-    : [inst.padiMemberNumber, inst.owsiNumber, inst.danNumber, inst.efrNumber].filter(Boolean);
+    : [inst.padiMemberNumber, inst.owsiNumber, inst.efrNumber].filter(Boolean);
+  const certsList = rawCertsList
+    .map(stripOwsi)
+    .filter((item) => !/PADI\s+MSDT\s+Member/i.test(item))
+    .filter((item) => !/شبكة تنبيه الغواصين|Divers Alert Network|\bDAN\b/i.test(item))
+    .map((item) => {
+      if (/^PADI\s+Open\s+Water\s+Scuba\s+Instructor$/i.test(item)) {
+        return 'PADI Open Water Scuba Instructor (499845)';
+      }
+      return item.replace(/482910/g, '499845');
+    });
 
   const d = config.designContent;
   const sectionKicker = language === 'ar' ? (d?.instSectionKickerAr || t.instSectionKicker) : (d?.instSectionKickerEn || t.instSectionKicker);
@@ -62,9 +75,19 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   const pillar3Desc = language === 'ar' ? (d?.pillar3DescAr || t.pillar3Desc) : (d?.pillar3DescEn || t.pillar3Desc);
 
   const femaleInst = config.femaleInstructor || DEFAULT_FEMALE_INSTRUCTOR;
-  const femaleName = language === 'ar' ? femaleInst.nameAr : femaleInst.nameEn;
-  const femaleTitle = language === 'ar' ? femaleInst.titleAr : femaleInst.titleEn;
-  const femaleBadge = language === 'ar' ? femaleInst.badgeAr : femaleInst.badgeEn;
+  const rawFemaleName = language === 'ar' ? femaleInst.nameAr : femaleInst.nameEn;
+  const femaleName = (!rawFemaleName || /ريم|reem|كابتن|capt/i.test(rawFemaleName))
+    ? (language === 'ar' ? 'القسم النسائي' : "Women's Division")
+    : rawFemaleName;
+  const femaleTitle = stripOwsi(language === 'ar' ? femaleInst.titleAr : femaleInst.titleEn);
+  const rawFemaleBadge = language === 'ar' ? femaleInst.badgeAr : femaleInst.badgeEn;
+  const femaleBadge = (!rawFemaleBadge || /قسم التدريب النسائي الخاص/i.test(rawFemaleBadge))
+    ? (language === 'ar' ? 'يوجد قسم خاص نسائي بتدريب النساء' : "Private Women's Diving Training Division")
+    : rawFemaleBadge.replace(/🧕/g, '').trim();
+  const rawFemalePadi = femaleInst.padiNumber || '';
+  const femalePadiLabel = (!rawFemalePadi || /514209|owsi/i.test(rawFemalePadi))
+    ? (language === 'ar' ? 'مدربات PADI معتمدات' : 'Certified PADI Female Instructors')
+    : rawFemalePadi;
   const femaleBio = language === 'ar' ? femaleInst.bioAr : femaleInst.bioEn;
   const femaleFeatures = language === 'ar' ? femaleInst.featuresListAr : femaleInst.featuresListEn;
   const femaleSpecialties = language === 'ar' ? femaleInst.specialtiesAr : femaleInst.specialtiesEn;
@@ -112,16 +135,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                   
                   {/* Profile Header without image box */}
                   <div className="space-y-2 border-b border-slate-800/80 pb-4">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#DDB67E]/20 via-[#C59B5F]/25 to-[#A4783B]/20 text-[#E0BA84] border border-[#C59B5F]/40 font-bold text-xs flex items-center gap-1.5 shadow-sm">
-                        <span>👑</span>
-                        <span>{isRtl ? 'كبير المدربين ومؤسس رواء الفن' : 'Lead Instructor & Founder'}</span>
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 font-bold text-[11px]">
-                        PADI OWSI
-                      </span>
-                    </div>
-                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-1">{name}</h3>
+                    <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic">{name}</h3>
                     <p className="text-xs text-[#C59B5F] font-semibold">{title}</p>
                     <p className="text-xs text-slate-400 font-medium">{accreditation}</p>
                   </div>
@@ -207,7 +221,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                     <h3 className="text-lg sm:text-2xl font-black text-white font-brand-arabic pt-1">{femaleName}</h3>
                     <p className="text-xs text-[#C59B5F] font-semibold">{femaleTitle}</p>
                     <p className="text-xs text-slate-400 font-medium font-sans">
-                      {femaleInst.padiNumber || 'PADI Certified Instructor'} · {femaleInst.experienceYears || '6+ سنوات خبرة'}
+                      {femalePadiLabel} · {femaleInst.experienceYears || '6+ سنوات خبرة'}
                     </p>
                   </div>
 
@@ -313,7 +327,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
         {/* Additional Certified Captains (Rendered only if there are other captains besides Lead Instructor) */}
         {(() => {
           const otherCaptains = (config.captains || []).filter(
-            c => !c.isLead && c.id !== 'captain-fahad' && c.nameAr !== inst.nameAr
+            c => !c.isLead && c.id !== 'captain-fahad' && c.id !== 'captain-reem' && !/ريم|reem/i.test(c.nameAr || '') && c.nameAr !== inst.nameAr
           );
           if (otherCaptains.length === 0) return null;
 
@@ -346,7 +360,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
                         )}
                       </div>
                       <p className="text-xs text-[#C59B5F] font-medium">
-                        {language === 'ar' ? cap.titleAr : (cap.titleEn || cap.titleAr)}
+                        {stripOwsi(language === 'ar' ? cap.titleAr : (cap.titleEn || cap.titleAr))}
                       </p>
                     </div>
 

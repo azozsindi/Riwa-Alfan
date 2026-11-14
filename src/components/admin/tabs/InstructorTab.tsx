@@ -543,7 +543,7 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
               </label>
               <input 
                 type="text"
-                placeholder="مثال: كابتن ريم السالم (قسم التدريب النسائي)"
+                placeholder="مثال: القسم النسائي"
                 value={femaleForm.nameAr}
                 onChange={(e) => setFemaleForm(prev => ({ ...prev, nameAr: e.target.value }))}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
@@ -555,7 +555,7 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
               </label>
               <input 
                 type="text"
-                placeholder="e.g. Capt. Reem (Ladies Division)"
+                placeholder="e.g. Women's Division"
                 value={femaleForm.nameEn}
                 onChange={(e) => setFemaleForm(prev => ({ ...prev, nameEn: e.target.value }))}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none font-bold"
@@ -568,7 +568,7 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
               </label>
               <input 
                 type="text"
-                placeholder="مثال: PADI Open Water Scuba Instructor (OWSI)"
+                placeholder="مثال: تدريب نسائي خاص بإشراف مدربات معتمدات"
                 value={femaleForm.titleAr}
                 onChange={(e) => setFemaleForm(prev => ({ ...prev, titleAr: e.target.value }))}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"
@@ -592,7 +592,7 @@ export const InstructorTab: React.FC<InstructorTabProps> = ({
               </label>
               <input 
                 type="text"
-                placeholder="قسم التدريب النسائي الخاص 🧕"
+                placeholder="يوجد قسم خاص نسائي بتدريب النساء"
                 value={femaleForm.badgeAr}
                 onChange={(e) => setFemaleForm(prev => ({ ...prev, badgeAr: e.target.value }))}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:border-[#C59B5F] outline-none"

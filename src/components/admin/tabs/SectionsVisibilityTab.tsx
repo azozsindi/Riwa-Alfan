@@ -141,8 +141,8 @@ export const SectionsVisibilityTab: React.FC<SectionsVisibilityTabProps> = ({
     },
     {
       key: 'femaleTraining',
-      titleAr: 'كرت قسم التدريب النسائي الخاص (كابتن ريم)',
-      titleEn: 'Women\'s Training Division (Capt. Reem)',
+      titleAr: 'كرت القسم النسائي (يوجد قسم خاص نسائي بتدريب النساء)',
+      titleEn: 'Women\'s Training Division',
       descAr: 'كرت التدريب النسائي بمسابح مغلقة وخصوصية 100% وأزرار الحجز المباشر.',
       descEn: 'Private female-led diving in private indoor pools with 100% privacy.',
       icon: <span className="text-xl">🧕</span>,

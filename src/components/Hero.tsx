@@ -170,9 +170,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
                       {isRtl ? 'اعتمادات PADI الدولية المعتمدة' : 'Official PADI Accreditations'}
                     </span>
                     <h3 className="text-sm sm:text-base font-extrabold text-white">
-                      {language === 'ar' 
-                        ? (config.instructor.titleAr || 'PADI Open Water Scuba Instructor (OWSI)') 
-                        : (config.instructor.titleEn || 'PADI Open Water Scuba Instructor (OWSI)')}
+                      {(language === 'ar' 
+                        ? (config.instructor.titleAr || 'PADI Open Water Scuba Instructor') 
+                        : (config.instructor.titleEn || 'PADI Open Water Scuba Instructor')
+                      ).replace(/\s*\(OWSI\)/gi, '').trim()}
                     </h3>
                   </div>
                 </div>
