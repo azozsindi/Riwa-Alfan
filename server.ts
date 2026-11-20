@@ -28,6 +28,8 @@ interface TelegramSubscriberRecord {
 
 interface StoredTelegramConfig {
   subscribers: TelegramSubscriberRecord[];
+  discoveredChats?: DiscoveredTelegramChat[];
+  lastUpdateId?: number;
   updatedAt: string;
 }
 
@@ -83,32 +85,39 @@ const readStoredTelegramConfig = (): StoredTelegramConfig => {
     if (fs.existsSync(TELEGRAM_STORE_PATH)) {
       const raw = fs.readFileSync(TELEGRAM_STORE_PATH, 'utf-8');
       const parsed = JSON.parse(raw) as Partial<StoredTelegramConfig>;
-      if (Array.isArray(parsed.subscribers)) {
-        return {
-          subscribers: parsed.subscribers,
-          updatedAt: parsed.updatedAt || new Date().toISOString(),
-        };
-      }
+      return {
+        subscribers: Array.isArray(parsed.subscribers) ? parsed.subscribers : [],
+        discoveredChats: Array.isArray(parsed.discoveredChats) ? parsed.discoveredChats : [],
+        lastUpdateId: typeof parsed.lastUpdateId === 'number' ? parsed.lastUpdateId : 0,
+        updatedAt: parsed.updatedAt || new Date().toISOString(),
+      };
     }
   } catch (err) {
     console.warn('Notice reading .data/telegram-config.json:', err);
   }
-  return { subscribers: [], updatedAt: new Date().toISOString() };
+  return { subscribers: [], discoveredChats: [], lastUpdateId: 0, updatedAt: new Date().toISOString() };
 };
 
-const writeStoredTelegramConfig = (subscribers: TelegramSubscriberRecord[]): void => {
+const writeStoredTelegramState = (patch: Partial<StoredTelegramConfig>): void => {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+    const prev = readStoredTelegramConfig();
     const payload: StoredTelegramConfig = {
-      subscribers,
+      subscribers: patch.subscribers ?? prev.subscribers,
+      discoveredChats: patch.discoveredChats ?? prev.discoveredChats ?? [],
+      lastUpdateId: patch.lastUpdateId ?? prev.lastUpdateId ?? 0,
       updatedAt: new Date().toISOString(),
     };
     fs.writeFileSync(TELEGRAM_STORE_PATH, JSON.stringify(payload, null, 2), 'utf-8');
   } catch (err) {
     console.warn('Notice writing .data/telegram-config.json:', err);
   }
+};
+
+const writeStoredTelegramConfig = (subscribers: TelegramSubscriberRecord[]): void => {
+  writeStoredTelegramState({ subscribers });
 };
 
 const getActiveChatTargets = (): { chatId: string; label: string }[] => {
@@ -291,12 +300,15 @@ const markAndCheckDuplicateBooking = (bookingId: string): boolean => {
 
 const getPublicBaseUrl = (req: Request): string => {
   const envUrl = cleanEnvValue(process.env.APP_URL);
-  if (envUrl && envUrl.startsWith('http')) {
+  if (envUrl && envUrl.startsWith('https://')) {
     return envUrl.replace(/\/+$/, '');
   }
-  const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
-  const host = (req.headers['x-forwarded-host'] as string) || req.get('host') || '';
-  return host ? `${proto}://${host}` : '';
+  const proto = String((req.headers['x-forwarded-proto'] as string) || req.protocol || '').split(',')[0].trim();
+  const host = String((req.headers['x-forwarded-host'] as string) || req.get('host') || '').split(',')[0].trim();
+  if (proto === 'https' && host && !host.startsWith('localhost') && !host.startsWith('127.')) {
+    return `https://${host}`;
+  }
+  return '';
 };
 
 const buildBookingTelegramMessage = (b: NotifyBookingPayload, dashboardUrl: string) => {
@@ -410,70 +422,86 @@ async function startServer() {
     }
   });
 
-  // 2. Discover recent Telegram chats that sent /start or messages to @Riwaa_alfan_bot
-  app.post('/api/telegram/discover', async (req: Request, res: Response) => {
-    const authCheck = await verifyFirebaseAdmin(req);
-    if (!authCheck.authorized) {
-      res.status(401).json({ ok: false, error: authCheck.reason || 'Unauthorized' });
-      return;
-    }
+  interface TgChat {
+    id: number;
+    type: 'private' | 'group' | 'supergroup' | 'channel';
+    title?: string;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+  }
 
+  interface TgUpdate {
+    update_id: number;
+    message?: {
+      date?: number;
+      text?: string;
+      chat?: TgChat;
+    };
+    edited_message?: {
+      date?: number;
+      text?: string;
+      chat?: TgChat;
+    };
+    my_chat_member?: {
+      date?: number;
+      chat?: TgChat;
+    };
+    channel_post?: {
+      date?: number;
+      text?: string;
+      chat?: TgChat;
+    };
+  }
+
+  let isPollingUpdates = false;
+
+  const pollTelegramBotUpdates = async (): Promise<{
+    ok: boolean;
+    chats: DiscoveredTelegramChat[];
+    error?: string;
+  }> => {
     const token = getBotToken();
+    const stored = readStoredTelegramConfig();
+    const cachedChats = stored.discoveredChats || [];
+
     if (!token) {
-      res.status(400).json({ ok: false, error: 'TELEGRAM_BOT_TOKEN is not configured on server.' });
-      return;
+      return { ok: false, chats: cachedChats, error: 'TELEGRAM_BOT_TOKEN is not configured on server.' };
+    }
+    if (isPollingUpdates) {
+      return { ok: true, chats: cachedChats };
     }
 
+    isPollingUpdates = true;
     try {
-      interface TgChat {
-        id: number;
-        type: 'private' | 'group' | 'supergroup' | 'channel';
-        title?: string;
-        username?: string;
-        first_name?: string;
-        last_name?: string;
-      }
-
-      interface TgUpdate {
-        update_id: number;
-        message?: {
-          date?: number;
-          text?: string;
-          chat?: TgChat;
-        };
-        edited_message?: {
-          date?: number;
-          text?: string;
-          chat?: TgChat;
-        };
-        my_chat_member?: {
-          date?: number;
-          chat?: TgChat;
-        };
-        channel_post?: {
-          date?: number;
-          text?: string;
-          chat?: TgChat;
-        };
-      }
-
+      const nextOffset = stored.lastUpdateId ? stored.lastUpdateId + 1 : undefined;
       const updatesRes = await callTelegramApi<TgUpdate[]>('getUpdates', {
+        ...(nextOffset ? { offset: nextOffset } : {}),
         limit: 50,
         allowed_updates: ['message', 'edited_message', 'my_chat_member', 'channel_post'],
       });
 
       if (!updatesRes.ok) {
-        res.status(400).json({
+        return {
           ok: false,
+          chats: cachedChats,
           error: updatesRes.description || 'Failed to read updates from Telegram',
-        });
-        return;
+        };
       }
 
       const chatMap = new Map<string, DiscoveredTelegramChat>();
+      for (const item of cachedChats) {
+        chatMap.set(item.chatId, item);
+      }
+
       const updates = Array.isArray(updatesRes.result) ? updatesRes.result : [];
+      let maxUpdateId = stored.lastUpdateId || 0;
+      const appBaseUrl = cleanEnvValue(process.env.APP_URL);
 
       for (const u of updates) {
+        if (typeof u.update_id === 'number' && u.update_id > maxUpdateId) {
+          maxUpdateId = u.update_id;
+        }
         const container = u.message || u.edited_message || u.my_chat_member || u.channel_post;
         const chat = container?.chat;
         if (!chat || !chat.id) continue;
@@ -481,8 +509,8 @@ async function startServer() {
         const chatId = String(chat.id);
         const fullName = [chat.first_name, chat.last_name].filter(Boolean).join(' ').trim();
         const title = chat.title || fullName || (chat.username ? `@${chat.username}` : chatId);
-        const lastText =
-          u.message?.text || u.channel_post?.text || (u.my_chat_member ? '/start' : '');
+        const rawText = (u.message?.text || u.channel_post?.text || '').trim();
+        const lastText = rawText || (u.my_chat_member ? '/start' : '');
         const dateIso = container?.date
           ? new Date(container.date * 1000).toISOString()
           : new Date().toISOString();
@@ -495,16 +523,87 @@ async function startServer() {
           lastText: lastText ? lastText.slice(0, 80) : undefined,
           date: dateIso,
         });
+
+        // Auto-reply cleanly to bot commands so users get immediate confirmation + Chat ID
+        if (u.message?.text) {
+          const cmd = rawText.split(/\s+/)[0].toLowerCase().split('@')[0];
+          const isLinked = getActiveChatTargets().some((t) => t.chatId === chatId);
+
+          if (cmd === '/start' || cmd === '/id') {
+            const replyLines = [
+              '🤿 <b>أهلاً بك في بوت إشعارات مركز رواء الفن للغوص!</b>',
+              '━━━━━━━━━━━━━━━━━━',
+              `🆔 <b>معرف المحادثة (Chat ID):</b> <code>${escapeHtml(chatId)}</code>`,
+              isLinked
+                ? '✅ <b>الحالة:</b> هذا الحساب مربوط ومفعّل لاستقبال إشعارات الحجوزات الفورية.'
+                : '📌 <b>لربط الحساب:</b> افتح لوحة التحكم ← الإعدادات ← إشعارات التلجرام ← اضغط <b>"جلب المحادثات التي راسلت البوت"</b> ثم اختر حسابك.',
+              '🔔 أرسل <code>/test</code> في أي وقت لمعاينة رسالة الإشعار.',
+            ];
+            await callTelegramApi('sendMessage', {
+              chat_id: chatId,
+              text: replyLines.join('\n'),
+              parse_mode: 'HTML',
+              reply_markup: appBaseUrl.startsWith('https://')
+                ? { inline_keyboard: [[{ text: '📊 فتح لوحة التحكم', url: `${appBaseUrl.replace(/\/+$/, '')}/admin` }]] }
+                : undefined,
+            }).catch(() => {});
+          } else if (cmd === '/test') {
+            const testReply = [
+              '🔔 <b>معاينة إشعار حجز — رواء الفن للغوص</b>',
+              '━━━━━━━━━━━━━━━━━━',
+              `🆔 <b>Chat ID:</b> <code>${escapeHtml(chatId)}</code>`,
+              isLinked
+                ? '✅ البوت جاهز ومربوط بنجاح! ستصلك تفاصيل كل حجز جديد هنا فوراً.'
+                : '⚠️ تم إرسال التجربة بنجاح، لكن تأكد من ربط هذا المعرف داخل لوحة التحكم ليصلك كل حجز تلقائياً.',
+              `🕒 ${new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' })}`,
+            ].join('\n');
+            await callTelegramApi('sendMessage', {
+              chat_id: chatId,
+              text: testReply,
+              parse_mode: 'HTML',
+            }).catch(() => {});
+          }
+        }
       }
 
-      const chats = Array.from(chatMap.values()).reverse();
-      res.json({ ok: true, chats });
+      const mergedChats = Array.from(chatMap.values())
+        .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        .slice(0, 30);
+
+      if (updates.length > 0) {
+        writeStoredTelegramState({
+          discoveredChats: mergedChats,
+          lastUpdateId: maxUpdateId,
+        });
+      }
+
+      return { ok: true, chats: mergedChats };
     } catch (err) {
-      res.status(500).json({
+      return {
         ok: false,
+        chats: cachedChats,
         error: err instanceof Error ? err.message : 'Discovery failed',
-      });
+      };
+    } finally {
+      isPollingUpdates = false;
     }
+  };
+
+  // 2. Discover recent Telegram chats that sent /start or messages to @Riwaa_alfan_bot
+  app.post('/api/telegram/discover', async (req: Request, res: Response) => {
+    const authCheck = await verifyFirebaseAdmin(req);
+    if (!authCheck.authorized) {
+      res.status(401).json({ ok: false, error: authCheck.reason || 'Unauthorized' });
+      return;
+    }
+
+    const result = await pollTelegramBotUpdates();
+    if (!result.ok && result.chats.length === 0) {
+      res.status(400).json({ ok: false, error: result.error });
+      return;
+    }
+
+    res.json({ ok: true, chats: result.chats });
   });
 
   // 3. Sync linked Firestore subscribers into server-side store
@@ -709,6 +808,12 @@ async function startServer() {
   const port = Number(process.env.PORT) || 3000;
   httpServer.listen(port, '0.0.0.0', () => {
     console.log(`Riwa Alfan Dive Center server listening on port ${port}`);
+    if (getBotToken()) {
+      void pollTelegramBotUpdates();
+      setInterval(() => {
+        void pollTelegramBotUpdates();
+      }, 5000);
+    }
   });
 }
 

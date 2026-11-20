@@ -90,10 +90,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBooking, onExploreCourses }) =
             <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#E0BA84] tracking-wide">
               <MapPin className="w-4 h-4 text-[#C59B5F] shrink-0" />
               <span>{locationLabel}</span>
-              <span className="text-slate-600">·</span>
-              <span className="font-mono text-slate-300 text-xs">
-                {config.brand.padiNumber || 'PADI #499845'}
-              </span>
             </div>
 
             {/* High-impact headline in brand gold & white with generous Arabic line-height */}
