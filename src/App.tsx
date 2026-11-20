@@ -100,7 +100,6 @@ function AppContent() {
       {/* Top Header */}
       <Header 
         onOpenBooking={() => handleOpenBooking()} 
-        onOpenAdmin={() => navigate('/admin')}
         onOpenTools={sections.diverToolsModal ? () => setIsToolsOpen(true) : undefined}
         onOpenSites={sections.diveSitesModal ? () => setIsSitesOpen(true) : undefined}
         onOpenFaq={sections.faqModal ? () => setIsFaqOpen(true) : undefined}

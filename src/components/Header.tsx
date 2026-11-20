@@ -7,7 +7,6 @@ import { FahadsLogo } from './FahadsLogo';
 
 interface HeaderProps {
   onOpenBooking?: (courseId?: string) => void;
-  onOpenAdmin?: () => void;
   onOpenTools?: () => void;
   onOpenSites?: () => void;
   onOpenFaq?: () => void;
@@ -15,7 +14,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ 
   onOpenBooking,
-  onOpenAdmin,
   onOpenTools,
   onOpenSites,
   onOpenFaq,
@@ -255,24 +253,6 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>{isRtl ? 'حاسبات وأدوات الغواصين' : 'Diver Calculators'}</span>
                 <span>🧮</span>
-              </button>
-            )}
-
-            {/* Mobile Admin Portal Trigger */}
-            {onOpenAdmin && (
-              <button 
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAdmin();
-                }}
-                className="px-4 py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 text-slate-400 hover:text-[#E0BA84] text-xs font-semibold text-start flex items-center justify-between border border-slate-800 min-h-[40px] cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <span>🔐</span>
-                  <span>{isRtl ? 'لوحة تحكم وإدارة الموقع' : 'Admin Portal'}</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">/admin</span>
               </button>
             )}
           </nav>
