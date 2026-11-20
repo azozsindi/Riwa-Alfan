@@ -125,9 +125,25 @@ const normalizeLocationValue = (val: string | undefined, lang: 'ar' | 'en', fall
   return val as string;
 };
 
+const LEGACY_PERSONAL_NAME_REGEX = /فهد\s+الهويملي|كابتن\s+فهد|fahad\s+al[-\s]?huwaimli|capt\.?\s*fahad|captain\s+fahad/i;
+
+const sanitizeBrandSeoCopy = (val: string | undefined, fallback: string | undefined): string => {
+  const safeFallback = fallback || '';
+  const trimmed = (val || '').trim();
+  if (!trimmed) return safeFallback;
+  if (LEGACY_PERSONAL_NAME_REGEX.test(trimmed)) return safeFallback;
+  return val as string;
+};
+
 const isDiscoverScubaCourse = (c: Course) => {
   const t = `${c.id} ${c.title?.ar || ''} ${c.title?.en || ''}`.toLowerCase();
-  return c.id === 'discover-scuba' || t.includes('تجربة الغوص') || t.includes('discover scuba');
+  return (
+    c.id === 'discover-scuba' ||
+    c.id === 'course-1794660756107' ||
+    t.includes('تجربة الغوص') ||
+    t.includes('تجربة اكتشاف الغوص') ||
+    t.includes('discover scuba')
+  );
 };
 
 const isOpenWaterCourse = (c: Course) => {
@@ -142,7 +158,12 @@ const isAdvancedOpenWaterCourse = (c: Course) => {
 };
 
 const ensureOrderedCourses = (rawList: Course[] | undefined): Course[] => {
-  const list = Array.isArray(rawList) && rawList.length > 0 ? [...rawList] : [...DEFAULT_CONFIG.courses];
+  const list = (Array.isArray(rawList) && rawList.length > 0 ? [...rawList] : [...DEFAULT_CONFIG.courses]).map((c) => {
+    if (isDiscoverScubaCourse(c) && c.poolSessions === 4) {
+      return { ...c, poolSessions: 0 };
+    }
+    return c;
+  });
   const defaultDiscover = DEFAULT_CONFIG.courses.find(isDiscoverScubaCourse);
 
   const discover = list.find(isDiscoverScubaCourse) || defaultDiscover;
@@ -237,11 +258,18 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const rawDesign = { ...DEFAULT_DESIGN_CONTENT, ...(base.designContent || {}) };
       const rawLocation = { ...DEFAULT_LOCATION_CONFIG, ...(base.locationConfig || {}) };
 
+      const rawHero = { ...DEFAULT_CONFIG.hero, ...(base.hero || {}) };
+      const rawTrustBadges = { ...DEFAULT_TRUST_BADGES, ...(base.trustBadges || {}) };
+
       return {
         ...DEFAULT_CONFIG,
         ...base,
         brand: {
           ...rawBrand,
+          subtitleAr: sanitizeBrandSeoCopy(rawBrand.subtitleAr, DEFAULT_CONFIG.brand.subtitleAr),
+          subtitleEn: sanitizeBrandSeoCopy(rawBrand.subtitleEn, DEFAULT_CONFIG.brand.subtitleEn),
+          bioAr: sanitizeBrandSeoCopy(rawBrand.bioAr, DEFAULT_CONFIG.brand.bioAr),
+          bioEn: sanitizeBrandSeoCopy(rawBrand.bioEn, DEFAULT_CONFIG.brand.bioEn),
           locationAr: normalizeLocationValue(rawBrand.locationAr, 'ar', 'أبحر الشمالية - جدة'),
           locationEn: normalizeLocationValue(rawBrand.locationEn, 'en', 'North Obhur - Jeddah'),
         },
@@ -253,8 +281,9 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           addressEn: normalizeLocationValue(rawLocation.addressEn, 'en', 'North Obhur - Jeddah'),
         },
         trustBadges: {
-          ...DEFAULT_TRUST_BADGES,
-          ...(base.trustBadges || {}),
+          ...rawTrustBadges,
+          copyrightTextAr: sanitizeBrandSeoCopy(rawTrustBadges.copyrightTextAr, DEFAULT_TRUST_BADGES.copyrightTextAr),
+          copyrightTextEn: sanitizeBrandSeoCopy(rawTrustBadges.copyrightTextEn, DEFAULT_TRUST_BADGES.copyrightTextEn),
           partnerLogos: (base.trustBadges?.partnerLogos && base.trustBadges.partnerLogos.length > 0)
             ? base.trustBadges.partnerLogos
             : DEFAULT_TRUST_BADGES.partnerLogos,
@@ -262,7 +291,11 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             ? base.trustBadges.certificates
             : DEFAULT_TRUST_BADGES.certificates
         },
-        hero: { ...DEFAULT_CONFIG.hero, ...(base.hero || {}) },
+        hero: {
+          ...rawHero,
+          subheadAr: sanitizeBrandSeoCopy(rawHero.subheadAr, DEFAULT_CONFIG.hero.subheadAr),
+          subheadEn: sanitizeBrandSeoCopy(rawHero.subheadEn, DEFAULT_CONFIG.hero.subheadEn),
+        },
         instructor: { ...DEFAULT_CONFIG.instructor, ...(base.instructor || {}), photoUrl: '' },
         femaleInstructor: { ...(DEFAULT_CONFIG.femaleInstructor || {}), ...(base.femaleInstructor || {}), photoUrl: '' },
         captains: Array.isArray(base.captains) && base.captains.length > 0 ? base.captains : DEFAULT_CAPTAINS,
@@ -402,6 +435,16 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           ...(remoteData.designContent || {})
         };
 
+        const mergedHero = {
+          ...prev.hero,
+          ...(remoteData.hero || {})
+        };
+        const mergedTrustBadges = {
+          ...DEFAULT_TRUST_BADGES,
+          ...(prev.trustBadges || {}),
+          ...(remoteData.trustBadges || {})
+        };
+
         return {
           ...prev,
           ...remoteData,
@@ -411,10 +454,15 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               : prev.courses
           ),
           announcement: updatedAnnouncement,
+          hero: {
+            ...mergedHero,
+            subheadAr: sanitizeBrandSeoCopy(mergedHero.subheadAr, DEFAULT_CONFIG.hero.subheadAr),
+            subheadEn: sanitizeBrandSeoCopy(mergedHero.subheadEn, DEFAULT_CONFIG.hero.subheadEn),
+          },
           trustBadges: {
-            ...DEFAULT_TRUST_BADGES,
-            ...(prev.trustBadges || {}),
-            ...(remoteData.trustBadges || {}),
+            ...mergedTrustBadges,
+            copyrightTextAr: sanitizeBrandSeoCopy(mergedTrustBadges.copyrightTextAr, DEFAULT_TRUST_BADGES.copyrightTextAr),
+            copyrightTextEn: sanitizeBrandSeoCopy(mergedTrustBadges.copyrightTextEn, DEFAULT_TRUST_BADGES.copyrightTextEn),
             partnerLogos: mergedPartners,
             certificates: (remoteData.trustBadges?.certificates && remoteData.trustBadges.certificates.length > 0)
               ? remoteData.trustBadges.certificates
@@ -424,6 +472,10 @@ export const SiteConfigProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           },
           brand: {
             ...mergedBrand,
+            subtitleAr: sanitizeBrandSeoCopy(mergedBrand.subtitleAr, DEFAULT_CONFIG.brand.subtitleAr),
+            subtitleEn: sanitizeBrandSeoCopy(mergedBrand.subtitleEn, DEFAULT_CONFIG.brand.subtitleEn),
+            bioAr: sanitizeBrandSeoCopy(mergedBrand.bioAr, DEFAULT_CONFIG.brand.bioAr),
+            bioEn: sanitizeBrandSeoCopy(mergedBrand.bioEn, DEFAULT_CONFIG.brand.bioEn),
             locationAr: normalizeLocationValue(mergedBrand.locationAr, 'ar', 'أبحر الشمالية - جدة'),
             locationEn: normalizeLocationValue(mergedBrand.locationEn, 'en', 'North Obhur - Jeddah'),
           },

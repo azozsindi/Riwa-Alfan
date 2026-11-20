@@ -2,7 +2,7 @@ export const UI_TRANSLATIONS = {
   ar: {
     // Header & Nav
     brandName: "رواء الفن",
-    brandSubtitle: "دورات تدريب الغوص المعتمدة · كابتن فهد الهويملي PADI",
+    brandSubtitle: "مركز دورات تدريب الغوص المعتمدة PADI · جدة",
     navHome: "الرئيسية",
     navInstructor: "عن المدرب",
     navCourses: "الدورات التدريبية",
@@ -18,7 +18,7 @@ export const UI_TRANSLATIONS = {
     heroLocation: "جدة فقط (عروس البحر الأحمر)",
     heroHeadlinePart1: "اكتشف أسرار عالم الغوص في ",
     heroHeadlineHighlight: "البحر الأحمر",
-    heroSubhead: "رحلتك من الصفر وحتى الاحتراف مع كابتن فهد الهويملي في رواء الفن بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.",
+    heroSubhead: "رحلتك من الصفر وحتى الاحتراف في رواء الفن للغوص بجدة. تدريب شخصي صبور بأعلى معايير السلامة العالمية، دورات PADI المعتمدة، ورحلات بحرية دورية لاستكشاف أجمل شِعاب وحطام سفن جدة التاريخية.",
     heroCtaBook: "احجز موعد أو استشارة مجانية",
     heroCtaCourses: "تصفح برامج الدورات",
     statDivesNumber: "1,450+",
@@ -34,7 +34,7 @@ export const UI_TRANSLATIONS = {
     heroCardTemp: "درجة الحرارة: 26° - 29°C",
     heroCardVis: "الرؤية الأفقية: 30م+",
     heroCardStatus: "الظروف: مثالية",
-    heroWhyTitle: "لماذا تختار التدريب مع كابتن فهد؟",
+    heroWhyTitle: "لماذا تختار التدريب مع رواء الفن؟",
     heroWhy1: "تدريب بمجموعات صغيرة (3 إلى 4 طلاب كحد أقصى) لضمان الاهتمام الفردي الكامل.",
     heroWhy2: "شهادات ورخص دولية رقمية ومطبوعة معتمدة من منظمة PADI العالمية.",
     heroWhy3: "متابعة مستمرة بعد التخرج وجدول رحلات دورية لتبقى عضواً في مجتمع الغواصين.",
@@ -152,7 +152,7 @@ export const UI_TRANSLATIONS = {
 
     // Testimonials
     testiKicker: "قصص وتجارب حقيقية",
-    testiTitle: "ماذا يقول خريجو كابتن فهد الهويملي؟",
+    testiTitle: "ماذا يقول خريجو رواء الفن للغوص؟",
     testiDesc: "شهادات وتجارب متدربين عاشوا متعة التعلم والتغلب على المخاوف والارتقاء في مستويات الغوص المختلفة.",
 
     // FAQ
@@ -177,7 +177,7 @@ export const UI_TRANSLATIONS = {
 
     // Booking Modal
     modalKicker: "حجز مباشر واستشارة مجانية",
-    modalTitle: "انضم إلى مركز رواء الفن للغوص (Riwa Alfan) مع كابتن فهد",
+    modalTitle: "انضم إلى مركز رواء الفن للغوص (Riwa Alfan)",
     modalSuccessTitle: "تم استلام طلبك بنجاح!",
     modalSuccessDesc: (name: string) => `شكراً لتواصلك يا ${name}. رقم طلبك المرجعي هو:`,
     modalSuccessNote: "سيتواصل معك الكابتن عبر الواتساب في أقرب وقت لترتيب المواعيد والإجابة عن أي استفسار.",
@@ -202,11 +202,11 @@ export const UI_TRANSLATIONS = {
     errPhone: "يرجى إدخال رقم جوال أو واتساب صحيح للتواصل",
 
     // Footer
-    footerBio: "رواء الفن للغوص (Riwa Alfan Diving) بجدة بقيادة كابتن فهد الهويملي (PADI MSDT). نلتزم بأعلى معايير السلامة المهنية لحماية وتأهيل الغواصين واستكشاف جمال البحر الأحمر.",
+    footerBio: "رواء الفن للغوص (Riwa Alfan Diving) بجدة — مركز متخصص في دورات الغوص المعتمدة من منظمة PADI والرحلات البحرية في البحر الأحمر بأعلى معايير السلامة الدولية.",
     footerQuickLinks: "روابط سريعة",
     footerDisclaimerTitle: "إخلاء مسؤولية ومعايير السلامة",
     footerDisclaimerText: "رياضة الغوص بمعدات التنفس تحت الماء (Scuba Diving) تتطلب تدريباً وتأهيلاً رسمياً وحصولاً على شهادة معتمدة من منظمة دولية معترف بها. الحاسبات المعروضة هنا هي أدوات مساعدة وتثقيفية ولا تغني عن حاسوب الغوص المعتمد وخطة الغوص الرسمية.",
-    footerCopyright: `جميع الحقوق محفوظة © ${new Date().getFullYear()} رواء الفن للغوص (Riwa Alfan) · كابتن فهد الهويملي PADI`,
+    footerCopyright: `جميع الحقوق محفوظة © ${new Date().getFullYear()} رواء الفن للغوص (Riwa Alfan) · دورات PADI بجدة`,
     footerCountry: "المملكة العربية السعودية · جدة فقط"
   },
 
@@ -229,7 +229,7 @@ export const UI_TRANSLATIONS = {
     heroLocation: "Jeddah Exclusively (Bride of the Red Sea)",
     heroHeadlinePart1: "Discover the Secrets of Diving in the ",
     heroHeadlineHighlight: "Red Sea",
-    heroSubhead: "Your journey from beginner to certified dive professional with Capt. Fahad Al-Huwaimli at Riwa Alfan in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.",
+    heroSubhead: "Your journey from beginner to certified dive professional at Riwa Alfan Diving in Jeddah. Combining patient coaching, top-tier international safety standards, accredited PADI certifications, and regular Jeddah boat expeditions.",
     heroCtaBook: "Book Free Consultation / Course",
     heroCtaCourses: "Explore Courses",
     statDivesNumber: "1,450+",
@@ -245,7 +245,7 @@ export const UI_TRANSLATIONS = {
     heroCardTemp: "Water Temp: 26° - 29°C",
     heroCardVis: "Horizontal Vis: 30m+",
     heroCardStatus: "Conditions: Prime",
-    heroWhyTitle: "Why Train with Captain Fahad?",
+    heroWhyTitle: "Why Train with Riwa Alfan?",
     heroWhy1: "Small training groups (maximum 3 to 4 students) for 100% focused attention.",
     heroWhy2: "Internationally accredited digital & printed PADI certification cards.",
     heroWhy3: "Continuous post-graduate support and regular dive trips within an active diver community.",
@@ -363,7 +363,7 @@ export const UI_TRANSLATIONS = {
 
     // Testimonials
     testiKicker: "Authentic Student Experiences",
-    testiTitle: "What Captain Fahad's Graduates Say",
+    testiTitle: "What Riwa Alfan Graduates Say",
     testiDesc: "True stories from students who overcame fears, mastered buoyancy, and advanced their certifications.",
 
     // FAQ
@@ -388,7 +388,7 @@ export const UI_TRANSLATIONS = {
 
     // Booking Modal
     modalKicker: "Direct Enrollment & Free Consultation",
-    modalTitle: "Join Riwa Alfan Diving Center with Capt. Fahad",
+    modalTitle: "Join Riwa Alfan Diving Center",
     modalSuccessTitle: "Booking Request Received!",
     modalSuccessDesc: (name: string) => `Thank you, ${name}. Your inquiry reference code is:`,
     modalSuccessNote: "Captain Fahad will message you directly on WhatsApp shortly to confirm details and answer any questions.",
@@ -413,11 +413,11 @@ export const UI_TRANSLATIONS = {
     errPhone: "Please enter a valid mobile / WhatsApp number",
 
     // Footer
-    footerBio: "Riwa Alfan Diving in Jeddah led by Captain Fahad Al-Huwaimli (PADI MSDT). Committed to the highest safety and professional standards in the Saudi Red Sea.",
+    footerBio: "Riwa Alfan Diving in Jeddah — a dedicated PADI scuba diving training center offering certified courses and Red Sea boat trips with the highest international safety standards.",
     footerQuickLinks: "Quick Navigation",
     footerDisclaimerTitle: "Safety & Medical Disclaimer",
     footerDisclaimerText: "Scuba diving requires formal training, health fitness, and international certification from an accredited agency. The calculators and tools provided on this portal are educational aids and do not replace certified dive computers and official dive tables.",
-    footerCopyright: `All rights reserved © ${new Date().getFullYear()} Riwa Alfan Diving · Capt. Fahad Al-Huwaimli (PADI)`,
+    footerCopyright: `All rights reserved © ${new Date().getFullYear()} Riwa Alfan Diving · PADI Courses in Jeddah`,
     footerCountry: "Kingdom of Saudi Arabia · Jeddah Only"
   }
 };

@@ -38,21 +38,31 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
 
     const brandNameAr = config.brand?.centerNameAr || 'رواء الفن';
     const brandNameEn = config.brand?.centerNameEn || 'Riwa Alfan';
+    const locationAr = config.brand?.locationAr || 'أبحر الشمالية - جدة';
+    const locationEn = config.brand?.locationEn || 'North Obhur - Jeddah';
 
     const title = isAdmin
       ? `${isAr ? 'لوحة الإدارة' : 'Admin Dashboard'} | ${isAr ? brandNameAr : brandNameEn}`
       : isAr
-      ? `${brandNameAr} للغوص (${brandNameEn}) | دورات PADI ورحلات الغوص في جدة`
-      : `${brandNameEn} Diving Center | PADI Scuba Courses & Red Sea Dives in Jeddah`;
+      ? `${brandNameAr} للغوص (${brandNameEn}) | دورات PADI وتجربة الغوص بجدة`
+      : `${brandNameEn} Diving | PADI Scuba Courses & Trips in Jeddah`;
 
     const description = isAdmin
-      ? 'لوحة التحكم الإدارية لمركز رواء الفن للغوص بجدة.'
+      ? `لوحة التحكم الإدارية لمركز ${brandNameAr} للغوص بجدة.`
       : isAr
-      ? `مركز ${brandNameAr} للغوص في ${config.brand?.locationAr || 'أبحر الشمالية - جدة'} بقيادة كابتن فهد الهويملي PADI. تجربة الغوص للمبتدئين، دورة غواص المياه المفتوحة والمتقدمة، تدريب نسائي خاص، ورحلات البحر الأحمر.`
-      : `${brandNameEn} Diving Center in ${config.brand?.locationEn || 'North Obhur - Jeddah'} led by PADI Instructor Capt. Fahad Al-Huwaimli. Discover Scuba, PADI Open Water & Advanced courses, ladies training, and Red Sea expeditions.`;
+      ? `${brandNameAr} للغوص في ${locationAr}: احجز تجربة الغوص للمبتدئين، دورات PADI المعتمدة (المياه المفتوحة والمتقدمة)، التدريب النسائي الخاص، ورحلات البحر الأحمر.`
+      : `${brandNameEn} Diving in ${locationEn}: Book Discover Scuba Diving, PADI Open Water & Advanced courses, private ladies training, and Red Sea boat trips.`;
 
     document.title = title;
     upsertMeta('name', 'description', description);
+    upsertMeta(
+      'name',
+      'keywords',
+      isAr
+        ? `${brandNameAr}, ${brandNameAr} للغوص, مركز ${brandNameAr} للغوص, ${brandNameEn}, ${brandNameEn} Diving, تجربة الغوص جدة, دورات غوص جدة, دورات PADI جدة, غواص المياه المفتوحة, تدريب غوص نسائي جدة, غوص أبحر الشمالية, رحلات غوص البحر الأحمر`
+        : `${brandNameEn}, ${brandNameEn} Diving, scuba diving Jeddah, PADI courses Jeddah, Discover Scuba Diving Jeddah, Open Water Diver Jeddah, Red Sea diving Obhur`
+    );
+    upsertMeta('name', 'author', `${brandNameAr} للغوص - ${brandNameEn} Diving`);
     upsertMeta(
       'name',
       'robots',
@@ -66,7 +76,7 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
     const coverImage = `${origin}/og-cover.jpg`;
     const logoImage = `${origin}/pwa-512x512.png`;
 
-    upsertMeta('property', 'og:site_name', isAr ? `${brandNameAr} للغوص` : `${brandNameEn} Diving`);
+    upsertMeta('property', 'og:site_name', isAr ? brandNameAr : brandNameEn);
     upsertMeta('property', 'og:title', title);
     upsertMeta('property', 'og:description', description);
     upsertMeta('property', 'og:url', canonicalUrl);
@@ -82,7 +92,7 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
       return;
     }
 
-    // Structured data (@graph: WebSite, SportsActivityLocation + LocalBusiness, OfferCatalog, Course[], FAQPage)
+    // Structured data (@graph: WebSite, WebPage, SportsActivityLocation + LocalBusiness, OfferCatalog, Course[], FAQPage)
     const socialUrls = [
       config.socialLinks?.instagram,
       config.socialLinks?.tiktok,
@@ -159,16 +169,32 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
           '@type': 'WebSite',
           '@id': `${origin}/#website`,
           url: `${origin}/`,
-          name: `${brandNameAr} للغوص`,
-          alternateName: [brandNameAr, brandNameEn, `${brandNameEn} Diving`],
+          name: brandNameAr,
+          alternateName: [`${brandNameAr} للغوص`, `مركز ${brandNameAr} للغوص`, brandNameEn, `${brandNameEn} Diving`],
           inLanguage: ['ar', 'en'],
           publisher: { '@id': `${origin}/#organization` },
         },
         {
+          '@type': 'WebPage',
+          '@id': `${origin}/#webpage`,
+          url: `${origin}/`,
+          name: title,
+          description,
+          inLanguage: isAr ? 'ar' : 'en',
+          isPartOf: { '@id': `${origin}/#website` },
+          about: { '@id': `${origin}/#organization` },
+          primaryImageOfPage: {
+            '@type': 'ImageObject',
+            url: coverImage,
+            width: 1200,
+            height: 630,
+          },
+        },
+        {
           '@type': ['SportsActivityLocation', 'LocalBusiness'],
           '@id': `${origin}/#organization`,
-          name: `${brandNameAr} للغوص - ${brandNameEn} Diving`,
-          alternateName: [brandNameAr, brandNameEn, 'كابتن فهد الهويملي PADI'],
+          name: `${brandNameAr} للغوص`,
+          alternateName: [brandNameAr, `مركز ${brandNameAr} للغوص`, brandNameEn, `${brandNameEn} Diving`],
           url: `${origin}/`,
           description,
           logo: {
@@ -183,7 +209,7 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
           priceRange: '$$',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: config.brand?.locationAr || 'أبحر الشمالية',
+            streetAddress: locationAr,
             addressLocality: 'جدة',
             addressRegion: 'منطقة مكة المكرمة',
             addressCountry: 'SA',
@@ -193,20 +219,30 @@ export function useSeoSync(config: SiteConfig, language: Lang, isAdmin: boolean)
             latitude: 21.741,
             longitude: 39.092,
           },
+          openingHoursSpecification: [
+            {
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+              opens: '08:00',
+              closes: '22:00',
+            },
+          ],
+          contactPoint: {
+            '@type': 'ContactPoint',
+            telephone: config.brand?.phone || '+966530549675',
+            contactType: 'customer service',
+            areaServed: 'SA',
+            availableLanguage: ['ar', 'en'],
+          },
           areaServed: [
             { '@type': 'City', name: 'جدة' },
             { '@type': 'Place', name: 'أبحر الشمالية' },
             { '@type': 'Place', name: 'البحر الأحمر' },
           ],
           ...(socialUrls.length > 0 ? { sameAs: socialUrls } : {}),
-          founder: {
-            '@type': 'Person',
-            name: config.instructor?.nameAr || 'كابتن فهد الهويملي',
-            jobTitle: 'PADI Open Water Scuba Instructor',
-          },
           hasOfferCatalog: {
             '@type': 'OfferCatalog',
-            name: isAr ? 'برامج ودورات الغوص المعتمدة في جدة' : 'Certified PADI Diving Programs in Jeddah',
+            name: isAr ? `برامج ودورات الغوص المعتمدة في ${brandNameAr} بجدة` : `Certified PADI Diving Programs at ${brandNameEn} Jeddah`,
             itemListElement: offerCatalogItems,
           },
         },

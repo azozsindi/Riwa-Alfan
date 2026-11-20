@@ -157,7 +157,15 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ onSelectCourseFo
                   <div className="p-2 rounded-xl bg-slate-900/75 border border-slate-800/70">
                     <span className="text-slate-400 text-[10px] sm:text-xs block mb-0.5">{t.poolSessionsLabel}</span>
                     <span className="font-semibold text-white font-mono text-xs tabular-nums">
-                      {course.poolSessions > 0 ? course.poolSessions : t.poolNotRequired}
+                      {(course.id === 'course-1794660756107' ||
+                        course.id === 'discover-scuba' ||
+                        `${course.title?.ar || ''} ${course.title?.en || ''}`.toLowerCase().includes('اكتشاف الغوص') ||
+                        `${course.title?.ar || ''} ${course.title?.en || ''}`.toLowerCase().includes('discover scuba')) &&
+                      (course.poolSessions === 0 || course.poolSessions === 4)
+                        ? '-'
+                        : course.poolSessions > 0
+                        ? course.poolSessions
+                        : t.poolNotRequired}
                     </span>
                   </div>
                 </div>
